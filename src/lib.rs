@@ -1,4 +1,10 @@
-#![warn(clippy::all, rust_2018_idioms)]
+//! ClickStorm application library.
 
+/// Application module
 mod app;
-pub use app::TemplateApp;
+
+/// Localization module
+mod localization;
+
+/// Application module re-export
+pub use app::ClickStormApp;

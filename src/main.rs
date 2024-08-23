@@ -1,8 +1,9 @@
-#![warn(clippy::all, rust_2018_idioms)]
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
+//! The main entry point for the application.
+
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() -> eframe::Result {
-    env_logger::init(); // Log to stderr (if you run with `RUST_LOG=debug`).
+    env_logger::init();
 
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
@@ -16,8 +17,8 @@ fn main() -> eframe::Result {
         ..Default::default()
     };
     eframe::run_native(
-        "eframe template",
+        "ClickStorm",
         native_options,
-        Box::new(|cc| Ok(Box::new(click_storm::TemplateApp::new(cc)))),
+        Box::new(|cc| Ok(Box::new(click_storm::ClickStormApp::new(cc)))),
     )
 }
