@@ -29,13 +29,13 @@ right = Right
 repeat_options = Repeat Options
 repeat_until_stopped = Repeat Until Stopped
 repeat_number = Number
-repeat_desc = The number of times to repeat the click
 
 # Position options
 cursor_position = Cursor Position
 current_position = Current Position
+fixed_position = Fixed Position
 pick_position = Pick Position
-pick_position_desc = The position to click
+pick_position_desc = Click anywhere on the screen to set the position
 
 # Actions
 start = Start

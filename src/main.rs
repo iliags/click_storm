@@ -5,6 +5,8 @@
 fn main() -> eframe::Result {
     env_logger::init();
 
+    // TODO: Add an options file that is read in at startup
+    // TODO: If the file doesn't exist, create it with default values
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             // Set the window size

@@ -2,7 +2,10 @@ use std::time::Duration;
 
 use crate::localization::locale_text::LocaleText;
 
-use super::{mouse_button::MouseButton, mouse_click::MouseClickType, repeat::RepeatType};
+use super::{
+    cursor_position::CursorPosition, mouse_button::MouseButton, mouse_click::MouseClickType,
+    repeat::RepeatType,
+};
 
 #[derive(Debug, Default, Clone, serde::Deserialize, serde::Serialize)]
 pub struct AppSettings {
@@ -16,12 +19,17 @@ pub struct AppSettings {
     interval_milliseconds: usize,
 
     // Mouse click settings
-    mouse_button: MouseButton,
-    mouse_click_type: MouseClickType,
+    // Public required for the UI. This should be refactored to be private.
+    pub mouse_button: MouseButton,
+    pub mouse_click_type: MouseClickType,
 
     // Repeat settings
     repeat_type: RepeatType,
     repeat_count: usize,
+
+    // Cursor position
+    cursor_position_type: CursorPosition,
+    cursor_position_fixed: (i32, i32),
 }
 
 impl AppSettings {
@@ -114,5 +122,21 @@ impl AppSettings {
 
     pub fn repeat_count_mut(&mut self) -> &mut usize {
         &mut self.repeat_count
+    }
+
+    pub fn cursor_position_type(&self) -> &CursorPosition {
+        &self.cursor_position_type
+    }
+
+    pub fn cursor_position_type_mut(&mut self) -> &mut CursorPosition {
+        &mut self.cursor_position_type
+    }
+
+    pub fn cursor_position_fixed(&self) -> (i32, i32) {
+        self.cursor_position_fixed
+    }
+
+    pub fn cursor_position_fixed_mut(&mut self) -> &mut (i32, i32) {
+        &mut self.cursor_position_fixed
     }
 }
