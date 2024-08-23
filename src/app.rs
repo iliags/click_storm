@@ -73,6 +73,14 @@ impl eframe::App for ClickStormApp {
             // TODO: Add a button to cancel picking position
         }
 
+        ctx.input(|i| {
+            if i.key_pressed(egui::Key::F6) {
+                println!("F6 pressed");
+                // TODO: Toggle start/stop click storm
+                // TODO: Custom key bindings
+            }
+        });
+
         // Top panel
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
@@ -420,7 +428,7 @@ impl ClickStormApp {
     fn start_click_storm(&mut self) {
         // Send message to thread to start click storm
         // Include a copy of the settings
-        // Maybe darken the UI while the click storm is running
+        // Use a UI cue while the storm is running, maybe darken the UI
     }
     fn stop_click_storm(&mut self) {
         // Send message to thread to stop click storm
