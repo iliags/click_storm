@@ -1,9 +1,11 @@
 use device_query::{DeviceQuery, DeviceState, MouseState};
 use egui::Margin;
 use enigo::{Enigo, Mouse, Settings};
-use std::sync::atomic::AtomicBool;
-use std::sync::mpsc::{channel, Receiver, Sender, TryRecvError};
-use std::thread;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::mpsc::{channel, Receiver, Sender};
+use std::sync::Arc;
+use std::thread::{self, JoinHandle};
+use std::time::Duration;
 use strum::IntoEnumIterator;
 
 use crate::{
@@ -19,9 +21,6 @@ use crate::{
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
 pub struct ClickStormApp {
     settings: AppSettings,
-
-    #[serde(skip)]
-    enigo: Enigo,
 
     #[serde(skip)]
     device_state: DeviceState,
@@ -59,46 +58,71 @@ impl Default for ClickStormApp {
             channel();
 
         thread::spawn(move || {
-            let mut is_running = false;
+            let mut thread: Option<JoinHandle<()>> = None;
+            let mut settings_clone = Arc::new(AppSettings::default());
+            let stop_flag = Arc::new(AtomicBool::new(false));
+
             loop {
-                match receiver.try_recv() {
+                match receiver.recv() {
                     Ok(message) => match message {
                         ClickStormMessage::Start(settings) => {
                             // Start the click storm
                             println!("Starting click storm with settings: {:?}", settings);
-                            is_running = true;
+
+                            if let Some(thread) = thread.take() {
+                                stop_flag.store(true, Ordering::SeqCst);
+                                let _ = thread.join();
+                            }
+
+                            let stop_flag_clone = Arc::clone(&stop_flag);
+                            stop_flag.store(false, Ordering::SeqCst);
+
+                            let new_settings = Arc::new(settings);
+                            settings_clone = Arc::clone(&new_settings);
+
+                            // Worker thread
+                            thread = Some(thread::spawn(move || {
+                                let enigo = Enigo::new(&Settings::default()).unwrap_or_else(|_| {
+                                    panic!("Failed to create Enigo instance. Please make sure you are running the application on a system that supports the Enigo library.")
+                                });
+                                while stop_flag_clone.load(Ordering::SeqCst) == false {
+                                    println!(
+                                        "Inner thread performing task with settings: {:?}",
+                                        settings_clone
+                                    );
+                                    thread::sleep(Duration::from_secs(1));
+                                }
+                            }));
                         }
                         ClickStormMessage::Stop => {
                             // Stop the click storm
                             println!("Stopping click storm");
-                            is_running = false;
+                            if let Some(thread) = thread.take() {
+                                stop_flag.store(true, Ordering::SeqCst);
+                                let _ = thread.join();
+                            }
                         }
                         ClickStormMessage::Shutdown => {
                             // Shutdown the thread
                             println!("Shutting down click storm thread");
+                            if let Some(thread) = thread.take() {
+                                stop_flag.store(true, Ordering::SeqCst);
+                                let _ = thread.join();
+                            }
                             break;
                         }
                     },
-                    Err(TryRecvError::Empty) => {
-                        // No message received, continue the loop
-                    }
+
                     Err(e) => {
                         println!("Error receiving message: {:?}", e);
                         break;
                     }
-                }
-
-                if is_running {
-                    // Perform the click storm
-                    println!("Performing click storm");
-                    //std::thread::sleep(std::time::Duration::from_secs(1));
                 }
             }
         });
 
         Self {
             settings: AppSettings::new(),
-            enigo,
             device_state: DeviceState::new(),
             display_size: display_size,
             picking_position: false,
@@ -218,19 +242,6 @@ impl eframe::App for ClickStormApp {
                             egui::warn_if_debug_build(ui);
                         }
                     });
-                });
-
-                //ui.separator();
-
-                /* */
-                ui.with_layout(egui::Layout::right_to_left(egui::Align::RIGHT), |ui| {
-                    #[cfg(debug_assertions)]
-                    {
-                        let _ = self.enigo.location().map(|location| {
-                            let cursor_pos = format!("(X: {}, Y: {})", location.0, location.1);
-                            ui.label(cursor_pos);
-                        });
-                    }
                 });
             });
         });
