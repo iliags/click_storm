@@ -1,14 +1,20 @@
 [package]
-name = "eframe_template"
+name = "click_storm"
 version = "0.1.0"
-authors = ["Emil Ernerfeldt <emil.ernerfeldt@gmail.com>"]
+authors = ["James Lennon"]
 edition = "2021"
 include = ["LICENSE-APACHE", "LICENSE-MIT", "**/*.rs", "Cargo.toml"]
-rust-version = "1.76"
+license = "MIT/Apache-2.0"
+resolver = "2"
+#build = "build.rs"
 
-[package.metadata.docs.rs]
-all-features = true
-targets = ["x86_64-unknown-linux-gnu", "wasm32-unknown-unknown"]
+#[build-dependencies]
+#embed-resource = { version = "2.4" }
+
+[lints.rust]
+unsafe_op_in_unsafe_fn = "warn"
+missing_docs = "warn"
+unsafe_code = "deny"
 
 [dependencies]
 egui = "0.28"
@@ -18,37 +24,27 @@ eframe = { version = "0.28", default-features = false, features = [
     "glow",          # Use the glow rendering backend. Alternative: "wgpu".
     "persistence",   # Enable restoring app state when restarting the app.
 ] }
-log = "0.4"
 
-# You only need serde if you want app persistence:
+# Localization
+fluent = "0.16"
+fluent-templates = "0.10"
+unic-langid = "0.9"
+
+# Logging
+log = "0.4"
+env_logger = "0.11"
+
+# Serialization for persistence
 serde = { version = "1", features = ["derive"] }
 
-# native:
-[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-env_logger = "0.10"
+# Hardware control
+enigo = "0.2"
 
-# web:
-[target.'cfg(target_arch = "wasm32")'.dependencies]
-wasm-bindgen-futures = "0.4"
-
-# to access the DOM (to hide the loading text)
-[target.'cfg(target_arch = "wasm32")'.dependencies.web-sys]
-version = "0.3.4"
 
 [profile.release]
-opt-level = 2 # fast and small wasm
+opt-level = 2
+lto = true
 
-# Optimize all dependencies even in debug builds:
+# Optimize all dependencies even in debug builds
 [profile.dev.package."*"]
 opt-level = 2
-
-
-[patch.crates-io]
-
-# If you want to use the bleeding edge version of egui and eframe:
-# egui = { git = "https://github.com/emilk/egui", branch = "master" }
-# eframe = { git = "https://github.com/emilk/egui", branch = "master" }
-
-# If you fork https://github.com/emilk/egui you can test with:
-# egui = { path = "../egui/crates/egui" }
-# eframe = { path = "../egui/crates/eframe" }
