@@ -1,6 +1,16 @@
 # Click Storm
 
-Click Storm is an open-source auto-clicker created to provide a safe alternative.
+Click Storm is a safe, open-source, auto-clicker.
+
+## Notes
+
+### Dependencies
+
+Linux users may need to install `libxdo-dev` to run the application.
+
+### Permission
+
+Some devices may prevent hardware access due to permissions, see this [permissions](https://github.com/enigo-rs/enigo/blob/main/Permissions.md) page if you have issues.
 
 ## Virus Total
 
