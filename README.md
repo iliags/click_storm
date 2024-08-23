@@ -20,7 +20,8 @@ TODO
 In some cases, linux may also require the following dependencies:
 
 - egui: `sudo apt-get install -y libclang-dev libgtk-3-dev libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev libssl-dev`
-- enigo: `sudo apt install libxdo-dev`
+- enigo: `sudo apt install -y libxdo-dev`
+- device_query: `sudo apt-get install -y libx11-dev`
 
 ### Documentation
 

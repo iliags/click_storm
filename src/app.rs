@@ -1,5 +1,6 @@
+use device_query::{DeviceQuery, DeviceState, Keycode, MouseState};
 use egui::Margin;
-use enigo::{Enigo, Mouse, Settings};
+use enigo::{Enigo, Keyboard, Mouse, Settings};
 use strum::IntoEnumIterator;
 
 use crate::{
@@ -20,6 +21,9 @@ pub struct ClickStormApp {
     enigo: Enigo,
 
     #[serde(skip)]
+    device_state: DeviceState,
+
+    #[serde(skip)]
     display_size: (i32, i32),
 
     #[serde(skip)]
@@ -38,6 +42,7 @@ impl Default for ClickStormApp {
         Self {
             settings: AppSettings::new(),
             enigo,
+            device_state: DeviceState::new(),
             display_size: display_size,
             picking_position: false,
         }
@@ -69,8 +74,17 @@ impl eframe::App for ClickStormApp {
     /// Called each time the UI needs repainting, which may be many times per second.
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         if self.picking_position {
-            // TODO: Get the cursor position on next mouse click
-            // TODO: Add a button to cancel picking position
+            let mouse: MouseState = self.device_state.get_mouse();
+
+            for press in mouse.button_pressed.iter() {
+                if *press == true {
+                    let coords = mouse.coords;
+                    self.settings.cursor_position_fixed_mut().0 = coords.0;
+                    self.settings.cursor_position_fixed_mut().1 = coords.1;
+                    self.picking_position = false;
+                    println!("Picked position: {:?}", coords);
+                }
+            }
         }
 
         ctx.input(|i| {
@@ -137,6 +151,7 @@ impl eframe::App for ClickStormApp {
 
                 //ui.separator();
 
+                /* */
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::RIGHT), |ui| {
                     #[cfg(debug_assertions)]
                     {
