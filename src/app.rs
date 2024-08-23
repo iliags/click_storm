@@ -1,6 +1,9 @@
 use device_query::{DeviceQuery, DeviceState, MouseState};
 use egui::Margin;
 use enigo::{Enigo, Mouse, Settings};
+use std::sync::atomic::AtomicBool;
+use std::sync::mpsc::{channel, Receiver, Sender, TryRecvError};
+use std::thread;
 use strum::IntoEnumIterator;
 
 use crate::{
@@ -28,6 +31,19 @@ pub struct ClickStormApp {
 
     #[serde(skip)]
     picking_position: bool,
+
+    #[serde(skip)]
+    sender: Option<Sender<ClickStormMessage>>,
+
+    #[serde(skip)]
+    is_running: bool,
+}
+
+#[derive(Debug, Clone)]
+enum ClickStormMessage {
+    Start(AppSettings),
+    Stop,
+    Shutdown,
 }
 
 impl Default for ClickStormApp {
@@ -39,12 +55,55 @@ impl Default for ClickStormApp {
 
         let display_size = enigo.main_display().unwrap();
 
+        let (sender, receiver): (Sender<ClickStormMessage>, Receiver<ClickStormMessage>) =
+            channel();
+
+        thread::spawn(move || {
+            let mut is_running = false;
+            loop {
+                match receiver.try_recv() {
+                    Ok(message) => match message {
+                        ClickStormMessage::Start(settings) => {
+                            // Start the click storm
+                            println!("Starting click storm with settings: {:?}", settings);
+                            is_running = true;
+                        }
+                        ClickStormMessage::Stop => {
+                            // Stop the click storm
+                            println!("Stopping click storm");
+                            is_running = false;
+                        }
+                        ClickStormMessage::Shutdown => {
+                            // Shutdown the thread
+                            println!("Shutting down click storm thread");
+                            break;
+                        }
+                    },
+                    Err(TryRecvError::Empty) => {
+                        // No message received, continue the loop
+                    }
+                    Err(e) => {
+                        println!("Error receiving message: {:?}", e);
+                        break;
+                    }
+                }
+
+                if is_running {
+                    // Perform the click storm
+                    println!("Performing click storm");
+                    //std::thread::sleep(std::time::Duration::from_secs(1));
+                }
+            }
+        });
+
         Self {
             settings: AppSettings::new(),
             enigo,
             device_state: DeviceState::new(),
             display_size: display_size,
             picking_position: false,
+            sender: Some(sender),
+            is_running: false,
         }
     }
 }
@@ -69,6 +128,18 @@ impl eframe::App for ClickStormApp {
     /// Called by the frame work to save state before shutdown.
     fn save(&mut self, storage: &mut dyn eframe::Storage) {
         eframe::set_value(storage, eframe::APP_KEY, self);
+    }
+
+    fn on_exit(&mut self, _gl: Option<&eframe::glow::Context>) {
+        // Send message to thread to stop click storm
+        match self.sender.as_ref() {
+            Some(sender) => {
+                let _ = sender.send(ClickStormMessage::Shutdown);
+            }
+            None => {
+                println!("Error sending message: Sender is None");
+            }
+        }
     }
 
     /// Called each time the UI needs repainting, which may be many times per second.
@@ -444,8 +515,32 @@ impl ClickStormApp {
         // Send message to thread to start click storm
         // Include a copy of the settings
         // Use a UI cue while the storm is running, maybe darken the UI
+
+        if self.is_running {
+            return;
+        }
+
+        match self.sender.as_ref() {
+            Some(sender) => {
+                let _ = sender.send(ClickStormMessage::Start(self.settings.clone()));
+                self.is_running = true;
+            }
+            None => {
+                println!("Error sending message: Sender is None");
+            }
+        }
     }
     fn stop_click_storm(&mut self) {
         // Send message to thread to stop click storm
+
+        match self.sender.as_ref() {
+            Some(sender) => {
+                let _ = sender.send(ClickStormMessage::Stop);
+                self.is_running = false;
+            }
+            None => {
+                println!("Error sending message: Sender is None");
+            }
+        }
     }
 }
