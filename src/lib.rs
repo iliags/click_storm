@@ -4,7 +4,7 @@
 mod app;
 
 /// Application settings
-mod app_settings;
+mod settings;
 
 /// Localization module
 mod localization;

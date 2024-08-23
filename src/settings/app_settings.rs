@@ -1,26 +1,8 @@
 use std::time::Duration;
 
-use strum_macros::EnumIter;
-
 use crate::localization::locale_text::LocaleText;
 
-#[derive(Debug, Default, Clone, serde::Deserialize, serde::Serialize, PartialEq, EnumIter)]
-pub enum MouseButton {
-    #[default]
-    Left,
-    Right,
-    Middle,
-}
-
-#[derive(Debug, Default, Clone, serde::Deserialize, serde::Serialize, PartialEq, EnumIter)]
-pub enum MouseClickType {
-    #[default]
-    Single,
-    Double,
-}
-
-//Note: Maybe add a direction for which way the mouse is clicking.
-// Instead of just clicking down, it could be holding down, and the "click" could be a release.
+use super::{mouse_button::MouseButton, mouse_click::MouseClickType, repeat::RepeatType};
 
 #[derive(Debug, Default, Clone, serde::Deserialize, serde::Serialize)]
 pub struct AppSettings {
@@ -36,6 +18,10 @@ pub struct AppSettings {
     // Mouse click settings
     mouse_button: MouseButton,
     mouse_click_type: MouseClickType,
+
+    // Repeat settings
+    repeat_type: RepeatType,
+    repeat_count: usize,
 }
 
 impl AppSettings {
@@ -96,5 +82,37 @@ impl AppSettings {
 
     pub fn interval_milliseconds_mut(&mut self) -> &mut usize {
         &mut self.interval_milliseconds
+    }
+
+    pub fn click_type(&self) -> &MouseClickType {
+        &self.mouse_click_type
+    }
+
+    pub fn click_type_mut(&mut self) -> &mut MouseClickType {
+        &mut self.mouse_click_type
+    }
+
+    pub fn mouse_button(&self) -> &MouseButton {
+        &self.mouse_button
+    }
+
+    pub fn mouse_button_mut(&mut self) -> &mut MouseButton {
+        &mut self.mouse_button
+    }
+
+    pub fn repeat_type(&self) -> &RepeatType {
+        &self.repeat_type
+    }
+
+    pub fn repeat_type_mut(&mut self) -> &mut RepeatType {
+        &mut self.repeat_type
+    }
+
+    pub fn repeat_count(&self) -> usize {
+        self.repeat_count
+    }
+
+    pub fn repeat_count_mut(&mut self) -> &mut usize {
+        &mut self.repeat_count
     }
 }

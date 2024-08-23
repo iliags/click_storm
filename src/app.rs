@@ -1,6 +1,10 @@
-use egui::{Margin, Response, Shadow};
+use egui::Margin;
+use strum::IntoEnumIterator;
 
-use super::app_settings::AppSettings;
+use crate::settings::{
+    app_settings::AppSettings, mouse_button::MouseButton, mouse_click::MouseClickType,
+    repeat::RepeatType,
+};
 
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
@@ -154,7 +158,66 @@ impl ClickStormApp {
             .rounding(ui.visuals().widgets.noninteractive.rounding)
             .inner_margin(Margin::same(4.0))
             .show(ui, |ui| {
-                ui.heading(self.settings.language().get_locale_string("click_options"));
+                ui.vertical(|ui| {
+                    ui.heading(self.settings.language().get_locale_string("click_options"));
+
+                    // Click button name
+                    let selected_button = self.settings.mouse_button().as_str_locale().to_owned();
+
+                    // Generate the combo box
+                    egui::ComboBox::from_label(
+                        self.settings.language().get_locale_string("mouse_button"),
+                    )
+                    .selected_text(self.settings.language().get_locale_string(&selected_button))
+                    .show_ui(ui, |ui| {
+                        // Iterate over the click types
+                        for mut mouse_button in MouseButton::iter() {
+                            // Get the locale string for the click type
+                            let mouse_button_locale = self
+                                .settings
+                                .language()
+                                .get_locale_string(mouse_button.as_str_locale());
+
+                            // Select the click type
+                            ui.selectable_value(
+                                &mut self.settings.mouse_button_mut(),
+                                &mut mouse_button,
+                                mouse_button_locale,
+                            );
+                        }
+                    });
+
+                    // Click type options
+                    // Get the selected click type name
+                    let selected_click_type = self.settings.click_type().as_str_locale().to_owned();
+
+                    // Generate the combo box
+                    egui::ComboBox::from_label(
+                        self.settings.language().get_locale_string("click_type"),
+                    )
+                    .selected_text(
+                        self.settings
+                            .language()
+                            .get_locale_string(&selected_click_type),
+                    )
+                    .show_ui(ui, |ui| {
+                        // Iterate over the click types
+                        for mut click_type in MouseClickType::iter() {
+                            // Get the locale string for the click type
+                            let click_type_locale = self
+                                .settings
+                                .language()
+                                .get_locale_string(click_type.as_str_locale());
+
+                            // Select the click type
+                            ui.selectable_value(
+                                &mut self.settings.click_type_mut(),
+                                &mut click_type,
+                                click_type_locale,
+                            );
+                        }
+                    });
+                });
             });
 
         click_frame.response.on_hover_text(
@@ -170,7 +233,37 @@ impl ClickStormApp {
             .rounding(ui.visuals().widgets.noninteractive.rounding)
             .inner_margin(Margin::same(4.0))
             .show(ui, |ui| {
-                ui.heading(self.settings.language().get_locale_string("repeat_options"));
+                ui.vertical(|ui| {
+                    ui.heading(self.settings.language().get_locale_string("repeat_options"));
+
+                    ui.horizontal(|ui| {
+                        let repeat_count_name =
+                            self.settings.language().get_locale_string("repeat_number");
+                        let repeat_count = self.settings.repeat_count();
+                        ui.radio_value(
+                            self.settings.repeat_type_mut(),
+                            RepeatType::Repeat(repeat_count),
+                            repeat_count_name,
+                        );
+
+                        ui.add(
+                            egui::DragValue::new(self.settings.repeat_count_mut())
+                                .range(0..=1000)
+                                .speed(1)
+                                .clamp_to_range(false),
+                        );
+                    });
+
+                    let repeat_infinite_name = self
+                        .settings
+                        .language()
+                        .get_locale_string("repeat_until_stopped");
+                    ui.radio_value(
+                        self.settings.repeat_type_mut(),
+                        RepeatType::RepeatUntilStopped,
+                        repeat_infinite_name,
+                    );
+                });
             });
 
         repeat_frame
