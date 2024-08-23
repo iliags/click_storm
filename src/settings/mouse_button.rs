@@ -9,15 +9,6 @@ pub enum MouseButton {
 }
 
 impl MouseButton {
-    /// Get the string representation of the mouse button
-    pub fn as_str(&self) -> &str {
-        match self {
-            Self::Left => "Left",
-            Self::Right => "Right",
-            Self::Middle => "Middle",
-        }
-    }
-
     /// Get the key for the locale string
     pub fn as_str_locale(&self) -> &str {
         match self {

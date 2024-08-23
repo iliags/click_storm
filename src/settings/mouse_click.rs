@@ -12,14 +12,6 @@ pub enum MouseClickType {
 
 // TODO: Add localization for the mouse button and click type
 impl MouseClickType {
-    /// Get the string representation of the click type
-    pub fn as_str(&self) -> &str {
-        match self {
-            Self::Single => "Click",
-            Self::Double => "Double Click",
-        }
-    }
-
     /// Get the key for the locale string
     pub fn as_str_locale(&self) -> &str {
         match self {

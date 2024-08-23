@@ -8,14 +8,6 @@ pub enum RepeatType {
 }
 
 impl RepeatType {
-    /// Get the string representation of the repeat type
-    pub fn as_str(&self) -> &str {
-        match self {
-            Self::Repeat(_) => "Repeat",
-            Self::RepeatUntilStopped => "Repeat Until Stopped",
-        }
-    }
-
     /// Get the key for the locale string
     pub fn as_str_locale(&self) -> &str {
         match self {

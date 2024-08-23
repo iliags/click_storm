@@ -14,11 +14,6 @@ impl LocaleText {
         self.language.clone()
     }
 
-    /// Get the current language mutable
-    pub fn get_language_mut(&mut self) -> &mut Language {
-        &mut self.language
-    }
-
     /// Set the current language
     pub fn set_language(&mut self, language: Language) {
         self.language = language;
