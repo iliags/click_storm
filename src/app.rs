@@ -1,10 +1,10 @@
-use device_query::{DeviceQuery, DeviceState, Keycode, MouseState};
+use device_query::{DeviceQuery, DeviceState, MouseState};
 use egui::Margin;
-use enigo::{Enigo, Keyboard, Mouse, Settings};
+use enigo::{Enigo, Mouse, Settings};
 use strum::IntoEnumIterator;
 
 use crate::{
-    localization::language::{self, Language},
+    localization::language::Language,
     settings::{
         app_settings::AppSettings, cursor_position::CursorPosition, mouse_button::MouseButton,
         mouse_click::MouseClickType, repeat::RepeatType,
