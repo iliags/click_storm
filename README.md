@@ -4,6 +4,8 @@ Click Storm is a safe, open-source, auto-clicker.
 
 ## Notes
 
+The application uses OS threads to perform work, While the timing may not be 100% accurate, it tries to be as close as possible.
+
 ### Dependencies
 
 Linux users may need to install `libxdo-dev` to run the application.
@@ -52,3 +54,8 @@ See [miri repository](https://github.com/rust-lang/miri).
 - Run tests with miri: ```cargo +nightly miri test --workspace```
 - Run application with miri: ```cargo +nightly miri run```
   - This takes a long time to run and currently fails due to an unsupported operation in `winit`.
+
+## Wishlist
+
+- Hotkey settings
+- Record and playback
