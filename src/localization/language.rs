@@ -1,24 +1,18 @@
 // The static loader macro doesn't work with documentation comments, so we have to disable the warning.
 #![allow(missing_docs)]
 use fluent_templates::static_loader;
+use strum_macros::EnumIter;
 use unic_langid::{langid, LanguageIdentifier};
 
 /// The languages available for localization
-#[derive(Debug, PartialEq, Clone, serde::Deserialize, serde::Serialize)]
+#[derive(Default, Debug, PartialEq, Clone, serde::Deserialize, serde::Serialize, EnumIter)]
 pub enum Language {
+    #[default]
     English,
 }
 
-/// Array of available languages for iteration
-pub const LANGUAGE_LIST: &[Language] = &[Language::English];
-
-impl Default for Language {
-    fn default() -> Self {
-        Self::English
-    }
-}
-
 impl Language {
+    // Note: Make sure the return value is a valid language identifier
     pub fn value(&self) -> LanguageIdentifier {
         match self {
             Self::English => langid!("en-US"),

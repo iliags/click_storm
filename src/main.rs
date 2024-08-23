@@ -7,8 +7,16 @@ fn main() -> eframe::Result {
 
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_inner_size([400.0, 300.0])
-            .with_min_inner_size([300.0, 220.0])
+            // Set the window size
+            .with_inner_size([472.0, 295.0])
+            .with_min_inner_size([472.0, 295.0])
+            // Always on top for easy access
+            .with_always_on_top()
+            // No resizing
+            .with_resizable(false)
+            // Start with focus on the window
+            .with_active(true)
+            // Set the window icon
             .with_icon(
                 // NOTE: Adding an icon is optional
                 eframe::icon_data::from_png_bytes(&include_bytes!("../assets/icon-256.png")[..])
@@ -17,7 +25,7 @@ fn main() -> eframe::Result {
         ..Default::default()
     };
     eframe::run_native(
-        "ClickStorm",
+        "Click Storm",
         native_options,
         Box::new(|cc| Ok(Box::new(click_storm::ClickStormApp::new(cc)))),
     )

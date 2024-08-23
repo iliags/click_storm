@@ -1,20 +1,18 @@
+use egui::{Margin, Response, Shadow};
+
+use super::app_settings::AppSettings;
+
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
 pub struct ClickStormApp {
-    // Example stuff:
-    label: String,
-
-    #[serde(skip)] // This how you opt-out of serialization of a field
-    value: f32,
+    settings: AppSettings,
 }
 
 impl Default for ClickStormApp {
     fn default() -> Self {
         Self {
-            // Example stuff:
-            label: "Hello World!".to_owned(),
-            value: 2.7,
+            settings: AppSettings::new(),
         }
     }
 }
@@ -43,67 +41,183 @@ impl eframe::App for ClickStormApp {
 
     /// Called each time the UI needs repainting, which may be many times per second.
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        // Put your widgets into a `SidePanel`, `TopBottomPanel`, `CentralPanel`, `Window` or `Area`.
-        // For inspiration and more examples, go to https://emilk.github.io/egui
-
+        // Top panel
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
-            // The top panel is often a good place for a menu bar:
-
             egui::menu::bar(ui, |ui| {
-                // NOTE: no File->Quit on web pages!
-                let is_web = cfg!(target_arch = "wasm32");
-                if !is_web {
-                    ui.menu_button("File", |ui| {
-                        if ui.button("Quit").clicked() {
-                            ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+                egui::widgets::global_dark_light_mode_buttons(ui);
+                ui.separator();
+
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::RIGHT), |ui| {
+                    ui.menu_button(self.settings.language().get_locale_string("about"), |ui| {
+                        let version_label = format!(
+                            "{}{}",
+                            self.settings.language().get_locale_string("version"),
+                            env!("CARGO_PKG_VERSION")
+                        );
+                        ui.label(version_label);
+
+                        ui.separator();
+
+                        ui.hyperlink_to(
+                            self.settings.language().get_locale_string("source"),
+                            "https://github.com/iliags/click_storm",
+                        );
+
+                        #[cfg(debug_assertions)]
+                        {
+                            ui.separator();
+
+                            //println!("Window size: {:?}", ctx.screen_rect());
+
+                            egui::warn_if_debug_build(ui);
                         }
                     });
-                    ui.add_space(16.0);
-                }
-
-                egui::widgets::global_dark_light_mode_buttons(ui);
+                });
             });
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            // The central panel the region left after adding TopPanel's and SidePanel's
-            ui.heading("eframe template");
+            //println!("Window size: {:?}", ctx.screen_rect());
+            self.ui_interval(ui);
 
             ui.horizontal(|ui| {
-                ui.label("Write something: ");
-                ui.text_edit_singleline(&mut self.label);
+                self.ui_click_options(ui);
+                self.ui_click_repeat(ui);
             });
 
-            ui.add(egui::Slider::new(&mut self.value, 0.0..=10.0).text("value"));
-            if ui.button("Increment").clicked() {
-                self.value += 1.0;
-            }
-
-            ui.separator();
-
-            ui.add(egui::github_link_file!(
-                "https://github.com/emilk/eframe_template/blob/main/",
-                "Source code."
-            ));
-
-            ui.with_layout(egui::Layout::bottom_up(egui::Align::LEFT), |ui| {
-                powered_by_egui_and_eframe(ui);
-                egui::warn_if_debug_build(ui);
-            });
+            self.ui_cursor_position(ui);
+            self.ui_actions(ui);
         });
     }
 }
 
-fn powered_by_egui_and_eframe(ui: &mut egui::Ui) {
-    ui.horizontal(|ui| {
-        ui.spacing_mut().item_spacing.x = 0.0;
-        ui.label("Powered by ");
-        ui.hyperlink_to("egui", "https://github.com/emilk/egui");
-        ui.label(" and ");
-        ui.hyperlink_to(
-            "eframe",
-            "https://github.com/emilk/egui/tree/master/crates/eframe",
+impl ClickStormApp {
+    fn ui_interval(&mut self, ui: &mut egui::Ui) {
+        let interval_frame = egui::Frame::default()
+            .stroke(ui.visuals().widgets.noninteractive.bg_stroke)
+            .rounding(ui.visuals().widgets.noninteractive.rounding)
+            .inner_margin(Margin::same(4.0))
+            .show(ui, |ui| {
+                ui.heading(self.settings.language().get_locale_string("click_interval"));
+                ui.horizontal(|ui| {
+                    // Hours
+                    ui.label(self.settings.language().get_locale_string("hours"));
+                    ui.add(
+                        egui::DragValue::new(self.settings.interval_hours_mut())
+                            .range(0..=24)
+                            .speed(1),
+                    );
+
+                    ui.separator();
+
+                    // Minutes
+                    ui.label(self.settings.language().get_locale_string("minutes"));
+                    ui.add(
+                        egui::DragValue::new(self.settings.interval_minutes_mut())
+                            .range(0..=60)
+                            .speed(1),
+                    );
+
+                    ui.separator();
+
+                    // Seconds
+                    ui.label(self.settings.language().get_locale_string("seconds"));
+                    ui.add(
+                        egui::DragValue::new(self.settings.interval_seconds_mut())
+                            .range(0..=60)
+                            .speed(1),
+                    );
+
+                    ui.separator();
+
+                    // Milliseconds
+                    ui.label(self.settings.language().get_locale_string("milliseconds"));
+                    ui.add(
+                        egui::DragValue::new(self.settings.interval_milliseconds_mut())
+                            .range(0..=1000)
+                            .speed(1),
+                    );
+                });
+            });
+
+        // Show the hover text for the interval frame
+        interval_frame.response.on_hover_text(
+            self.settings
+                .language()
+                .get_locale_string("click_interval_desc"),
         );
-        ui.label(".");
-    });
+    }
+
+    fn ui_click_options(&mut self, ui: &mut egui::Ui) {
+        let click_frame = egui::Frame::default()
+            .stroke(ui.visuals().widgets.noninteractive.bg_stroke)
+            .rounding(ui.visuals().widgets.noninteractive.rounding)
+            .inner_margin(Margin::same(4.0))
+            .show(ui, |ui| {
+                ui.heading(self.settings.language().get_locale_string("click_options"));
+            });
+
+        click_frame.response.on_hover_text(
+            self.settings
+                .language()
+                .get_locale_string("click_type_desc"),
+        );
+    }
+
+    fn ui_click_repeat(&mut self, ui: &mut egui::Ui) {
+        let repeat_frame = egui::Frame::default()
+            .stroke(ui.visuals().widgets.noninteractive.bg_stroke)
+            .rounding(ui.visuals().widgets.noninteractive.rounding)
+            .inner_margin(Margin::same(4.0))
+            .show(ui, |ui| {
+                ui.heading(self.settings.language().get_locale_string("repeat_options"));
+            });
+
+        repeat_frame
+            .response
+            .on_hover_text(self.settings.language().get_locale_string("repeat_desc"));
+    }
+
+    fn ui_cursor_position(&mut self, ui: &mut egui::Ui) {
+        let cursor_position_frame = egui::Frame::default()
+            .stroke(ui.visuals().widgets.noninteractive.bg_stroke)
+            .rounding(ui.visuals().widgets.noninteractive.rounding)
+            .inner_margin(Margin::same(4.0))
+            .show(ui, |ui| {
+                ui.heading(
+                    self.settings
+                        .language()
+                        .get_locale_string("cursor_position"),
+                );
+                ui.horizontal(|ui| {});
+            });
+
+        cursor_position_frame.response.on_hover_text(
+            self.settings
+                .language()
+                .get_locale_string("pick_position_desc"),
+        );
+    }
+
+    fn ui_actions(&mut self, ui: &mut egui::Ui) {
+        // TODO: Center the buttons
+        egui::Grid::new("actions").show(ui, |ui| {
+            if ui
+                .button(self.settings.language().get_locale_string("start"))
+                .clicked()
+            {
+                self.start_click_storm();
+            }
+            if ui
+                .button(self.settings.language().get_locale_string("stop"))
+                .clicked()
+            {
+                self.stop_click_storm();
+            }
+            ui.end_row();
+        });
+    }
+
+    fn start_click_storm(&mut self) {}
+    fn stop_click_storm(&mut self) {}
 }

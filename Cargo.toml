@@ -40,6 +40,10 @@ serde = { version = "1", features = ["derive"] }
 # Hardware control
 enigo = "0.2"
 
+# Enum helpers
+strum = "0.26"
+strum_macros = "0.26"
+
 
 [profile.release]
 opt-level = 2

@@ -3,6 +3,9 @@
 /// Application module
 mod app;
 
+/// Application settings
+mod app_settings;
+
 /// Localization module
 mod localization;
 
