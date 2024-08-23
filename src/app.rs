@@ -35,12 +35,12 @@ pub struct ClickStormApp {
     sender: Option<Sender<ClickStormMessage>>,
 
     #[serde(skip)]
-    is_running: bool,
+    is_running: Arc<AtomicBool>,
 }
 
 #[derive(Debug, Clone)]
 enum ClickStormMessage {
-    Start(AppSettings),
+    Start(AppSettings, Arc<AtomicBool>),
     Stop,
     Shutdown,
 }
@@ -58,39 +58,48 @@ impl Default for ClickStormApp {
             channel();
 
         thread::spawn(move || {
+            // TODO: This is a total mess, clean it up
             let mut thread: Option<JoinHandle<()>> = None;
-            let mut settings_clone = Arc::new(AppSettings::default());
-            let stop_flag = Arc::new(AtomicBool::new(false));
+            let mut is_working = Arc::new(AtomicBool::new(false));
 
             loop {
                 match receiver.recv() {
                     Ok(message) => match message {
-                        ClickStormMessage::Start(settings) => {
+                        ClickStormMessage::Start(settings, is_running) => {
                             // Start the click storm
                             println!("Starting click storm with settings: {:?}", settings);
 
                             if let Some(thread) = thread.take() {
-                                stop_flag.store(true, Ordering::SeqCst);
+                                is_running.store(true, Ordering::SeqCst);
                                 let _ = thread.join();
                             }
 
-                            let stop_flag_clone = Arc::clone(&stop_flag);
-                            stop_flag.store(false, Ordering::SeqCst);
+                            let doing_work = Arc::clone(&is_running);
+                            is_working = Arc::clone(&is_running);
+                            is_running.store(true, Ordering::SeqCst);
 
-                            let new_settings = Arc::new(settings);
-                            settings_clone = Arc::clone(&new_settings);
+                            //let new_settings = Arc::new(settings);
+                            //let settings_clone = Arc::clone(&new_settings);
+                            let settings_clone = Arc::clone(&Arc::new(settings));
 
                             // Worker thread
                             thread = Some(thread::spawn(move || {
                                 let enigo = Enigo::new(&Settings::default()).unwrap_or_else(|_| {
                                     panic!("Failed to create Enigo instance. Please make sure you are running the application on a system that supports the Enigo library.")
                                 });
-                                while stop_flag_clone.load(Ordering::SeqCst) == false {
+                                let mut i = 0;
+                                while doing_work.load(Ordering::SeqCst) {
                                     println!(
                                         "Inner thread performing task with settings: {:?}",
                                         settings_clone
                                     );
-                                    thread::sleep(Duration::from_secs(1));
+                                    i += 1;
+
+                                    if i >= 3 {
+                                        doing_work.store(false, Ordering::SeqCst);
+                                    } else {
+                                        thread::sleep(Duration::from_millis(100));
+                                    }
                                 }
                             }));
                         }
@@ -98,7 +107,7 @@ impl Default for ClickStormApp {
                             // Stop the click storm
                             println!("Stopping click storm");
                             if let Some(thread) = thread.take() {
-                                stop_flag.store(true, Ordering::SeqCst);
+                                is_working.store(false, Ordering::SeqCst);
                                 let _ = thread.join();
                             }
                         }
@@ -106,7 +115,7 @@ impl Default for ClickStormApp {
                             // Shutdown the thread
                             println!("Shutting down click storm thread");
                             if let Some(thread) = thread.take() {
-                                stop_flag.store(true, Ordering::SeqCst);
+                                is_working.store(false, Ordering::SeqCst);
                                 let _ = thread.join();
                             }
                             break;
@@ -127,7 +136,7 @@ impl Default for ClickStormApp {
             display_size: display_size,
             picking_position: false,
             sender: Some(sender),
-            is_running: false,
+            is_running: Arc::new(AtomicBool::new(false)),
         }
     }
 }
@@ -243,6 +252,13 @@ impl eframe::App for ClickStormApp {
                         }
                     });
                 });
+
+                #[cfg(debug_assertions)]
+                {
+                    let doing_work = self.is_running.load(Ordering::SeqCst);
+                    let message = format!("Working: {}", doing_work);
+                    ui.label(message);
+                }
             });
         });
 
@@ -527,14 +543,17 @@ impl ClickStormApp {
         // Include a copy of the settings
         // Use a UI cue while the storm is running, maybe darken the UI
 
-        if self.is_running {
+        if self.is_running.load(Ordering::SeqCst) {
             return;
         }
 
         match self.sender.as_ref() {
             Some(sender) => {
-                let _ = sender.send(ClickStormMessage::Start(self.settings.clone()));
-                self.is_running = true;
+                let _ = sender.send(ClickStormMessage::Start(
+                    self.settings.clone(),
+                    Arc::clone(&self.is_running),
+                ));
+                self.is_running.store(true, Ordering::SeqCst);
             }
             None => {
                 println!("Error sending message: Sender is None");
@@ -547,7 +566,7 @@ impl ClickStormApp {
         match self.sender.as_ref() {
             Some(sender) => {
                 let _ = sender.send(ClickStormMessage::Stop);
-                self.is_running = false;
+                self.is_running.store(true, Ordering::SeqCst);
             }
             None => {
                 println!("Error sending message: Sender is None");
