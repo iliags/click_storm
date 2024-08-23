@@ -2,9 +2,12 @@ use egui::Margin;
 use enigo::{Enigo, Mouse, Settings};
 use strum::IntoEnumIterator;
 
-use crate::settings::{
-    app_settings::AppSettings, cursor_position::CursorPosition, mouse_button::MouseButton,
-    mouse_click::MouseClickType, repeat::RepeatType,
+use crate::{
+    localization::language::{self, Language},
+    settings::{
+        app_settings::AppSettings, cursor_position::CursorPosition, mouse_button::MouseButton,
+        mouse_click::MouseClickType, repeat::RepeatType,
+    },
 };
 
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
@@ -73,14 +76,26 @@ impl eframe::App for ClickStormApp {
         // Top panel
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
-                egui::widgets::global_dark_light_mode_buttons(ui);
-                ui.separator();
+                ui.menu_button(self.get_locale_string("settings"), |ui| {
+                    // Light/dark mode buttons
+                    egui::widgets::global_dark_light_mode_buttons(ui);
 
-                // TODO: Language dropdown
+                    ui.separator();
 
-                //ui.separator();
+                    // Language selection
+                    egui::ComboBox::from_label("")
+                        .selected_text(self.settings.language().get_language().as_str())
+                        .show_ui(ui, |ui| {
+                            let mut lang = self.settings.language().get_language();
+                            for language in Language::iter() {
+                                let language_string = language.as_str();
+                                ui.selectable_value(&mut lang, language.clone(), language_string);
+                            }
+                            self.settings.language_mut().set_language(lang);
+                        });
+                    ui.separator();
 
-                ui.with_layout(egui::Layout::right_to_left(egui::Align::RIGHT), |ui| {
+                    // About button
                     ui.menu_button(self.get_locale_string("about"), |ui| {
                         let version_label = format!(
                             "{}{}",
@@ -91,10 +106,15 @@ impl eframe::App for ClickStormApp {
 
                         ui.separator();
 
-                        ui.hyperlink_to(
-                            self.get_locale_string("source"),
-                            "https://github.com/iliags/click_storm",
-                        );
+                        if ui
+                            .hyperlink_to(
+                                self.get_locale_string("source"),
+                                "https://github.com/iliags/click_storm",
+                            )
+                            .clicked()
+                        {
+                            ui.close_menu();
+                        }
 
                         #[cfg(debug_assertions)]
                         {
@@ -105,7 +125,11 @@ impl eframe::App for ClickStormApp {
                             egui::warn_if_debug_build(ui);
                         }
                     });
+                });
 
+                //ui.separator();
+
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::RIGHT), |ui| {
                     #[cfg(debug_assertions)]
                     {
                         let _ = self.enigo.location().map(|location| {
@@ -206,6 +230,7 @@ impl ClickStormApp {
                         .selected_text(self.get_locale_string(&selected_button))
                         .show_ui(ui, |ui| {
                             // Iterate over the click types
+                            let mut current_value = self.settings.mouse_button().clone();
                             for mouse_button in MouseButton::iter() {
                                 // Get the locale string for the click type
                                 let mouse_button_locale = self
@@ -215,11 +240,12 @@ impl ClickStormApp {
 
                                 // Select the click type
                                 ui.selectable_value(
-                                    &mut self.settings.mouse_button,
+                                    &mut current_value,
                                     mouse_button,
                                     mouse_button_locale,
                                 );
                             }
+                            self.settings.mouse_button_mut().clone_from(&current_value);
                         });
 
                     // Click type options
@@ -235,6 +261,7 @@ impl ClickStormApp {
                         )
                         .show_ui(ui, |ui| {
                             // Iterate over the click types
+                            let mut current_value = self.settings.click_type().clone();
                             for click_type in MouseClickType::iter() {
                                 // Get the locale string for the click type
                                 let click_type_locale = self
@@ -244,11 +271,12 @@ impl ClickStormApp {
 
                                 // Select the click type
                                 ui.selectable_value(
-                                    &mut self.settings.mouse_click_type,
+                                    &mut current_value,
                                     click_type,
                                     click_type_locale,
                                 );
                             }
+                            self.settings.click_type_mut().clone_from(&current_value);
                         });
                 });
             });

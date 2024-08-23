@@ -8,6 +8,7 @@ use super::{
 };
 
 #[derive(Debug, Default, Clone, serde::Deserialize, serde::Serialize)]
+#[serde(default)]
 pub struct AppSettings {
     // Language
     language: LocaleText,
@@ -19,9 +20,8 @@ pub struct AppSettings {
     interval_milliseconds: usize,
 
     // Mouse click settings
-    // Public required for the UI. This should be refactored to be private.
-    pub mouse_button: MouseButton,
-    pub mouse_click_type: MouseClickType,
+    mouse_button: MouseButton,
+    mouse_click_type: MouseClickType,
 
     // Repeat settings
     repeat_type: RepeatType,

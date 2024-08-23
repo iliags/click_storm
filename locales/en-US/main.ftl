@@ -1,5 +1,6 @@
 
 # General
+settings = Settings
 about = About
 version = Version: {" "}
 source = Source code
