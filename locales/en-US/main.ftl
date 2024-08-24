@@ -6,7 +6,16 @@ version = Version:{" "}
 source = Source code
 reset = Reset
 
-# Settings
+# Settings menu
+hotkey = Hotkey
+change_hotkey = Change Hotkey
+change_hotkey_desc = Change the hotkey to start and stop the clicker
+press_key = Press a key
+reset_hotkey = Reset Hotkey
+reset_hotkey_desc = Reset the hotkey to the default value
+language = Language
+
+# Duration
 click_interval = Click Interval
 hours = Hours
 minutes = Minutes

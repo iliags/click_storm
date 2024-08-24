@@ -9,6 +9,8 @@ All notable changes to this project will be documented in this file.
 * Disable center panel while running
 * Turbo clicking added
 * Turbo clicking set as the default mode
+* Custom hotkey
+* Use icon for settings menu button
 
 ## 0.1.4
 

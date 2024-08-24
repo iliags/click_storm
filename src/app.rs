@@ -11,6 +11,7 @@ use std::thread::{self, JoinHandle};
 
 use strum::IntoEnumIterator;
 
+use crate::keycode::AppKeycode;
 use crate::{
     localization::language::Language,
     settings::{
@@ -20,13 +21,11 @@ use crate::{
 };
 
 // Wishlist:
-// - Hotkey settings
 // - Record and playback mouse movements
 // - Check github for updates
+//  - Use GET /repos/:owner/:repo/releases/latest
 
-const HOTKEY_CODE: device_query::Keycode = device_query::Keycode::F6;
-
-/// We derive Deserialize/Serialize so we can persist app state on shutdown.
+/// Application state
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
 pub struct ClickStormApp {
@@ -34,6 +33,8 @@ pub struct ClickStormApp {
 
     cursor_position_fixed: (i32, i32),
     repeat_count: usize,
+
+    hotkey_code: AppKeycode,
 
     #[serde(skip)]
     device_state: DeviceState,
@@ -43,6 +44,12 @@ pub struct ClickStormApp {
 
     #[serde(skip)]
     picking_position: bool,
+
+    #[serde(skip)]
+    waiting_for_key: bool,
+
+    #[serde(skip)]
+    waiting_for_key_release: bool,
 
     #[serde(skip)]
     sender: Option<Sender<ClickStormMessage>>,
@@ -83,9 +90,12 @@ impl Default for ClickStormApp {
             settings: AppSettings::new(),
             cursor_position_fixed: (0, 0),
             repeat_count: 0,
+            hotkey_code: AppKeycode::F6,
             device_state: DeviceState::new(),
             display_size,
             picking_position: false,
+            waiting_for_key: false,
+            waiting_for_key_release: false,
             sender: Some(sender),
             is_running: Arc::new(AtomicBool::new(false)),
             key_pressed: false,
@@ -125,7 +135,33 @@ impl eframe::App for ClickStormApp {
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
                 ui.menu_button("⛭", |ui| {
+                    // Change hotkey button
+                    ui.label(self.get_locale_string("hotkey"));
+                    let button_text = if self.waiting_for_key {
+                        self.get_locale_string("press_key")
+                    } else {
+                        self.get_locale_string("change_hotkey")
+                    };
+                    if ui
+                        .button(button_text)
+                        .on_hover_text_at_pointer(self.get_locale_string("change_hotkey_desc"))
+                        .clicked()
+                    {
+                        self.waiting_for_key = true;
+                    }
+
+                    if ui
+                        .button(self.get_locale_string("reset_hotkey"))
+                        .on_hover_text_at_pointer(self.get_locale_string("reset_hotkey_desc"))
+                        .clicked()
+                    {
+                        self.hotkey_code = AppKeycode::F6;
+                    }
+
+                    ui.separator();
+
                     // Language selection
+                    ui.label(self.get_locale_string("language"));
                     egui::ComboBox::from_label("")
                         .selected_text(self.settings.language().get_language().as_str())
                         .show_ui(ui, |ui| {
@@ -250,21 +286,41 @@ impl ClickStormApp {
             }
         }
 
-        // TODO: Custom key bindings
-        let hot_key_pressed = self.device_state.get_keys().contains(&HOTKEY_CODE);
+        if self.waiting_for_key {
+            let keys = self.device_state.get_keys();
 
-        if hot_key_pressed && !self.key_pressed {
-            self.key_pressed = true;
-
-            if self.is_running.load(Ordering::SeqCst) {
-                //println!("Stop");
-                self.stop_click_storm();
-            } else {
-                //println!("Start");
-                self.start_click_storm();
+            // Get the first key pressed
+            if !keys.is_empty() {
+                self.waiting_for_key = false;
+                self.waiting_for_key_release = true;
+                self.hotkey_code = AppKeycode::from(keys[0]);
+                println!("Hotkey set to: {:?}", self.hotkey_code);
             }
-        } else if self.key_pressed && !hot_key_pressed {
-            self.key_pressed = false;
+        } else if self.waiting_for_key_release {
+            let keys = self.device_state.get_keys();
+
+            if keys.is_empty() {
+                self.waiting_for_key_release = false;
+            }
+        } else {
+            let hot_key_pressed = self
+                .device_state
+                .get_keys()
+                .contains(&self.hotkey_code.into());
+
+            if hot_key_pressed && !self.key_pressed {
+                self.key_pressed = true;
+
+                if self.is_running.load(Ordering::SeqCst) {
+                    //println!("Stop");
+                    self.stop_click_storm();
+                } else {
+                    //println!("Start");
+                    self.start_click_storm();
+                }
+            } else if self.key_pressed && !hot_key_pressed {
+                self.key_pressed = false;
+            }
         }
     }
 
@@ -586,13 +642,15 @@ impl ClickStormApp {
 
         cursor_position_frame
             .response
-            .on_hover_text(self.settings.language().get_locale_string("position_desc"));
+            .on_hover_text(self.get_locale_string("position_desc"));
     }
 
     fn ui_actions(&mut self, ui: &mut egui::Ui) {
         ui.centered_and_justified(|ui| {
             ui.columns(2, |cols| {
-                let key_code_text = format!(" ({})", HOTKEY_CODE);
+                // Note: Not localized text
+                let keycode: device_query::Keycode = self.hotkey_code.into();
+                let key_code_text = format!(" ({})", keycode.to_string());
                 cols[0].centered_and_justified(|ui| {
                     let enabled = !self.is_running.load(Ordering::SeqCst);
 
