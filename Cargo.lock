@@ -706,7 +706,7 @@ dependencies = [
 
 [[package]]
 name = "click_storm"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "device_query",
  "eframe",
