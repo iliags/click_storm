@@ -4,7 +4,7 @@ use crate::localization::locale_text::LocaleText;
 
 use super::{
     cursor_position::CursorPosition, mouse_button::MouseButton, mouse_click::MouseClickType,
-    repeat::RepeatType,
+    repeat_type::RepeatType,
 };
 
 #[derive(Debug, Default, Clone, serde::Deserialize, serde::Serialize)]

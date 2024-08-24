@@ -15,7 +15,7 @@ use crate::{
     localization::language::Language,
     settings::{
         app_settings::AppSettings, cursor_position::CursorPosition, mouse_button::MouseButton,
-        mouse_click::MouseClickType, repeat::RepeatType,
+        mouse_click::MouseClickType, repeat_type::RepeatType,
     },
 };
 
