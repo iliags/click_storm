@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.1.4
+
+* Workflow file renamed from `deploy.yml` to `release.yml`
+* Moved some UI variables out of app settings to reduce memory usage when sending data to background thread
+
 ## 0.1.3
 
 * Added changelog

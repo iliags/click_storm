@@ -2,6 +2,7 @@ use device_query::{DeviceQuery, DeviceState, MouseState};
 use egui::Margin;
 use enigo::{Button, Enigo, Mouse, Settings};
 
+use core::panic;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::sync::Arc;
@@ -28,6 +29,9 @@ const HOTKEY_CODE: device_query::Keycode = device_query::Keycode::F6;
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
 pub struct ClickStormApp {
     settings: AppSettings,
+
+    cursor_position_fixed: (i32, i32),
+    repeat_count: usize,
 
     #[serde(skip)]
     device_state: DeviceState,
@@ -58,12 +62,13 @@ enum ClickStormMessage {
 impl Default for ClickStormApp {
     fn default() -> Self {
         // TODO: Handle error
-        // TODO: Maybe move this to an Arc<Mutex<Enigo>> for use in all threads
         let enigo = Enigo::new(&Settings::default()).unwrap_or_else(|_| {
             panic!("Failed to create Enigo instance. Please make sure you are running the application on a system that supports the Enigo library.")
         });
 
-        let display_size = enigo.main_display().unwrap();
+        let display_size = enigo
+            .main_display()
+            .unwrap_or_else(|_| panic!("Failed to get display size."));
 
         let (sender, receiver): (Sender<ClickStormMessage>, Receiver<ClickStormMessage>) =
             channel();
@@ -72,10 +77,10 @@ impl Default for ClickStormApp {
             worker_thread(receiver);
         });
 
-        // TODO: Input thread
-
         Self {
             settings: AppSettings::new(),
+            cursor_position_fixed: (0, 0),
+            repeat_count: 0,
             device_state: DeviceState::new(),
             display_size,
             picking_position: false,
@@ -109,7 +114,6 @@ impl eframe::App for ClickStormApp {
     /// Called each time the UI needs repainting, which may be many times per second.
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         // Request repaint so the input is updated
-        // TODO: Move input to a separate thread and remove this
         ctx.request_repaint();
 
         // Handle input
@@ -176,17 +180,9 @@ impl eframe::App for ClickStormApp {
                     .clicked()
                 {
                     self.settings.reset();
+                    self.cursor_position_fixed = (0, 0);
+                    self.repeat_count = 0;
                 }
-
-                /*
-                #[cfg(debug_assertions)]
-                {
-                    ui.separator();
-
-                    let doing_work = self.is_running.load(Ordering::SeqCst);
-                    ui.label(format!("Working: {}", doing_work));
-                }
-                 */
             });
         });
 
@@ -211,7 +207,6 @@ impl ClickStormApp {
         // `cc.egui_ctx.set_visuals` and `cc.egui_ctx.set_fonts`.
 
         // Load previous app state (if any).
-        // Note that you must enable the `persistence` feature for this to work.
         if let Some(storage) = cc.storage {
             return eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default();
         }
@@ -226,8 +221,8 @@ impl ClickStormApp {
             for press in mouse.button_pressed.iter() {
                 if *press {
                     let coords = mouse.coords;
-                    self.settings.cursor_position_fixed_mut().0 = coords.0;
-                    self.settings.cursor_position_fixed_mut().1 = coords.1;
+                    self.cursor_position_fixed.0 = coords.0;
+                    self.cursor_position_fixed.1 = coords.1;
                     self.picking_position = false;
                     println!("Picked position: {:?}", coords);
                 }
@@ -417,7 +412,7 @@ impl ClickStormApp {
                         });
                         cols[1].centered_and_justified(|ui| {
                             let repeat_count_name = self.get_locale_string("repeat_number");
-                            let repeat_count = self.settings.repeat_count();
+                            let repeat_count = self.repeat_count;
                             ui.radio_value(
                                 self.settings.repeat_type_mut(),
                                 RepeatType::Repeat(repeat_count),
@@ -425,7 +420,7 @@ impl ClickStormApp {
                             );
                         });
                         cols[2].horizontal_centered(|ui| {
-                            let mut current_count = self.settings.repeat_count();
+                            let mut current_count = self.repeat_count;
                             ui.add(
                                 egui::DragValue::new(&mut current_count)
                                     .range(0..=1000)
@@ -433,8 +428,8 @@ impl ClickStormApp {
                                     .clamp_to_range(false),
                             );
 
-                            if current_count != self.settings.repeat_count() {
-                                self.settings.repeat_count_mut().clone_from(&current_count);
+                            if current_count != self.repeat_count {
+                                self.repeat_count = current_count;
                                 self.settings
                                     .set_repeat_type(RepeatType::Repeat(current_count));
                             }
@@ -478,7 +473,7 @@ impl ClickStormApp {
                         cols[1].centered_and_justified(|ui| {
                             // Fixed position radio button
                             let fixed_position_name = self.get_locale_string("fixed_position");
-                            let current_position = self.settings.cursor_position_fixed();
+                            let current_position = self.cursor_position_fixed;
                             ui.radio_value(
                                 self.settings.cursor_position_type_mut(),
                                 CursorPosition::FixedLocation(
@@ -503,41 +498,40 @@ impl ClickStormApp {
                                 )
                                 .clicked()
                             {
-                                let (pos_x, pos_y) = self.settings.cursor_position_fixed();
+                                let (pos_x, pos_y) = self.cursor_position_fixed;
                                 let cursor_type = CursorPosition::FixedLocation(pos_x, pos_y);
                                 self.settings.set_cursor_position_type(cursor_type);
 
-                                // TODO: Add a visual cue that the user is picking a position
                                 self.picking_position = true;
                             }
                         });
                         cols[3].centered_and_justified(|ui| {
-                            let mut pos_x = self.settings.cursor_position_fixed().0;
+                            let mut pos_x = self.cursor_position_fixed.0;
                             ui.add(
                                 egui::DragValue::new(&mut pos_x)
                                     .range(0..=self.display_size.0)
                                     .prefix("x: ")
                                     .speed(1),
                             );
-                            if pos_x != self.settings.cursor_position_fixed().0 {
-                                self.settings.cursor_position_fixed_mut().0 = pos_x;
-                                let pos_y = self.settings.cursor_position_fixed().1;
+                            if pos_x != self.cursor_position_fixed.0 {
+                                self.cursor_position_fixed.0 = pos_x;
+                                let pos_y = self.cursor_position_fixed.1;
 
                                 let cursor_type = CursorPosition::FixedLocation(pos_x, pos_y);
                                 self.settings.set_cursor_position_type(cursor_type);
                             }
                         });
                         cols[4].centered_and_justified(|ui| {
-                            let mut pos_y = self.settings.cursor_position_fixed().1;
+                            let mut pos_y = self.cursor_position_fixed.1;
                             ui.add(
                                 egui::DragValue::new(&mut pos_y)
                                     .range(0..=self.display_size.1)
                                     .prefix("y: ")
                                     .speed(1),
                             );
-                            if pos_y != self.settings.cursor_position_fixed().1 {
-                                self.settings.cursor_position_fixed_mut().1 = pos_y;
-                                let pos_x = self.settings.cursor_position_fixed().0;
+                            if pos_y != self.cursor_position_fixed.1 {
+                                self.cursor_position_fixed.1 = pos_y;
+                                let pos_x = self.cursor_position_fixed.0;
 
                                 let cursor_type = CursorPosition::FixedLocation(pos_x, pos_y);
                                 self.settings.set_cursor_position_type(cursor_type);
@@ -646,14 +640,12 @@ fn worker_thread(receiver: Receiver<ClickStormMessage>) {
 
                         // Worker thread
                         thread = Some(thread::spawn(move || {
-                            // Note: maybe move this to an arc mutex
                             let mut enigo = Enigo::new(&Settings::default()).unwrap_or_else(|_| {
                             panic!("Failed to create Enigo instance. Please make sure you are running the application on a system that supports the Enigo library.")
                         });
 
                             // Get the time interval to sleep between clicks
                             let sleep_duration = settings_clone.click_interval();
-                            //println!("Sleep duration: {:?}", sleep_duration);
 
                             // Get the mouse button to click with
                             let mouse_button = match settings_clone.mouse_button() {
@@ -763,9 +755,4 @@ fn worker_thread(receiver: Receiver<ClickStormMessage>) {
             }
         }
     }
-}
-
-#[allow(dead_code)]
-fn input_thread() {
-    // TODO: Handle input
 }

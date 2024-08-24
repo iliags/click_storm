@@ -25,11 +25,9 @@ pub struct AppSettings {
 
     // Repeat settings
     repeat_type: RepeatType,
-    repeat_count: usize,
 
     // Cursor position
     cursor_position_type: CursorPosition,
-    cursor_position_fixed: (i32, i32),
 }
 
 impl AppSettings {
@@ -124,14 +122,6 @@ impl AppSettings {
         self.repeat_type = repeat_type;
     }
 
-    pub fn repeat_count(&self) -> usize {
-        self.repeat_count
-    }
-
-    pub fn repeat_count_mut(&mut self) -> &mut usize {
-        &mut self.repeat_count
-    }
-
     pub fn cursor_position_type(&self) -> &CursorPosition {
         &self.cursor_position_type
     }
@@ -142,13 +132,5 @@ impl AppSettings {
 
     pub fn set_cursor_position_type(&mut self, cursor_position_type: CursorPosition) {
         self.cursor_position_type = cursor_position_type;
-    }
-
-    pub fn cursor_position_fixed(&self) -> (i32, i32) {
-        self.cursor_position_fixed
-    }
-
-    pub fn cursor_position_fixed_mut(&mut self) -> &mut (i32, i32) {
-        &mut self.cursor_position_fixed
     }
 }
