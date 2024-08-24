@@ -575,8 +575,12 @@ impl ClickStormApp {
             ui.columns(2, |cols| {
                 let key_code_text = format!(" ({})", HOTKEY_CODE);
                 cols[0].centered_and_justified(|ui| {
+                    let enabled = !self.is_running.load(Ordering::SeqCst);
+
                     let start_text = self.get_locale_string("start") + &key_code_text;
-                    if ui.button(start_text).clicked() {
+                    let start_button = ui.add_enabled(enabled, egui::Button::new(start_text));
+
+                    if start_button.clicked() {
                         self.start_click_storm();
                     }
                 });
