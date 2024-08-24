@@ -25,6 +25,7 @@ use crate::{
 // - Check github for updates
 //  - Use GET /repos/:owner/:repo/releases/latest
 // - Write a lint or comp-time check to find unused/mismatched keys in the localization files
+// - Disable widgets that are not applicable when certain settings are selected
 
 /// Application state
 #[derive(serde::Deserialize, serde::Serialize)]
