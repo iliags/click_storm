@@ -21,6 +21,8 @@ use crate::{
 // Wishlist:
 // - Hotkey settings
 // - Record and playback
+// - Customizable variation between ticks
+// - Turbo mode (no sleep between ticks, only auto-click when the user has the mouse pressed)
 
 const HOTKEY_CODE: device_query::Keycode = device_query::Keycode::F6;
 
