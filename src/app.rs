@@ -275,11 +275,6 @@ impl eframe::App for ClickStormApp {
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
                 ui.menu_button(self.get_locale_string("settings"), |ui| {
-                    // Light/dark mode buttons
-                    egui::widgets::global_dark_light_mode_buttons(ui);
-
-                    ui.separator();
-
                     // Language selection
                     egui::ComboBox::from_label("")
                         .selected_text(self.settings.language().get_language().as_str())
@@ -291,6 +286,7 @@ impl eframe::App for ClickStormApp {
                             }
                             self.settings.language_mut().set_language(lang);
                         });
+
                     ui.separator();
 
                     // About button
@@ -321,15 +317,24 @@ impl eframe::App for ClickStormApp {
                             egui::warn_if_debug_build(ui);
                         }
                     });
+
+                    ui.separator();
+
+                    egui::widgets::global_dark_light_mode_buttons(ui);
                 });
 
                 ui.separator();
 
                 // Reset button
-                if ui.button(self.get_locale_string("reset")).clicked() {
+                if ui
+                    .button("⟳")
+                    .on_hover_text_at_pointer(self.get_locale_string("reset"))
+                    .clicked()
+                {
                     self.settings.reset();
                 }
 
+                /*
                 #[cfg(debug_assertions)]
                 {
                     ui.separator();
@@ -337,6 +342,7 @@ impl eframe::App for ClickStormApp {
                     let doing_work = self.is_running.load(Ordering::SeqCst);
                     ui.label(format!("Working: {}", doing_work));
                 }
+                 */
             });
         });
 
@@ -458,7 +464,7 @@ impl ClickStormApp {
                 ui.vertical(|ui| {
                     ui.heading(self.get_locale_string("click_options"));
 
-                    ui.vertical_centered(|ui| {
+                    ui.centered_and_justified(|ui| {
                         // Click button name
                         let selected_button =
                             self.settings.mouse_button().as_str_locale().to_owned();
@@ -487,7 +493,7 @@ impl ClickStormApp {
                             });
                     });
 
-                    ui.vertical_centered(|ui| {
+                    ui.centered_and_justified(|ui| {
                         // Click type options
                         // Get the selected click type name
                         let selected_click_type =
@@ -628,8 +634,13 @@ impl ClickStormApp {
                             );
                         });
                         cols[2].centered_and_justified(|ui| {
+                            let picking_text = if self.picking_position {
+                                self.get_locale_string("picking_position")
+                            } else {
+                                self.get_locale_string("pick_position")
+                            };
                             if ui
-                                .button(self.get_locale_string("pick_position"))
+                                .button(picking_text)
                                 .on_hover_text_at_pointer(
                                     self.settings
                                         .language()
@@ -637,6 +648,10 @@ impl ClickStormApp {
                                 )
                                 .clicked()
                             {
+                                let (pos_x, pos_y) = self.settings.cursor_position_fixed();
+                                let cursor_type = CursorPosition::FixedLocation(pos_x, pos_y);
+                                self.settings.set_cursor_position_type(cursor_type);
+
                                 // TODO: Add a visual cue that the user is picking a position
                                 self.picking_position = true;
                             }

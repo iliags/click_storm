@@ -2,7 +2,7 @@
 # General
 settings = Settings
 about = About
-version = Version: {" "}
+version = Version:{" "}
 source = Source code
 reset = Reset
 
@@ -38,6 +38,7 @@ cursor_position = Cursor Position
 current_position = Current Position
 fixed_position = Fixed Position
 pick_position = Pick Position
+picking_position = Picking
 pick_position_desc = Click anywhere on the screen to set the position
 position_desc = The position to click
 
