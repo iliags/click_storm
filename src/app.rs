@@ -318,15 +318,22 @@ impl eframe::App for ClickStormApp {
                         {
                             ui.separator();
 
-                            //println!("Window size: {:?}", ctx.screen_rect());
-
                             egui::warn_if_debug_build(ui);
                         }
                     });
                 });
 
+                ui.separator();
+
+                // Reset button
+                if ui.button(self.get_locale_string("reset")).clicked() {
+                    self.settings.reset();
+                }
+
                 #[cfg(debug_assertions)]
                 {
+                    ui.separator();
+
                     let doing_work = self.is_running.load(Ordering::SeqCst);
                     let message = format!("Working: {}", doing_work);
                     ui.label(message);
@@ -617,11 +624,9 @@ impl ClickStormApp {
                 });
             });
 
-        cursor_position_frame.response.on_hover_text(
-            self.settings
-                .language()
-                .get_locale_string("pick_position_desc"),
-        );
+        cursor_position_frame
+            .response
+            .on_hover_text(self.settings.language().get_locale_string("position_desc"));
     }
 
     fn ui_actions(&mut self, ui: &mut egui::Ui) {

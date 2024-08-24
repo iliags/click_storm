@@ -40,6 +40,12 @@ impl AppSettings {
         }
     }
 
+    pub fn reset(&mut self) {
+        let language = self.language.clone();
+        *self = Self::new();
+        self.language = language;
+    }
+
     /// Get the click interval duration
     pub fn click_interval(&self) -> Duration {
         if self.interval_hours > 0 {
