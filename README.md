@@ -16,7 +16,7 @@ Some devices may prevent hardware access due to permissions, see this [permissio
 
 ## Virus Total
 
-TODO
+When running the file through [VirusTotal](https://www.virustotal.com/), a few of the engines may flag the file as malicious. This is most likely because the application can take control of the mouse and perform hardware actions automatically. Input manipulation is generally a red-flag in the context of device security, however it is the core functionality of Click Storm as an auto-clicker.
 
 ## Building
 
