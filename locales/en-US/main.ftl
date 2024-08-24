@@ -11,7 +11,7 @@ click_interval = Click Interval
 hours = Hours
 minutes = Minutes
 seconds = Seconds
-milliseconds = Milliseconds
+milliseconds = Millis
 click_interval_desc = The interval between each click
 
 # Click options

@@ -5,17 +5,20 @@
 fn main() -> eframe::Result {
     env_logger::init();
 
+    //const WIDTH: f32 = 472.0;
+    const WIDTH: f32 = 440.0;
+    const HEIGHT: f32 = 295.0;
     // TODO: Add an options file that is read in at startup
     // TODO: If the file doesn't exist, create it with default values
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             // Set the window size
-            .with_inner_size([472.0, 295.0])
-            .with_min_inner_size([472.0, 295.0])
+            .with_inner_size([WIDTH, HEIGHT])
+            .with_min_inner_size([WIDTH, HEIGHT])
             // Always on top for easy access
             .with_always_on_top()
             // No resizing
-            .with_resizable(false)
+            .with_resizable(true)
             // Start with focus on the window
             .with_active(true)
             // Set the window icon

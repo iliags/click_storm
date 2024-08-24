@@ -397,43 +397,48 @@ impl ClickStormApp {
             .show(ui, |ui| {
                 ui.heading(self.get_locale_string("click_interval"));
                 ui.horizontal(|ui| {
-                    // Hours
-                    ui.label(self.get_locale_string("hours"));
-                    ui.add(
-                        egui::DragValue::new(self.settings.interval_hours_mut())
-                            .range(0..=24)
-                            .speed(1),
-                    );
-
-                    ui.separator();
-
-                    // Minutes
-                    ui.label(self.get_locale_string("minutes"));
-                    ui.add(
-                        egui::DragValue::new(self.settings.interval_minutes_mut())
-                            .range(0..=60)
-                            .speed(1),
-                    );
-
-                    ui.separator();
-
-                    // Seconds
-                    ui.label(self.get_locale_string("seconds"));
-                    ui.add(
-                        egui::DragValue::new(self.settings.interval_seconds_mut())
-                            .range(0..=60)
-                            .speed(1),
-                    );
-
-                    ui.separator();
-
-                    // Milliseconds
-                    ui.label(self.get_locale_string("milliseconds"));
-                    ui.add(
-                        egui::DragValue::new(self.settings.interval_milliseconds_mut())
-                            .range(0..=1000)
-                            .speed(1),
-                    );
+                    ui.columns(8, |cols| {
+                        cols[0].centered_and_justified(|ui| {
+                            ui.label(self.get_locale_string("hours"));
+                        });
+                        cols[1].centered_and_justified(|ui| {
+                            ui.add(
+                                egui::DragValue::new(self.settings.interval_hours_mut())
+                                    .range(0..=24)
+                                    .speed(1),
+                            );
+                        });
+                        cols[2].centered_and_justified(|ui| {
+                            ui.label(self.get_locale_string("minutes"));
+                        });
+                        cols[3].centered_and_justified(|ui| {
+                            ui.add(
+                                egui::DragValue::new(self.settings.interval_minutes_mut())
+                                    .range(0..=60)
+                                    .speed(1),
+                            );
+                        });
+                        cols[4].centered_and_justified(|ui| {
+                            ui.label(self.get_locale_string("seconds"));
+                        });
+                        cols[5].centered_and_justified(|ui| {
+                            ui.add(
+                                egui::DragValue::new(self.settings.interval_seconds_mut())
+                                    .range(0..=60)
+                                    .speed(1),
+                            );
+                        });
+                        cols[6].centered_and_justified(|ui| {
+                            ui.label(self.get_locale_string("milliseconds"));
+                        });
+                        cols[7].centered_and_justified(|ui| {
+                            ui.add(
+                                egui::DragValue::new(self.settings.interval_milliseconds_mut())
+                                    .range(0..=1000)
+                                    .speed(1),
+                            );
+                        });
+                    });
                 });
             });
 
@@ -576,11 +581,14 @@ impl ClickStormApp {
                 );
 
                 ui.horizontal(|ui| {
+                    ui.columns(8, |cols| {});
+
                     // Current position radio button
                     let current_position_name = self
                         .settings
                         .language()
                         .get_locale_string("current_position");
+
                     ui.radio_value(
                         self.settings.cursor_position_type_mut(),
                         CursorPosition::CurrentLocation,
@@ -630,19 +638,25 @@ impl ClickStormApp {
     }
 
     fn ui_actions(&mut self, ui: &mut egui::Ui) {
-        // TODO: Center the buttons
-        egui::Grid::new("actions").show(ui, |ui| {
-            let key_code_text = format!(" ({})", HOTKEY_CODE);
-            let start_text = self.get_locale_string("start") + &key_code_text;
-            if ui.button(start_text).clicked() {
-                self.start_click_storm();
-            }
+        ui.separator();
 
-            let stop_text = self.get_locale_string("stop") + &key_code_text;
-            if ui.button(stop_text).clicked() {
-                self.stop_click_storm();
-            }
-            ui.end_row();
+        ui.horizontal(|ui| {
+            ui.columns(2, |cols| {
+                let key_code_text = format!(" ({})", HOTKEY_CODE);
+                cols[0].vertical_centered_justified(|ui| {
+                    let start_text = self.get_locale_string("start") + &key_code_text;
+                    if ui.button(start_text).clicked() {
+                        self.start_click_storm();
+                    }
+                });
+                cols[1].vertical_centered_justified(|ui| {
+                    let stop_text = self.get_locale_string("stop") + &key_code_text;
+                    if ui.button(stop_text).clicked() {
+                        self.stop_click_storm();
+                    }
+                    ui.end_row();
+                });
+            });
         });
     }
 
