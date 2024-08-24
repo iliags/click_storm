@@ -364,7 +364,7 @@ impl ClickStormApp {
             let mouse: MouseState = self.device_state.get_mouse();
 
             for press in mouse.button_pressed.iter() {
-                if *press == true {
+                if *press {
                     let coords = mouse.coords;
                     self.settings.cursor_position_fixed_mut().0 = coords.0;
                     self.settings.cursor_position_fixed_mut().1 = coords.1;
