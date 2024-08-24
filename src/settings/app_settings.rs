@@ -4,7 +4,7 @@ use crate::localization::locale_text::LocaleText;
 
 use super::{
     cursor_position::CursorPosition, mouse_button::MouseButton, mouse_click::MouseClickType,
-    repeat::RepeatType,
+    repeat_type::RepeatType,
 };
 
 #[derive(Debug, Default, Clone, serde::Deserialize, serde::Serialize)]
@@ -28,6 +28,8 @@ pub struct AppSettings {
 
     // Cursor position
     cursor_position_type: CursorPosition,
+
+    repeat_variation: usize,
 }
 
 impl AppSettings {
@@ -66,6 +68,10 @@ impl AppSettings {
         } else {
             Duration::from_millis(self.interval_milliseconds as u64)
         }
+    }
+
+    pub fn click_interval_milliseconds(&self) -> u64 {
+        self.interval_milliseconds as u64
     }
 
     /// Get the current language
@@ -132,5 +138,13 @@ impl AppSettings {
 
     pub fn set_cursor_position_type(&mut self, cursor_position_type: CursorPosition) {
         self.cursor_position_type = cursor_position_type;
+    }
+
+    pub fn repeat_variation(&self) -> &usize {
+        &self.repeat_variation
+    }
+
+    pub fn repeat_variation_mut(&mut self) -> &mut usize {
+        &mut self.repeat_variation
     }
 }

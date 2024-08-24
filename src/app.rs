@@ -1,6 +1,7 @@
 use device_query::{DeviceQuery, DeviceState, MouseState};
 use egui::Margin;
 use enigo::{Button, Enigo, Mouse, Settings};
+use rand::Rng;
 
 use core::panic;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -10,21 +11,21 @@ use std::thread::{self, JoinHandle};
 
 use strum::IntoEnumIterator;
 
+use crate::keycode::AppKeycode;
 use crate::{
     localization::language::Language,
     settings::{
         app_settings::AppSettings, cursor_position::CursorPosition, mouse_button::MouseButton,
-        mouse_click::MouseClickType, repeat::RepeatType,
+        mouse_click::MouseClickType, repeat_type::RepeatType,
     },
 };
 
 // Wishlist:
-// - Hotkey settings
-// - Record and playback
+// - Record and playback mouse movements
+// - Check github for updates
+//  - Use GET /repos/:owner/:repo/releases/latest
 
-const HOTKEY_CODE: device_query::Keycode = device_query::Keycode::F6;
-
-/// We derive Deserialize/Serialize so we can persist app state on shutdown.
+/// Application state
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
 pub struct ClickStormApp {
@@ -32,6 +33,8 @@ pub struct ClickStormApp {
 
     cursor_position_fixed: (i32, i32),
     repeat_count: usize,
+
+    hotkey_code: AppKeycode,
 
     #[serde(skip)]
     device_state: DeviceState,
@@ -41,6 +44,12 @@ pub struct ClickStormApp {
 
     #[serde(skip)]
     picking_position: bool,
+
+    #[serde(skip)]
+    waiting_for_key: bool,
+
+    #[serde(skip)]
+    waiting_for_key_release: bool,
 
     #[serde(skip)]
     sender: Option<Sender<ClickStormMessage>>,
@@ -81,9 +90,12 @@ impl Default for ClickStormApp {
             settings: AppSettings::new(),
             cursor_position_fixed: (0, 0),
             repeat_count: 0,
+            hotkey_code: AppKeycode::F6,
             device_state: DeviceState::new(),
             display_size,
             picking_position: false,
+            waiting_for_key: false,
+            waiting_for_key_release: false,
             sender: Some(sender),
             is_running: Arc::new(AtomicBool::new(false)),
             key_pressed: false,
@@ -122,8 +134,34 @@ impl eframe::App for ClickStormApp {
         // Top panel
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
-                ui.menu_button(self.get_locale_string("settings"), |ui| {
+                ui.menu_button("⛭", |ui| {
+                    // Change hotkey button
+                    ui.label(self.get_locale_string("hotkey"));
+                    let button_text = if self.waiting_for_key {
+                        self.get_locale_string("press_key")
+                    } else {
+                        self.get_locale_string("change_hotkey")
+                    };
+                    if ui
+                        .button(button_text)
+                        .on_hover_text_at_pointer(self.get_locale_string("change_hotkey_desc"))
+                        .clicked()
+                    {
+                        self.waiting_for_key = true;
+                    }
+
+                    if ui
+                        .button(self.get_locale_string("reset_hotkey"))
+                        .on_hover_text_at_pointer(self.get_locale_string("reset_hotkey_desc"))
+                        .clicked()
+                    {
+                        self.hotkey_code = AppKeycode::F6;
+                    }
+
+                    ui.separator();
+
                     // Language selection
+                    ui.label(self.get_locale_string("language"));
                     egui::ComboBox::from_label("")
                         .selected_text(self.settings.language().get_language().as_str())
                         .show_ui(ui, |ui| {
@@ -180,21 +218,35 @@ impl eframe::App for ClickStormApp {
                     .clicked()
                 {
                     self.settings.reset();
-                    self.cursor_position_fixed = (0, 0);
-                    self.repeat_count = 0;
+                    self.default_ui_values();
                 }
+
+                ui.separator();
             });
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            self.ui_interval(ui);
+            if self.is_running.load(Ordering::SeqCst) {
+                // Darken the UI
+                egui::CentralPanel::default().show(ctx, |ui| {
+                    ui.style_mut().visuals.widgets.noninteractive.bg_fill =
+                        egui::Color32::from_black_alpha(128);
+                });
 
-            ui.horizontal(|ui| {
-                self.ui_click_options(ui);
-                self.ui_click_repeat(ui);
-            });
+                // TODO: Add an animation or something
+            } else {
+                self.ui_interval(ui);
 
-            self.ui_cursor_position(ui);
+                ui.horizontal(|ui| {
+                    self.ui_click_options(ui);
+                    self.ui_click_repeat(ui);
+                });
+
+                self.ui_cursor_position(ui);
+
+                ui.separator();
+            }
+
             self.ui_actions(ui);
         });
     }
@@ -214,6 +266,11 @@ impl ClickStormApp {
         Default::default()
     }
 
+    fn default_ui_values(&mut self) {
+        self.cursor_position_fixed = (0, 0);
+        self.repeat_count = 0;
+    }
+
     fn handle_input(&mut self) {
         if self.picking_position {
             let mouse: MouseState = self.device_state.get_mouse();
@@ -229,21 +286,41 @@ impl ClickStormApp {
             }
         }
 
-        // TODO: Custom key bindings
-        let hot_key_pressed = self.device_state.get_keys().contains(&HOTKEY_CODE);
+        if self.waiting_for_key {
+            let keys = self.device_state.get_keys();
 
-        if hot_key_pressed && !self.key_pressed {
-            self.key_pressed = true;
-
-            if self.is_running.load(Ordering::SeqCst) {
-                //println!("Stop");
-                self.stop_click_storm();
-            } else {
-                //println!("Start");
-                self.start_click_storm();
+            // Get the first key pressed
+            if !keys.is_empty() {
+                self.waiting_for_key = false;
+                self.waiting_for_key_release = true;
+                self.hotkey_code = AppKeycode::from(keys[0]);
+                println!("Hotkey set to: {:?}", self.hotkey_code);
             }
-        } else if self.key_pressed && !hot_key_pressed {
-            self.key_pressed = false;
+        } else if self.waiting_for_key_release {
+            let keys = self.device_state.get_keys();
+
+            if keys.is_empty() {
+                self.waiting_for_key_release = false;
+            }
+        } else {
+            let hot_key_pressed = self
+                .device_state
+                .get_keys()
+                .contains(&self.hotkey_code.into());
+
+            if hot_key_pressed && !self.key_pressed {
+                self.key_pressed = true;
+
+                if self.is_running.load(Ordering::SeqCst) {
+                    //println!("Stop");
+                    self.stop_click_storm();
+                } else {
+                    //println!("Start");
+                    self.start_click_storm();
+                }
+            } else if self.key_pressed && !hot_key_pressed {
+                self.key_pressed = false;
+            }
         }
     }
 
@@ -254,47 +331,68 @@ impl ClickStormApp {
             .inner_margin(Margin::same(4.0))
             .show(ui, |ui| {
                 ui.heading(self.get_locale_string("click_interval"));
-                ui.horizontal(|ui| {
-                    ui.columns(8, |cols| {
-                        cols[0].centered_and_justified(|ui| {
-                            ui.label(self.get_locale_string("hours"));
+                ui.vertical(|ui| {
+                    ui.horizontal(|ui| {
+                        ui.columns(8, |cols| {
+                            cols[0].centered_and_justified(|ui| {
+                                ui.label(self.get_locale_string("hours"));
+                            });
+                            cols[1].centered_and_justified(|ui| {
+                                ui.add(
+                                    egui::DragValue::new(self.settings.interval_hours_mut())
+                                        .range(0..=24)
+                                        .speed(1),
+                                );
+                            });
+                            cols[2].centered_and_justified(|ui| {
+                                ui.label(self.get_locale_string("minutes"));
+                            });
+                            cols[3].centered_and_justified(|ui| {
+                                ui.add(
+                                    egui::DragValue::new(self.settings.interval_minutes_mut())
+                                        .range(0..=60)
+                                        .speed(1),
+                                );
+                            });
+                            cols[4].centered_and_justified(|ui| {
+                                ui.label(self.get_locale_string("seconds"));
+                            });
+                            cols[5].centered_and_justified(|ui| {
+                                ui.add(
+                                    egui::DragValue::new(self.settings.interval_seconds_mut())
+                                        .range(0..=60)
+                                        .speed(1),
+                                );
+                            });
+                            cols[6].centered_and_justified(|ui| {
+                                ui.label(self.get_locale_string("milliseconds"));
+                            });
+                            cols[7].centered_and_justified(|ui| {
+                                ui.add(
+                                    egui::DragValue::new(self.settings.interval_milliseconds_mut())
+                                        .range(0..=1000)
+                                        .speed(1),
+                                );
+                            });
                         });
-                        cols[1].centered_and_justified(|ui| {
-                            ui.add(
-                                egui::DragValue::new(self.settings.interval_hours_mut())
-                                    .range(0..=24)
-                                    .speed(1),
-                            );
-                        });
-                        cols[2].centered_and_justified(|ui| {
-                            ui.label(self.get_locale_string("minutes"));
-                        });
-                        cols[3].centered_and_justified(|ui| {
-                            ui.add(
-                                egui::DragValue::new(self.settings.interval_minutes_mut())
-                                    .range(0..=60)
-                                    .speed(1),
-                            );
-                        });
-                        cols[4].centered_and_justified(|ui| {
-                            ui.label(self.get_locale_string("seconds"));
-                        });
-                        cols[5].centered_and_justified(|ui| {
-                            ui.add(
-                                egui::DragValue::new(self.settings.interval_seconds_mut())
-                                    .range(0..=60)
-                                    .speed(1),
-                            );
-                        });
-                        cols[6].centered_and_justified(|ui| {
-                            ui.label(self.get_locale_string("milliseconds"));
-                        });
-                        cols[7].centered_and_justified(|ui| {
-                            ui.add(
-                                egui::DragValue::new(self.settings.interval_milliseconds_mut())
-                                    .range(0..=1000)
-                                    .speed(1),
-                            );
+                    });
+
+                    ui.separator();
+
+                    ui.horizontal(|ui| {
+                        ui.columns(6, |cols| {
+                            cols[0].centered_and_justified(|ui| {
+                                ui.label(self.get_locale_string("repeat_variation"));
+                            });
+                            cols[1].centered_and_justified(|ui| {
+                                ui.add(
+                                    egui::DragValue::new(self.settings.repeat_variation_mut())
+                                        .range(0..=1000)
+                                        .speed(1)
+                                        .clamp_to_range(true),
+                                )
+                                .on_hover_text_at_pointer(self.get_locale_string("variation_desc"));
+                            });
                         });
                     });
                 });
@@ -309,7 +407,7 @@ impl ClickStormApp {
     }
 
     fn ui_click_options(&mut self, ui: &mut egui::Ui) {
-        let click_frame = egui::Frame::default()
+        let _ = egui::Frame::default()
             .stroke(ui.visuals().widgets.noninteractive.bg_stroke)
             .rounding(ui.visuals().widgets.noninteractive.rounding)
             .inner_margin(Margin::same(4.0))
@@ -381,16 +479,10 @@ impl ClickStormApp {
                     });
                 });
             });
-
-        click_frame.response.on_hover_text(
-            self.settings
-                .language()
-                .get_locale_string("click_type_desc"),
-        );
     }
 
     fn ui_click_repeat(&mut self, ui: &mut egui::Ui) {
-        let repeat_frame = egui::Frame::default()
+        let _ = egui::Frame::default()
             .stroke(ui.visuals().widgets.noninteractive.bg_stroke)
             .rounding(ui.visuals().widgets.noninteractive.rounding)
             .inner_margin(Margin::same(4.0))
@@ -398,32 +490,43 @@ impl ClickStormApp {
                 ui.vertical(|ui| {
                     ui.heading(self.get_locale_string("repeat_options"));
 
-                    ui.columns(3, |cols| {
+                    ui.columns(4, |cols| {
                         cols[0].centered_and_justified(|ui| {
-                            let repeat_infinite_name = self
-                                .settings
-                                .language()
-                                .get_locale_string("repeat_until_stopped");
+                            let repeat_infinite_name =
+                                self.get_locale_string("repeat_until_stopped");
                             ui.radio_value(
                                 self.settings.repeat_type_mut(),
                                 RepeatType::RepeatUntilStopped,
                                 repeat_infinite_name,
+                            )
+                            .on_hover_text_at_pointer(
+                                self.get_locale_string("repeat_until_stopped_desc"),
                             );
                         });
                         cols[1].centered_and_justified(|ui| {
-                            let repeat_count_name = self.get_locale_string("repeat_number");
+                            let repeat_turbo_text = self.get_locale_string("turbo_click");
+                            ui.radio_value(
+                                self.settings.repeat_type_mut(),
+                                RepeatType::Turbo,
+                                repeat_turbo_text,
+                            )
+                            .on_hover_text_at_pointer(self.get_locale_string("turbo_click_desc"));
+                        });
+                        cols[2].centered_and_justified(|ui| {
+                            let repeat_count_name = self.get_locale_string("repeat_count");
                             let repeat_count = self.repeat_count;
                             ui.radio_value(
                                 self.settings.repeat_type_mut(),
                                 RepeatType::Repeat(repeat_count),
                                 repeat_count_name,
-                            );
+                            )
+                            .on_hover_text_at_pointer(self.get_locale_string("repeat_count_desc"));
                         });
-                        cols[2].horizontal_centered(|ui| {
+                        cols[3].horizontal_centered(|ui| {
                             let mut current_count = self.repeat_count;
                             ui.add(
                                 egui::DragValue::new(&mut current_count)
-                                    .range(0..=1000)
+                                    .range(1..=1000)
                                     .speed(1)
                                     .clamp_to_range(false),
                             );
@@ -437,10 +540,6 @@ impl ClickStormApp {
                     });
                 });
             });
-
-        repeat_frame
-            .response
-            .on_hover_text(self.get_locale_string("repeat_desc"));
     }
 
     fn ui_cursor_position(&mut self, ui: &mut egui::Ui) {
@@ -543,18 +642,22 @@ impl ClickStormApp {
 
         cursor_position_frame
             .response
-            .on_hover_text(self.settings.language().get_locale_string("position_desc"));
+            .on_hover_text(self.get_locale_string("position_desc"));
     }
 
     fn ui_actions(&mut self, ui: &mut egui::Ui) {
-        ui.separator();
-
         ui.centered_and_justified(|ui| {
             ui.columns(2, |cols| {
-                let key_code_text = format!(" ({})", HOTKEY_CODE);
+                // Note: Not localized text
+                let keycode: device_query::Keycode = self.hotkey_code.into();
+                let key_code_text = format!(" ({})", keycode.to_string());
                 cols[0].centered_and_justified(|ui| {
+                    let enabled = !self.is_running.load(Ordering::SeqCst);
+
                     let start_text = self.get_locale_string("start") + &key_code_text;
-                    if ui.button(start_text).clicked() {
+                    let start_button = ui.add_enabled(enabled, egui::Button::new(start_text));
+
+                    if start_button.clicked() {
                         self.start_click_storm();
                     }
                 });
@@ -647,6 +750,9 @@ fn worker_thread(receiver: Receiver<ClickStormMessage>) {
                             // Get the time interval to sleep between clicks
                             let sleep_duration = settings_clone.click_interval();
 
+                            // Random number generator
+                            let mut rand = rand::thread_rng();
+
                             // Get the mouse button to click with
                             let mouse_button = match settings_clone.mouse_button() {
                                 MouseButton::Left => Button::Left,
@@ -661,6 +767,10 @@ fn worker_thread(receiver: Receiver<ClickStormMessage>) {
                             let single_click =
                                 *settings_clone.click_type() == MouseClickType::Single;
 
+                            let turbo_mode = *settings_clone.repeat_type() == RepeatType::Turbo;
+                            let device = DeviceState::new();
+
+                            // Function to click the mouse
                             let click_mouse =
                                 |enigo: &mut Enigo,
                                  mouse_button: Button,
@@ -700,7 +810,8 @@ fn worker_thread(receiver: Receiver<ClickStormMessage>) {
 
                                 match settings_clone.repeat_type() {
                                     RepeatType::Repeat(count) => {
-                                        if current_count > *count {
+                                        //println!("Count click");
+                                        if current_count >= *count {
                                             doing_work.store(false, Ordering::SeqCst);
                                         } else {
                                             current_count += 1;
@@ -715,6 +826,7 @@ fn worker_thread(receiver: Receiver<ClickStormMessage>) {
                                         }
                                     }
                                     RepeatType::RepeatUntilStopped => {
+                                        //println!("Repeat click");
                                         click_mouse(
                                             &mut enigo,
                                             mouse_button,
@@ -723,24 +835,49 @@ fn worker_thread(receiver: Receiver<ClickStormMessage>) {
                                             single_click,
                                         );
                                     }
+                                    RepeatType::Turbo => {
+                                        // TODO: Check if this works with left handed mice
+                                        // TODO: If LMB/Primary is pressed, release and press again, otherwise press and release
+                                        if device.get_mouse().button_pressed[1] {
+                                            //println!("Turbo click");
+                                            let _ = enigo
+                                                .button(mouse_button, enigo::Direction::Release);
+                                            let _ =
+                                                enigo.button(mouse_button, enigo::Direction::Press);
+                                        }
+                                    }
                                 }
 
-                                thread::sleep(sleep_duration);
+                                if *settings_clone.repeat_variation() > 0 {
+                                    let variation = rand
+                                        .gen_range(0..*settings_clone.repeat_variation() as u64);
+                                    let sleep_duration = sleep_duration
+                                        + std::time::Duration::from_millis(variation);
+
+                                    thread::sleep(sleep_duration);
+                                } else if turbo_mode {
+                                    let sleep_duration = std::time::Duration::from_millis(
+                                        settings_clone.click_interval_milliseconds(),
+                                    );
+                                    thread::sleep(sleep_duration);
+                                } else {
+                                    thread::sleep(sleep_duration);
+                                }
                             }
                         }));
                     }
                     ClickStormMessage::Stop => {
                         // Stop the click storm
-                        println!("Stopping click storm");
                         if let Some(thread) = thread.take() {
+                            println!("Stopping click storm");
                             is_working.store(false, Ordering::SeqCst);
                             let _ = thread.join();
                         }
                     }
                     ClickStormMessage::Shutdown => {
                         // Shutdown the thread
-                        println!("Shutting down click storm thread");
                         if let Some(thread) = thread.take() {
+                            println!("Shutting down click storm thread");
                             is_working.store(false, Ordering::SeqCst);
                             let _ = thread.join();
                         }

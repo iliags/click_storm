@@ -1,8 +1,8 @@
 # Click Storm
 
-Click Storm is a safe, open-source, auto-clicker.
+Click Storm is an open-source auto-clicker written in Rust.
 
-![Screenshot](./screenshots/v0.1.1.png)
+![Screenshot](./screenshots/v0.1.5.png)
 
 ## Notes
 

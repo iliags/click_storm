@@ -5,9 +5,8 @@
 fn main() -> eframe::Result {
     env_logger::init();
 
-    //const WIDTH: f32 = 472.0;
-    const WIDTH: f32 = 470.0;
-    const HEIGHT: f32 = 280.0;
+    const WIDTH: f32 = 600.0;
+    const HEIGHT: f32 = 300.0;
     // TODO: Add an options file that is read in at startup
     // TODO: If the file doesn't exist, create it with default values
     let native_options = eframe::NativeOptions {

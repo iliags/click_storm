@@ -1,6 +1,6 @@
 [package]
 name = "click_storm"
-version = "0.1.4"
+version = "0.1.5"
 authors = ["James Lennon"]
 edition = "2021"
 include = ["LICENSE-APACHE", "LICENSE-MIT", "**/*.rs", "Cargo.toml"]
@@ -45,6 +45,9 @@ device_query = "2.1"
 # Enum helpers
 strum = "0.26"
 strum_macros = "0.26"
+
+# Misc
+rand = "0.8"
 
 
 [profile.release]

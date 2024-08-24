@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.1.5
+
+* Click variation
+* Disable start button while running
+* Disable center panel while running
+* Turbo clicking added
+* Turbo clicking set as the default mode
+* Custom hotkey setting
+* Use icon for settings menu button
+
 ## 0.1.4
 
 * Workflow file renamed from `deploy.yml` to `release.yml`
