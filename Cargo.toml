@@ -7,10 +7,10 @@ include = ["LICENSE-APACHE", "LICENSE-MIT", "**/*.rs", "Cargo.toml"]
 license = "MIT/Apache-2.0"
 resolver = "2"
 publish = false
-#build = "build.rs"
+build = "build.rs"
 
-#[build-dependencies]
-#embed-resource = { version = "2.4" }
+[build-dependencies]
+embed-resource = { version = "2.4" }
 
 [lints.rust]
 unsafe_op_in_unsafe_fn = "warn"

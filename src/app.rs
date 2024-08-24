@@ -17,6 +17,10 @@ use crate::{
     },
 };
 
+// Wishlist:
+// - Hotkey settings
+// - Record and playback
+
 const HOTKEY_CODE: device_query::Keycode = device_query::Keycode::F6;
 
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.

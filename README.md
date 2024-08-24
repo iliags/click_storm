@@ -55,7 +55,6 @@ See [miri repository](https://github.com/rust-lang/miri).
 - Run application with miri: ```cargo +nightly miri run```
   - This takes a long time to run and currently fails due to an unsupported operation in `winit`.
 
-## Wishlist
+## Attributions
 
-- Hotkey settings
-- Record and playback
+Zap icon from [Feather Icons](https://feathericons.com/).
