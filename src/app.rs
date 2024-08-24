@@ -24,6 +24,7 @@ use crate::{
 // - Record and playback mouse movements
 // - Check github for updates
 //  - Use GET /repos/:owner/:repo/releases/latest
+// - Write a lint or comp-time check to find unused/mismatched keys in the localization files
 
 /// Application state
 #[derive(serde::Deserialize, serde::Serialize)]
