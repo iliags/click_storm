@@ -5,16 +5,16 @@ permissions:
 
 on:
   push:
-    tags:
-      - v[0-9]+.*
+    branches:
+      - main
+  #  tags:
+  #    - v[0-9]+.*
 
 jobs:
   create-release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      #- run: sudo apt-get install -y libasound2-dev
-        if: runner.os == 'Linux'
       - uses: taiki-e/create-gh-release-action@v1
         with:
           # (required) GitHub token for creating GitHub Releases.
@@ -34,8 +34,6 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      #- run: sudo apt-get install -y libasound2-dev
-        if: runner.os == 'Linux'
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
           # (required) Comma-separated list of binary names (non-extension portion of filename) to build and upload.
