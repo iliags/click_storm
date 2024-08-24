@@ -31,7 +31,6 @@ click_type = Click Type
 single_click = Single Click
 double_click = Double Click
 
-
 # Mouse buttons
 mouse_button = Mouse Button
 left = Left
