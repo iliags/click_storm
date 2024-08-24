@@ -46,13 +46,7 @@ pub struct ClickStormApp {
     is_running: Arc<AtomicBool>,
 
     #[serde(skip)]
-    was_key_pressed: bool,
-
-    #[serde(skip)]
-    hotkey_pressed: Arc<AtomicBool>,
-
-    #[serde(skip)]
-    input_thread_stop: Arc<AtomicBool>,
+    key_pressed: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -64,37 +58,31 @@ enum ClickStormMessage {
 
 impl Default for ClickStormApp {
     fn default() -> Self {
-        let mut new_self = ClickStormApp {
-            settings: AppSettings::new(),
-            device_state: DeviceState::new(),
-            display_size: (0, 0),
-            picking_position: false,
-            sender: None,
-            is_running: Arc::new(AtomicBool::new(false)),
-            was_key_pressed: false,
-            hotkey_pressed: Arc::new(AtomicBool::new(false)),
-            input_thread_stop: Arc::new(AtomicBool::new(false)),
-        };
-
         // TODO: Handle error
         let enigo = Enigo::new(&Settings::default()).unwrap_or_else(|_| {
             panic!("Failed to create Enigo instance. Please make sure you are running the application on a system that supports the Enigo library.")
         });
 
-        new_self.display_size = enigo
+        let display_size = enigo
             .main_display()
             .unwrap_or_else(|_| panic!("Failed to get display size."));
 
         let (sender, receiver): (Sender<ClickStormMessage>, Receiver<ClickStormMessage>) =
             channel();
 
-        new_self.sender = Some(sender);
-
         thread::spawn(move || {
             worker_thread(receiver);
         });
 
-        new_self
+        Self {
+            settings: AppSettings::new(),
+            device_state: DeviceState::new(),
+            display_size,
+            picking_position: false,
+            sender: Some(sender),
+            is_running: Arc::new(AtomicBool::new(false)),
+            key_pressed: false,
+        }
     }
 }
 
@@ -212,23 +200,12 @@ impl ClickStormApp {
         // `cc.egui_ctx.set_visuals` and `cc.egui_ctx.set_fonts`.
 
         // Load previous app state (if any).
-        let new_self: ClickStormApp = match cc.storage {
-            Some(storage) => eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default(),
-            None => Default::default(),
-        };
+        // Note that you must enable the `persistence` feature for this to work.
+        if let Some(storage) = cc.storage {
+            return eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default();
+        }
 
-        // Start the input thread
-        let thread_stop = Arc::clone(&new_self.input_thread_stop);
-        let hotkey_pressed = Arc::clone(&new_self.hotkey_pressed);
-        let ctx = cc.egui_ctx.clone();
-
-        thread::spawn(move || {
-            input_thread(thread_stop, hotkey_pressed, HOTKEY_CODE, ctx);
-        });
-
-        println!("Starting app");
-
-        new_self
+        Default::default()
     }
 
     fn handle_input(&mut self) {
@@ -246,13 +223,21 @@ impl ClickStormApp {
             }
         }
 
-        let hotkey_pressed = self.hotkey_pressed.load(Ordering::SeqCst);
-        if hotkey_pressed && !self.was_key_pressed {
-            self.was_key_pressed = true;
-            self.start_click_storm();
-        } else if !hotkey_pressed && self.was_key_pressed {
-            self.was_key_pressed = false;
-            self.stop_click_storm();
+        // TODO: Custom key bindings
+        let hot_key_pressed = self.device_state.get_keys().contains(&HOTKEY_CODE);
+
+        if hot_key_pressed && !self.key_pressed {
+            self.key_pressed = true;
+
+            if self.is_running.load(Ordering::SeqCst) {
+                //println!("Stop");
+                self.stop_click_storm();
+            } else {
+                //println!("Start");
+                self.start_click_storm();
+            }
+        } else if self.key_pressed && !hot_key_pressed {
+            self.key_pressed = false;
         }
     }
 
@@ -764,36 +749,6 @@ fn worker_thread(receiver: Receiver<ClickStormMessage>) {
                 println!("Error receiving message: {:?}", e);
                 break;
             }
-        }
-    }
-}
-
-#[allow(dead_code)]
-fn input_thread(
-    thread_stop: Arc<AtomicBool>,
-    hotkey_pressed: Arc<AtomicBool>,
-    hotkey: device_query::Keycode,
-    frame: egui::Context,
-) {
-    // TODO: Handle input
-
-    let device_state = DeviceState::new();
-
-    let thread_stop_clone = Arc::clone(&thread_stop);
-
-    let mut was_pressed = false;
-
-    while thread_stop_clone.load(Ordering::SeqCst) != true {
-        let keys = device_state.get_keys();
-
-        if keys.contains(&hotkey) {
-            was_pressed = true;
-            hotkey_pressed.store(true, Ordering::SeqCst);
-            frame.request_repaint();
-        } else if was_pressed {
-            was_pressed = false;
-            hotkey_pressed.store(false, Ordering::SeqCst);
-            frame.request_repaint();
         }
     }
 }
