@@ -23,6 +23,7 @@ use crate::{
 // - Record and playback
 // - Random variation in click interval
 // - Turbo mode (use only milliseconds between clicks, only auto-click when the user has the mouse pressed)
+// - Check github for updates
 
 const HOTKEY_CODE: device_query::Keycode = device_query::Keycode::F6;
 
