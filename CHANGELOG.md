@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.1.6 (WIP)
+
+* Translations for French, German, and Spanish (Spain)
+
 ## 0.1.5
 
 * Click variation
