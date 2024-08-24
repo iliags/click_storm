@@ -7,7 +7,8 @@ All notable changes to this project will be documented in this file.
 * Click variation
 * Disable start button while running
 * Disable center panel while running
-* Turbo clicking
+* Turbo clicking added
+* Turbo clicking set as the default mode
 
 ## 0.1.4
 
