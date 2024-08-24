@@ -1,6 +1,7 @@
 use device_query::{DeviceQuery, DeviceState, MouseState};
 use egui::Margin;
 use enigo::{Button, Enigo, Mouse, Settings};
+use rand::Rng;
 
 use core::panic;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -20,8 +21,7 @@ use crate::{
 
 // Wishlist:
 // - Hotkey settings
-// - Record and playback
-// - Random variation in click interval
+// - Record and playback mouse movements
 // - Turbo mode (use only milliseconds between clicks, only auto-click when the user has the mouse pressed)
 // - Check github for updates
 
@@ -83,7 +83,7 @@ impl Default for ClickStormApp {
         Self {
             settings: AppSettings::new(),
             cursor_position_fixed: (0, 0),
-            repeat_count: 0,
+            repeat_count: 1,
             device_state: DeviceState::new(),
             display_size,
             picking_position: false,
@@ -183,8 +183,7 @@ impl eframe::App for ClickStormApp {
                     .clicked()
                 {
                     self.settings.reset();
-                    self.cursor_position_fixed = (0, 0);
-                    self.repeat_count = 0;
+                    self.default_ui_values();
                 }
             });
         });
@@ -215,6 +214,11 @@ impl ClickStormApp {
         }
 
         Default::default()
+    }
+
+    fn default_ui_values(&mut self) {
+        self.cursor_position_fixed = (0, 0);
+        self.repeat_count = 1;
     }
 
     fn handle_input(&mut self) {
@@ -426,7 +430,7 @@ impl ClickStormApp {
                             let mut current_count = self.repeat_count;
                             ui.add(
                                 egui::DragValue::new(&mut current_count)
-                                    .range(0..=1000)
+                                    .range(1..=1000)
                                     .speed(1)
                                     .clamp_to_range(false),
                             );
@@ -436,6 +440,21 @@ impl ClickStormApp {
                                 self.settings
                                     .set_repeat_type(RepeatType::Repeat(current_count));
                             }
+                        });
+                    });
+
+                    ui.columns(2, |cols| {
+                        cols[0].vertical_centered(|ui| {
+                            ui.label(self.get_locale_string("repeat_variation"));
+                        });
+                        cols[1].centered_and_justified(|ui| {
+                            ui.add(
+                                egui::DragValue::new(self.settings.repeat_variation_mut())
+                                    .range(0..=1000)
+                                    .speed(1)
+                                    .clamp_to_range(true),
+                            )
+                            .on_hover_text_at_pointer(self.get_locale_string("variation_desc"));
                         });
                     });
                 });
@@ -649,6 +668,7 @@ fn worker_thread(receiver: Receiver<ClickStormMessage>) {
 
                             // Get the time interval to sleep between clicks
                             let sleep_duration = settings_clone.click_interval();
+                            let mut rand = rand::thread_rng();
 
                             // Get the mouse button to click with
                             let mouse_button = match settings_clone.mouse_button() {
@@ -703,7 +723,7 @@ fn worker_thread(receiver: Receiver<ClickStormMessage>) {
 
                                 match settings_clone.repeat_type() {
                                     RepeatType::Repeat(count) => {
-                                        if current_count > *count {
+                                        if current_count >= *count {
                                             doing_work.store(false, Ordering::SeqCst);
                                         } else {
                                             current_count += 1;
@@ -726,6 +746,15 @@ fn worker_thread(receiver: Receiver<ClickStormMessage>) {
                                             single_click,
                                         );
                                     }
+                                }
+
+                                if *settings_clone.repeat_variation() > 0 {
+                                    let variation = rand
+                                        .gen_range(0..*settings_clone.repeat_variation() as u64);
+                                    let sleep_duration = sleep_duration
+                                        + std::time::Duration::from_millis(variation);
+
+                                    thread::sleep(sleep_duration);
                                 }
 
                                 thread::sleep(sleep_duration);

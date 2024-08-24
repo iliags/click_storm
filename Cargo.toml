@@ -46,6 +46,9 @@ device_query = "2.1"
 strum = "0.26"
 strum_macros = "0.26"
 
+# Misc
+rand = "0.8"
+
 
 [profile.release]
 opt-level = 2

@@ -717,6 +717,7 @@ dependencies = [
  "fluent",
  "fluent-templates",
  "log",
+ "rand",
  "serde",
  "strum",
  "strum_macros",

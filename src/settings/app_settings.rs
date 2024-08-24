@@ -28,6 +28,8 @@ pub struct AppSettings {
 
     // Cursor position
     cursor_position_type: CursorPosition,
+
+    repeat_variation: usize,
 }
 
 impl AppSettings {
@@ -132,5 +134,13 @@ impl AppSettings {
 
     pub fn set_cursor_position_type(&mut self, cursor_position_type: CursorPosition) {
         self.cursor_position_type = cursor_position_type;
+    }
+
+    pub fn repeat_variation(&self) -> &usize {
+        &self.repeat_variation
+    }
+
+    pub fn repeat_variation_mut(&mut self) -> &mut usize {
+        &mut self.repeat_variation
     }
 }

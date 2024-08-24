@@ -32,6 +32,8 @@ repeat_options = Repeat Options
 repeat_until_stopped = Infinite
 repeat_number = Number
 repeat_desc = The number of times to repeat the click
+repeat_variation = Variation + (ms):
+variation_desc = The variation in the interval between each click
 
 # Position options
 cursor_position = Cursor Position
