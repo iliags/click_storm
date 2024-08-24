@@ -12,9 +12,13 @@ The application uses OS threads to perform work. While the timing may not be 100
 
 Linux users may need to install `libxdo-dev` to run the application.
 
-### Permission
+### Device Permissions
 
 Some devices may prevent hardware access due to permissions, see this [permissions](https://github.com/enigo-rs/enigo/blob/main/Permissions.md) page if you have issues.
+
+### Translations
+
+The fluent `ftl` files are in the `locales` folder under their respective language codes. They were translated from english using AI so they are probably wrong, feel free to submit a PR with corrections.
 
 ## Virus Total
 
