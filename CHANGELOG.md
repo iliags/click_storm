@@ -2,12 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.1.3
+
+* Added changelog
+
 ## 0.1.2
 
 * Update dependencies
 * Updated icons
 * App icon for Windows executables
-* Added changelog
 
 ## 0.1.1
 
