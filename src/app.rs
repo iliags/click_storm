@@ -124,7 +124,7 @@ impl eframe::App for ClickStormApp {
         // Top panel
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             egui::menu::bar(ui, |ui| {
-                ui.menu_button(self.get_locale_string("settings"), |ui| {
+                ui.menu_button("⛭", |ui| {
                     // Language selection
                     egui::ComboBox::from_label("")
                         .selected_text(self.settings.language().get_language().as_str())
@@ -184,6 +184,8 @@ impl eframe::App for ClickStormApp {
                     self.settings.reset();
                     self.default_ui_values();
                 }
+
+                ui.separator();
             });
         });
 
