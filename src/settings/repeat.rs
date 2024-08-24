@@ -5,4 +5,5 @@ pub enum RepeatType {
     Repeat(usize),
     #[default]
     RepeatUntilStopped,
+    Turbo,
 }

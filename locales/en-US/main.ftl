@@ -11,15 +11,17 @@ click_interval = Click Interval
 hours = Hours
 minutes = Minutes
 seconds = Seconds
-milliseconds = Millis
+milliseconds = Milli
 click_interval_desc = The interval between each click
+variation_desc = The variation in the interval between each click
+repeat_variation = Variation (ms):
 
 # Click options
 click_options = Click Options
 click_type = Click Type
-click_type_desc = The type of click to perform
 single_click = Single Click
 double_click = Double Click
+
 
 # Mouse buttons
 mouse_button = Mouse Button
@@ -30,10 +32,11 @@ right = Right
 # Repeat options
 repeat_options = Repeat Options
 repeat_until_stopped = Infinite
-repeat_number = Number
-repeat_desc = The number of times to repeat the click
-repeat_variation = Variation + (ms):
-variation_desc = The variation in the interval between each click
+repeat_until_stopped_desc = Clicks until the stop button is pressed
+repeat_count = Count
+repeat_count_desc = Clicks a set number of times
+turbo_click = Turbo
+turbo_click_desc = Clicks only when the mouse is held down
 
 # Position options
 cursor_position = Cursor Position

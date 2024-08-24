@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 * Click variation
 * Disable start button while running
+* Turbo clicking
 
 ## 0.1.4
 

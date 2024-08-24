@@ -70,6 +70,10 @@ impl AppSettings {
         }
     }
 
+    pub fn click_interval_milliseconds(&self) -> u64 {
+        self.interval_milliseconds as u64
+    }
+
     /// Get the current language
     pub fn language(&self) -> &LocaleText {
         &self.language
