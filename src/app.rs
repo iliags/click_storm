@@ -634,14 +634,12 @@ fn worker_thread(receiver: Receiver<ClickStormMessage>) {
 
                         // Worker thread
                         thread = Some(thread::spawn(move || {
-                            // Note: maybe move this to an arc mutex
                             let mut enigo = Enigo::new(&Settings::default()).unwrap_or_else(|_| {
                             panic!("Failed to create Enigo instance. Please make sure you are running the application on a system that supports the Enigo library.")
                         });
 
                             // Get the time interval to sleep between clicks
                             let sleep_duration = settings_clone.click_interval();
-                            //println!("Sleep duration: {:?}", sleep_duration);
 
                             // Get the mouse button to click with
                             let mouse_button = match settings_clone.mouse_button() {
