@@ -6,7 +6,7 @@ Click Storm is a safe, open-source, auto-clicker.
 
 ## Notes
 
-The application uses OS threads to perform work, While the timing may not be 100% accurate, it tries to be as close as possible.
+The application uses OS threads to perform work, While the timing may not be 100% accurate, it tries to be as close as possible. The location picker and clicking only works on the main display due to library limitations.
 
 ### Dependencies
 
