@@ -1,11 +1,12 @@
 use device_query::{DeviceQuery, DeviceState, MouseState};
 use egui::Margin;
-use enigo::{Enigo, Mouse, Settings};
+use enigo::{Button, Enigo, Mouse, Settings};
+
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::sync::Arc;
 use std::thread::{self, JoinHandle};
-use std::time::Duration;
+
 use strum::IntoEnumIterator;
 
 use crate::{
@@ -15,6 +16,8 @@ use crate::{
         mouse_click::MouseClickType, repeat::RepeatType,
     },
 };
+
+const HOTKEY_CODE: device_query::Keycode = device_query::Keycode::F6;
 
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
@@ -36,6 +39,9 @@ pub struct ClickStormApp {
 
     #[serde(skip)]
     is_running: Arc<AtomicBool>,
+
+    #[serde(skip)]
+    key_pressed: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -48,6 +54,7 @@ enum ClickStormMessage {
 impl Default for ClickStormApp {
     fn default() -> Self {
         // TODO: Handle error
+        // TODO: Maybe move this to an Arc<Mutex<Enigo>> for use in all threads
         let enigo = Enigo::new(&Settings::default()).unwrap_or_else(|_| {
             panic!("Failed to create Enigo instance. Please make sure you are running the application on a system that supports the Enigo library.")
         });
@@ -64,63 +71,140 @@ impl Default for ClickStormApp {
 
             loop {
                 match receiver.recv() {
-                    Ok(message) => match message {
-                        ClickStormMessage::Start(settings, is_running) => {
-                            // Start the click storm
-                            println!("Starting click storm with settings: {:?}", settings);
+                    Ok(message) => {
+                        match message {
+                            ClickStormMessage::Start(settings, is_running) => {
+                                // Start the click storm
+                                //println!("Starting click storm with settings: {:?}", settings);
 
-                            if let Some(thread) = thread.take() {
+                                if let Some(thread) = thread.take() {
+                                    is_running.store(true, Ordering::SeqCst);
+                                    let _ = thread.join();
+                                }
+
+                                // Inner thread atomic
+                                let doing_work = Arc::clone(&is_running);
+
+                                // Worker thread atomic
+                                is_working = Arc::clone(&is_running);
                                 is_running.store(true, Ordering::SeqCst);
-                                let _ = thread.join();
-                            }
 
-                            let doing_work = Arc::clone(&is_running);
-                            is_working = Arc::clone(&is_running);
-                            is_running.store(true, Ordering::SeqCst);
+                                let settings_clone = Arc::clone(&Arc::new(settings));
 
-                            //let new_settings = Arc::new(settings);
-                            //let settings_clone = Arc::clone(&new_settings);
-                            let settings_clone = Arc::clone(&Arc::new(settings));
-
-                            // Worker thread
-                            thread = Some(thread::spawn(move || {
-                                let enigo = Enigo::new(&Settings::default()).unwrap_or_else(|_| {
+                                // Worker thread
+                                thread = Some(thread::spawn(move || {
+                                    // Note: maybe move this to an arc mutex
+                                    let mut enigo = Enigo::new(&Settings::default()).unwrap_or_else(|_| {
                                     panic!("Failed to create Enigo instance. Please make sure you are running the application on a system that supports the Enigo library.")
                                 });
-                                let mut i = 0;
-                                while doing_work.load(Ordering::SeqCst) {
-                                    println!(
-                                        "Inner thread performing task with settings: {:?}",
-                                        settings_clone
-                                    );
-                                    i += 1;
 
-                                    if i >= 3 {
-                                        doing_work.store(false, Ordering::SeqCst);
-                                    } else {
-                                        thread::sleep(Duration::from_millis(100));
+                                    // Get the time interval to sleep between clicks
+                                    let sleep_duration = settings_clone.click_interval();
+                                    //println!("Sleep duration: {:?}", sleep_duration);
+
+                                    // Get the mouse button to click with
+                                    let mouse_button = match settings_clone.mouse_button() {
+                                        MouseButton::Left => Button::Left,
+                                        MouseButton::Middle => Button::Middle,
+                                        MouseButton::Right => Button::Right,
+                                    };
+
+                                    let mut current_count = 0;
+
+                                    let move_mouse = *settings_clone.cursor_position_type()
+                                        != CursorPosition::CurrentLocation;
+                                    let single_click =
+                                        *settings_clone.click_type() == MouseClickType::Single;
+
+                                    let click_mouse =
+                                    |enigo: &mut Enigo,
+                                     mouse_button: Button,
+                                     location: (i32, i32),
+                                     move_mouse: bool,
+                                     single_click: bool| {
+                                        if move_mouse {
+                                            let _ = enigo.move_mouse(
+                                                location.0,
+                                                location.1,
+                                                enigo::Coordinate::Abs,
+                                            );
+                                        }
+
+                                        // TODO: Handle error
+                                        if single_click {
+                                            let _ =
+                                                enigo.button(mouse_button, enigo::Direction::Click);
+                                        } else {
+                                            let _ =enigo.button(mouse_button, enigo::Direction::Click);
+                                            let _ =enigo.button(mouse_button, enigo::Direction::Click);
+                                        }
+                                    };
+
+                                    while doing_work.load(Ordering::SeqCst) {
+                                        //println!("Working");
+
+                                        // Coordinates are in absolute screen coordinates
+                                        let mouse_position =
+                                            match settings_clone.cursor_position_type() {
+                                                CursorPosition::CurrentLocation => {
+                                                    // TODO: Error handling
+                                                    enigo.location().unwrap_or_else(|_| {
+                                                        panic!("Failed to get mouse location.")
+                                                    })
+                                                }
+                                                CursorPosition::FixedLocation(x, y) => (*x, *y),
+                                            };
+
+                                        match settings_clone.repeat_type() {
+                                            RepeatType::Repeat(count) => {
+                                                if current_count > *count {
+                                                    doing_work.store(false, Ordering::SeqCst);
+                                                } else {
+                                                    current_count += 1;
+
+                                                    click_mouse(
+                                                        &mut enigo,
+                                                        mouse_button,
+                                                        mouse_position,
+                                                        move_mouse,
+                                                        single_click,
+                                                    );
+                                                }
+                                            }
+                                            RepeatType::RepeatUntilStopped => {
+                                                click_mouse(
+                                                    &mut enigo,
+                                                    mouse_button,
+                                                    mouse_position,
+                                                    move_mouse,
+                                                    single_click,
+                                                );
+                                            }
+                                        }
+
+                                        thread::sleep(sleep_duration);
                                     }
+                                }));
+                            }
+                            ClickStormMessage::Stop => {
+                                // Stop the click storm
+                                println!("Stopping click storm");
+                                if let Some(thread) = thread.take() {
+                                    is_working.store(false, Ordering::SeqCst);
+                                    let _ = thread.join();
                                 }
-                            }));
-                        }
-                        ClickStormMessage::Stop => {
-                            // Stop the click storm
-                            println!("Stopping click storm");
-                            if let Some(thread) = thread.take() {
-                                is_working.store(false, Ordering::SeqCst);
-                                let _ = thread.join();
+                            }
+                            ClickStormMessage::Shutdown => {
+                                // Shutdown the thread
+                                println!("Shutting down click storm thread");
+                                if let Some(thread) = thread.take() {
+                                    is_working.store(false, Ordering::SeqCst);
+                                    let _ = thread.join();
+                                }
+                                break;
                             }
                         }
-                        ClickStormMessage::Shutdown => {
-                            // Shutdown the thread
-                            println!("Shutting down click storm thread");
-                            if let Some(thread) = thread.take() {
-                                is_working.store(false, Ordering::SeqCst);
-                                let _ = thread.join();
-                            }
-                            break;
-                        }
-                    },
+                    }
 
                     Err(e) => {
                         println!("Error receiving message: {:?}", e);
@@ -133,10 +217,11 @@ impl Default for ClickStormApp {
         Self {
             settings: AppSettings::new(),
             device_state: DeviceState::new(),
-            display_size: display_size,
+            display_size,
             picking_position: false,
             sender: Some(sender),
             is_running: Arc::new(AtomicBool::new(false)),
+            key_pressed: false,
         }
     }
 }
@@ -171,33 +256,20 @@ impl eframe::App for ClickStormApp {
             }
             None => {
                 println!("Error sending message: Sender is None");
+                // This should clean up the inner thread if it's still running
+                self.is_running.store(false, Ordering::SeqCst);
             }
         }
     }
 
     /// Called each time the UI needs repainting, which may be many times per second.
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        if self.picking_position {
-            let mouse: MouseState = self.device_state.get_mouse();
+        // Request repaint so the input is updated
+        // TODO: Move input to a separate thread and remove this
+        ctx.request_repaint();
 
-            for press in mouse.button_pressed.iter() {
-                if *press == true {
-                    let coords = mouse.coords;
-                    self.settings.cursor_position_fixed_mut().0 = coords.0;
-                    self.settings.cursor_position_fixed_mut().1 = coords.1;
-                    self.picking_position = false;
-                    println!("Picked position: {:?}", coords);
-                }
-            }
-        }
-
-        ctx.input(|i| {
-            if i.key_pressed(egui::Key::F6) {
-                println!("F6 pressed");
-                // TODO: Toggle start/stop click storm
-                // TODO: Custom key bindings
-            }
-        });
+        // Handle input
+        self.handle_input();
 
         // Top panel
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
@@ -263,7 +335,6 @@ impl eframe::App for ClickStormApp {
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            //println!("Window size: {:?}", ctx.screen_rect());
             self.ui_interval(ui);
 
             ui.horizontal(|ui| {
@@ -278,6 +349,39 @@ impl eframe::App for ClickStormApp {
 }
 
 impl ClickStormApp {
+    fn handle_input(&mut self) {
+        if self.picking_position {
+            let mouse: MouseState = self.device_state.get_mouse();
+
+            for press in mouse.button_pressed.iter() {
+                if *press == true {
+                    let coords = mouse.coords;
+                    self.settings.cursor_position_fixed_mut().0 = coords.0;
+                    self.settings.cursor_position_fixed_mut().1 = coords.1;
+                    self.picking_position = false;
+                    println!("Picked position: {:?}", coords);
+                }
+            }
+        }
+
+        // TODO: Custom key bindings
+        let hot_key_pressed = self.device_state.get_keys().contains(&HOTKEY_CODE);
+
+        if hot_key_pressed && !self.key_pressed {
+            self.key_pressed = true;
+
+            if self.is_running.load(Ordering::SeqCst) {
+                //println!("Stop");
+                self.stop_click_storm();
+            } else {
+                //println!("Start");
+                self.start_click_storm();
+            }
+        } else if self.key_pressed && !hot_key_pressed {
+            self.key_pressed = false;
+        }
+    }
+
     fn ui_interval(&mut self, ui: &mut egui::Ui) {
         let interval_frame = egui::Frame::default()
             .stroke(ui.visuals().widgets.noninteractive.bg_stroke)
@@ -523,10 +627,14 @@ impl ClickStormApp {
     fn ui_actions(&mut self, ui: &mut egui::Ui) {
         // TODO: Center the buttons
         egui::Grid::new("actions").show(ui, |ui| {
-            if ui.button(self.get_locale_string("start")).clicked() {
+            let key_code_text = format!(" ({})", HOTKEY_CODE);
+            let start_text = self.get_locale_string("start") + &key_code_text;
+            if ui.button(start_text).clicked() {
                 self.start_click_storm();
             }
-            if ui.button(self.get_locale_string("stop")).clicked() {
+
+            let stop_text = self.get_locale_string("stop") + &key_code_text;
+            if ui.button(stop_text).clicked() {
                 self.stop_click_storm();
             }
             ui.end_row();
@@ -566,7 +674,7 @@ impl ClickStormApp {
         match self.sender.as_ref() {
             Some(sender) => {
                 let _ = sender.send(ClickStormMessage::Stop);
-                self.is_running.store(true, Ordering::SeqCst);
+                self.is_running.store(false, Ordering::SeqCst);
             }
             None => {
                 println!("Error sending message: Sender is None");

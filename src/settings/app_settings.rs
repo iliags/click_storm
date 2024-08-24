@@ -1,4 +1,3 @@
-#![allow(dead_code)]
 use std::time::Duration;
 
 use crate::localization::locale_text::LocaleText;
@@ -43,12 +42,26 @@ impl AppSettings {
 
     /// Get the click interval duration
     pub fn click_interval(&self) -> Duration {
-        Duration::from_secs(
-            (self.interval_hours as u64) * 3600
-                + (self.interval_minutes as u64) * 60
-                + self.interval_seconds as u64
-                + (self.interval_milliseconds as u64) / 1000,
-        )
+        if self.interval_hours > 0 {
+            Duration::from_secs(
+                (self.interval_hours as u64) * 3600
+                    + (self.interval_minutes as u64) * 60
+                    + self.interval_seconds as u64
+                    + (self.interval_milliseconds as u64) / 1000,
+            )
+        } else if self.interval_minutes > 0 {
+            Duration::from_secs(
+                (self.interval_minutes as u64) * 60
+                    + self.interval_seconds as u64
+                    + (self.interval_milliseconds as u64) / 1000,
+            )
+        } else if self.interval_seconds > 0 {
+            Duration::from_secs(
+                self.interval_seconds as u64 + (self.interval_milliseconds as u64) / 1000,
+            )
+        } else {
+            Duration::from_millis(self.interval_milliseconds as u64)
+        }
     }
 
     /// Get the current language
@@ -61,32 +74,16 @@ impl AppSettings {
         &mut self.language
     }
 
-    pub fn interval_hours(&self) -> usize {
-        self.interval_hours
-    }
-
     pub fn interval_hours_mut(&mut self) -> &mut usize {
         &mut self.interval_hours
-    }
-
-    pub fn interval_minutes(&self) -> usize {
-        self.interval_minutes
     }
 
     pub fn interval_minutes_mut(&mut self) -> &mut usize {
         &mut self.interval_minutes
     }
 
-    pub fn interval_seconds(&self) -> usize {
-        self.interval_seconds
-    }
-
     pub fn interval_seconds_mut(&mut self) -> &mut usize {
         &mut self.interval_seconds
-    }
-
-    pub fn interval_milliseconds(&self) -> usize {
-        self.interval_milliseconds
     }
 
     pub fn interval_milliseconds_mut(&mut self) -> &mut usize {
