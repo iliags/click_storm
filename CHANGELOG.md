@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.1.5
+
 ## 0.1.4
 
 * Workflow file renamed from `deploy.yml` to `release.yml`
