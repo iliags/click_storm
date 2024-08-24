@@ -176,16 +176,6 @@ impl eframe::App for ClickStormApp {
                 {
                     self.settings.reset();
                 }
-
-                /*
-                #[cfg(debug_assertions)]
-                {
-                    ui.separator();
-
-                    let doing_work = self.is_running.load(Ordering::SeqCst);
-                    ui.label(format!("Working: {}", doing_work));
-                }
-                 */
             });
         });
 
