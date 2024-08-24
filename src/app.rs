@@ -2,6 +2,7 @@ use device_query::{DeviceQuery, DeviceState, MouseState};
 use egui::Margin;
 use enigo::{Button, Enigo, Mouse, Settings};
 
+use core::panic;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{channel, Receiver, Sender};
 use std::sync::Arc;
@@ -58,12 +59,13 @@ enum ClickStormMessage {
 impl Default for ClickStormApp {
     fn default() -> Self {
         // TODO: Handle error
-        // TODO: Maybe move this to an Arc<Mutex<Enigo>> for use in all threads
         let enigo = Enigo::new(&Settings::default()).unwrap_or_else(|_| {
             panic!("Failed to create Enigo instance. Please make sure you are running the application on a system that supports the Enigo library.")
         });
 
-        let display_size = enigo.main_display().unwrap();
+        let display_size = enigo
+            .main_display()
+            .unwrap_or_else(|_| panic!("Failed to get display size."));
 
         let (sender, receiver): (Sender<ClickStormMessage>, Receiver<ClickStormMessage>) =
             channel();
@@ -71,8 +73,6 @@ impl Default for ClickStormApp {
         thread::spawn(move || {
             worker_thread(receiver);
         });
-
-        // TODO: Input thread
 
         Self {
             settings: AppSettings::new(),
@@ -109,7 +109,6 @@ impl eframe::App for ClickStormApp {
     /// Called each time the UI needs repainting, which may be many times per second.
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         // Request repaint so the input is updated
-        // TODO: Move input to a separate thread and remove this
         ctx.request_repaint();
 
         // Handle input
@@ -507,7 +506,6 @@ impl ClickStormApp {
                                 let cursor_type = CursorPosition::FixedLocation(pos_x, pos_y);
                                 self.settings.set_cursor_position_type(cursor_type);
 
-                                // TODO: Add a visual cue that the user is picking a position
                                 self.picking_position = true;
                             }
                         });
@@ -763,9 +761,4 @@ fn worker_thread(receiver: Receiver<ClickStormMessage>) {
             }
         }
     }
-}
-
-#[allow(dead_code)]
-fn input_thread() {
-    // TODO: Handle input
 }
