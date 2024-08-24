@@ -2,6 +2,8 @@
 
 Click Storm is a safe, open-source, auto-clicker.
 
+![Screenshot](./screenshots/v0.1.1.png)
+
 ## Notes
 
 The application uses OS threads to perform work, While the timing may not be 100% accurate, it tries to be as close as possible.
@@ -23,9 +25,10 @@ When running the file through [VirusTotal](https://www.virustotal.com/), a few o
  Install [rust](https://www.rust-lang.org/tools/install)
 
 - Open a terminal in the repository location
-  - Most operating systems have an option to open a terminal in the current folder when right clicking in the file browser.
+  - Most operating systems have an option to open a terminal in the current folder when right clicking in blank space within the file browser.
 - Enter ```cargo build --release``` to build but not execute, ```cargo run --release``` to build and execute
   - The ```--release``` flag can be removed to build the debug version
+  - The binary will be located in `target/release/` or `target/debug/` depending on which version was built.
 
 ### Linux
 
