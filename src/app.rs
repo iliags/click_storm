@@ -459,6 +459,8 @@ impl ClickStormApp {
                 ui.vertical(|ui| {
                     ui.heading(self.get_locale_string("click_options"));
 
+                    //ui.columns(3, |cols| {});
+
                     // Click button name
                     let selected_button = self.settings.mouse_button().as_str_locale().to_owned();
 
@@ -534,32 +536,45 @@ impl ClickStormApp {
                 ui.vertical(|ui| {
                     ui.heading(self.get_locale_string("repeat_options"));
 
-                    ui.horizontal(|ui| {
-                        let repeat_count_name = self.get_locale_string("repeat_number");
-                        let repeat_count = self.settings.repeat_count();
-                        ui.radio_value(
-                            self.settings.repeat_type_mut(),
-                            RepeatType::Repeat(repeat_count),
-                            repeat_count_name,
-                        );
+                    ui.columns(3, |cols| {
+                        cols[0].vertical_centered_justified(|ui| {
+                            let repeat_infinite_name = self
+                                .settings
+                                .language()
+                                .get_locale_string("repeat_until_stopped");
+                            ui.radio_value(
+                                self.settings.repeat_type_mut(),
+                                RepeatType::RepeatUntilStopped,
+                                repeat_infinite_name,
+                            );
+                        });
+                        cols[1].vertical_centered_justified(|ui| {
+                            let repeat_count_name = self.get_locale_string("repeat_number");
+                            let repeat_count = self.settings.repeat_count();
+                            ui.radio_value(
+                                self.settings.repeat_type_mut(),
+                                RepeatType::Repeat(repeat_count),
+                                repeat_count_name,
+                            );
+                        });
+                        cols[2].vertical_centered_justified(|ui| {
+                            let mut current_count = self.settings.repeat_count();
+                            ui.add(
+                                egui::DragValue::new(&mut current_count)
+                                    .range(0..=1000)
+                                    .speed(1)
+                                    .clamp_to_range(false),
+                            );
 
-                        ui.add(
-                            egui::DragValue::new(self.settings.repeat_count_mut())
-                                .range(0..=1000)
-                                .speed(1)
-                                .clamp_to_range(false),
-                        );
+                            if current_count != self.settings.repeat_count() {
+                                self.settings.repeat_count_mut().clone_from(&current_count);
+                                self.settings
+                                    .set_repeat_type(RepeatType::Repeat(current_count));
+                            }
+                        });
                     });
 
-                    let repeat_infinite_name = self
-                        .settings
-                        .language()
-                        .get_locale_string("repeat_until_stopped");
-                    ui.radio_value(
-                        self.settings.repeat_type_mut(),
-                        RepeatType::RepeatUntilStopped,
-                        repeat_infinite_name,
-                    );
+                    // TODO: Add padding to the bottom of the frame
                 });
             });
 

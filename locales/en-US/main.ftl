@@ -29,7 +29,7 @@ right = Right
 
 # Repeat options
 repeat_options = Repeat Options
-repeat_until_stopped = Repeat Until Stopped
+repeat_until_stopped = Infinite
 repeat_number = Number
 repeat_desc = The number of times to repeat the click
 

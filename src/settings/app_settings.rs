@@ -120,6 +120,10 @@ impl AppSettings {
         &mut self.repeat_type
     }
 
+    pub fn set_repeat_type(&mut self, repeat_type: RepeatType) {
+        self.repeat_type = repeat_type;
+    }
+
     pub fn repeat_count(&self) -> usize {
         self.repeat_count
     }
