@@ -1,6 +1,5 @@
 
 # General
-settings = Settings
 about = About
 version = Version:{" "}
 source = Source code
@@ -20,7 +19,7 @@ click_interval = Click Interval
 hours = Hours
 minutes = Minutes
 seconds = Seconds
-milliseconds = Milli
+milliseconds = Milliseconds
 click_interval_desc = The interval between each click
 variation_desc = The variation in the interval between each click
 repeat_variation = Variation (ms):
