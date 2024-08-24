@@ -4,13 +4,14 @@ use fluent_templates::static_loader;
 use strum_macros::EnumIter;
 use unic_langid::{langid, LanguageIdentifier};
 
-// TODO: French, German, and Spain Spanish
-
 /// The languages available for localization
 #[derive(Default, Debug, PartialEq, Clone, serde::Deserialize, serde::Serialize, EnumIter)]
 pub enum Language {
     #[default]
     English,
+    French,
+    German,
+    SpanishSpain,
 }
 
 impl Language {
@@ -18,6 +19,9 @@ impl Language {
     pub fn value(&self) -> LanguageIdentifier {
         match self {
             Self::English => langid!("en-US"),
+            Self::French => langid!("fr-FR"),
+            Self::German => langid!("de-DE"),
+            Self::SpanishSpain => langid!("es-ES"),
         }
     }
 
@@ -25,6 +29,9 @@ impl Language {
     pub fn as_str(&self) -> &str {
         match self {
             Self::English => "English",
+            Self::French => "Français",
+            Self::German => "Deutsch",
+            Self::SpanishSpain => "Español (España)",
         }
     }
 }
