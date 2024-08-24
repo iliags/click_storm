@@ -1,59 +1,59 @@
 
 # General
-about = About
+about = Über
 version = Version:{" "}
-source = Source code
-reset = Reset
+source = Quellcode
+reset = Zurücksetzen
 
 # Settings menu
 hotkey = Hotkey
-change_hotkey = Change Hotkey
-change_hotkey_desc = Change the hotkey to start and stop the clicker
-press_key = Press a key
-reset_hotkey = Reset Hotkey
-reset_hotkey_desc = Reset the hotkey to the default value
-language = Language
+change_hotkey = Hotkey ändern
+change_hotkey_desc = Ändern Sie den Hotkey, um den Clicker zu starten und zu stoppen
+press_key = Drücken Sie eine Taste
+reset_hotkey = Hotkey zurücksetzen
+reset_hotkey_desc = Setzen Sie den Hotkey auf den Standardwert zurück
+language = Sprache
 
 # Duration
-click_interval = Click Interval
-hours = Hours
-minutes = Minutes
-seconds = Seconds
-milliseconds = Milliseconds
-click_interval_desc = The interval between each click
-variation_desc = The variation in the interval between each click
+click_interval = Klickintervall
+hours = Stunden
+minutes = Minuten
+seconds = Sekunden
+milliseconds = Millisekunden
+click_interval_desc = Das Intervall zwischen jedem Klick
+variation_desc = Die Variation des Intervalls zwischen jedem Klick
 repeat_variation = Variation (ms):
 
 # Click options
-click_options = Click Options
-click_type = Click Type
-single_click = Single Click
-double_click = Double Click
+click_options = Klickoptionen
+click_type = Klicktyp
+single_click = Einzelklick
+double_click = Doppelklick
 
 # Mouse buttons
-mouse_button = Mouse Button
-left = Left
-middle = Middle
-right = Right
+mouse_button = Maustaste
+left = Links
+middle = Mitte
+right = Rechts
 
 # Repeat options
-repeat_options = Repeat Options
-repeat_until_stopped = Infinite
-repeat_until_stopped_desc = Clicks until the stop button is pressed
-repeat_count = Count
-repeat_count_desc = Clicks a set number of times
+repeat_options = Wiederholungsoptionen
+repeat_until_stopped = Unendlich
+repeat_until_stopped_desc = Klickt, bis die Stopp-Taste gedrückt wird
+repeat_count = Zählen
+repeat_count_desc = Klickt eine festgelegte Anzahl von Malen
 turbo_click = Turbo
-turbo_click_desc = Clicks only when the mouse is held down
+turbo_click_desc = Klickt nur, wenn die Maus gedrückt wird
 
 # Position options
-cursor_position = Cursor Position
-current_position = Current Position
-fixed_position = Fixed Position
-pick_position = Pick Position
-picking_position = Picking
-pick_position_desc = Click anywhere on the screen to set the position
-position_desc = The position to click
+cursor_position = Cursorposition
+current_position = Aktuelle Position
+fixed_position = Feste Position
+pick_position = Pick-Position
+picking_position = Wählen
+pick_position_desc = Klicken Sie irgendwo auf dem Bildschirm, um die Position festzulegen
+position_desc = Die Position zum Klicken
 
 # Actions
 start = Start
-stop = Stop
+stop = Stoppen
