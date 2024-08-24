@@ -335,8 +335,7 @@ impl eframe::App for ClickStormApp {
                     ui.separator();
 
                     let doing_work = self.is_running.load(Ordering::SeqCst);
-                    let message = format!("Working: {}", doing_work);
-                    ui.label(message);
+                    ui.label(format!("Working: {}", doing_work));
                 }
             });
         });
@@ -459,64 +458,68 @@ impl ClickStormApp {
                 ui.vertical(|ui| {
                     ui.heading(self.get_locale_string("click_options"));
 
-                    //ui.columns(3, |cols| {});
+                    ui.vertical_centered(|ui| {
+                        // Click button name
+                        let selected_button =
+                            self.settings.mouse_button().as_str_locale().to_owned();
 
-                    // Click button name
-                    let selected_button = self.settings.mouse_button().as_str_locale().to_owned();
+                        // Generate the combo box
+                        egui::ComboBox::from_label(self.get_locale_string("mouse_button"))
+                            .selected_text(self.get_locale_string(&selected_button))
+                            .show_ui(ui, |ui| {
+                                // Iterate over the click types
+                                let mut current_value = self.settings.mouse_button().clone();
+                                for mouse_button in MouseButton::iter() {
+                                    // Get the locale string for the click type
+                                    let mouse_button_locale = self
+                                        .settings
+                                        .language()
+                                        .get_locale_string(mouse_button.as_str_locale());
 
-                    // Generate the combo box
-                    egui::ComboBox::from_label(self.get_locale_string("mouse_button"))
-                        .selected_text(self.get_locale_string(&selected_button))
-                        .show_ui(ui, |ui| {
-                            // Iterate over the click types
-                            let mut current_value = self.settings.mouse_button().clone();
-                            for mouse_button in MouseButton::iter() {
-                                // Get the locale string for the click type
-                                let mouse_button_locale = self
-                                    .settings
+                                    // Select the click type
+                                    ui.selectable_value(
+                                        &mut current_value,
+                                        mouse_button,
+                                        mouse_button_locale,
+                                    );
+                                }
+                                self.settings.mouse_button_mut().clone_from(&current_value);
+                            });
+                    });
+
+                    ui.vertical_centered(|ui| {
+                        // Click type options
+                        // Get the selected click type name
+                        let selected_click_type =
+                            self.settings.click_type().as_str_locale().to_owned();
+
+                        // Generate the combo box
+                        egui::ComboBox::from_label(self.get_locale_string("click_type"))
+                            .selected_text(
+                                self.settings
                                     .language()
-                                    .get_locale_string(mouse_button.as_str_locale());
+                                    .get_locale_string(&selected_click_type),
+                            )
+                            .show_ui(ui, |ui| {
+                                // Iterate over the click types
+                                let mut current_value = self.settings.click_type().clone();
+                                for click_type in MouseClickType::iter() {
+                                    // Get the locale string for the click type
+                                    let click_type_locale = self
+                                        .settings
+                                        .language()
+                                        .get_locale_string(click_type.as_str_locale());
 
-                                // Select the click type
-                                ui.selectable_value(
-                                    &mut current_value,
-                                    mouse_button,
-                                    mouse_button_locale,
-                                );
-                            }
-                            self.settings.mouse_button_mut().clone_from(&current_value);
-                        });
-
-                    // Click type options
-                    // Get the selected click type name
-                    let selected_click_type = self.settings.click_type().as_str_locale().to_owned();
-
-                    // Generate the combo box
-                    egui::ComboBox::from_label(self.get_locale_string("click_type"))
-                        .selected_text(
-                            self.settings
-                                .language()
-                                .get_locale_string(&selected_click_type),
-                        )
-                        .show_ui(ui, |ui| {
-                            // Iterate over the click types
-                            let mut current_value = self.settings.click_type().clone();
-                            for click_type in MouseClickType::iter() {
-                                // Get the locale string for the click type
-                                let click_type_locale = self
-                                    .settings
-                                    .language()
-                                    .get_locale_string(click_type.as_str_locale());
-
-                                // Select the click type
-                                ui.selectable_value(
-                                    &mut current_value,
-                                    click_type,
-                                    click_type_locale,
-                                );
-                            }
-                            self.settings.click_type_mut().clone_from(&current_value);
-                        });
+                                    // Select the click type
+                                    ui.selectable_value(
+                                        &mut current_value,
+                                        click_type,
+                                        click_type_locale,
+                                    );
+                                }
+                                self.settings.click_type_mut().clone_from(&current_value);
+                            });
+                    });
                 });
             });
 
@@ -537,7 +540,7 @@ impl ClickStormApp {
                     ui.heading(self.get_locale_string("repeat_options"));
 
                     ui.columns(3, |cols| {
-                        cols[0].vertical_centered_justified(|ui| {
+                        cols[0].centered_and_justified(|ui| {
                             let repeat_infinite_name = self
                                 .settings
                                 .language()
@@ -548,7 +551,7 @@ impl ClickStormApp {
                                 repeat_infinite_name,
                             );
                         });
-                        cols[1].vertical_centered_justified(|ui| {
+                        cols[1].centered_and_justified(|ui| {
                             let repeat_count_name = self.get_locale_string("repeat_number");
                             let repeat_count = self.settings.repeat_count();
                             ui.radio_value(
@@ -557,7 +560,7 @@ impl ClickStormApp {
                                 repeat_count_name,
                             );
                         });
-                        cols[2].vertical_centered_justified(|ui| {
+                        cols[2].horizontal_centered(|ui| {
                             let mut current_count = self.settings.repeat_count();
                             ui.add(
                                 egui::DragValue::new(&mut current_count)
@@ -575,6 +578,7 @@ impl ClickStormApp {
                     });
 
                     // TODO: Add padding to the bottom of the frame
+                    //ui.add_space(18.0)
                 });
             });
 
@@ -638,24 +642,36 @@ impl ClickStormApp {
                             }
                         });
                         cols[3].centered_and_justified(|ui| {
+                            let mut pos_x = self.settings.cursor_position_fixed().0;
                             ui.add(
-                                egui::DragValue::new(
-                                    &mut self.settings.cursor_position_fixed_mut().0,
-                                )
-                                .range(0..=self.display_size.0)
-                                .prefix("x: ")
-                                .speed(1),
+                                egui::DragValue::new(&mut pos_x)
+                                    .range(0..=self.display_size.0)
+                                    .prefix("x: ")
+                                    .speed(1),
                             );
+                            if pos_x != self.settings.cursor_position_fixed().0 {
+                                self.settings.cursor_position_fixed_mut().0 = pos_x;
+                                let pos_y = self.settings.cursor_position_fixed().1;
+
+                                let cursor_type = CursorPosition::FixedLocation(pos_x, pos_y);
+                                self.settings.set_cursor_position_type(cursor_type);
+                            }
                         });
                         cols[4].centered_and_justified(|ui| {
+                            let mut pos_y = self.settings.cursor_position_fixed().1;
                             ui.add(
-                                egui::DragValue::new(
-                                    &mut self.settings.cursor_position_fixed_mut().1,
-                                )
-                                .range(0..=self.display_size.1)
-                                .prefix("y: ")
-                                .speed(1),
+                                egui::DragValue::new(&mut pos_y)
+                                    .range(0..=self.display_size.1)
+                                    .prefix("y: ")
+                                    .speed(1),
                             );
+                            if pos_y != self.settings.cursor_position_fixed().1 {
+                                self.settings.cursor_position_fixed_mut().1 = pos_y;
+                                let pos_x = self.settings.cursor_position_fixed().0;
+
+                                let cursor_type = CursorPosition::FixedLocation(pos_x, pos_y);
+                                self.settings.set_cursor_position_type(cursor_type);
+                            }
                         });
                     });
                 });

@@ -140,6 +140,10 @@ impl AppSettings {
         &mut self.cursor_position_type
     }
 
+    pub fn set_cursor_position_type(&mut self, cursor_position_type: CursorPosition) {
+        self.cursor_position_type = cursor_position_type;
+    }
+
     pub fn cursor_position_fixed(&self) -> (i32, i32) {
         self.cursor_position_fixed
     }
