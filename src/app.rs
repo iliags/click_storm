@@ -581,54 +581,68 @@ impl ClickStormApp {
                 );
 
                 ui.horizontal(|ui| {
-                    ui.columns(8, |cols| {});
-
-                    // Current position radio button
-                    let current_position_name = self
-                        .settings
-                        .language()
-                        .get_locale_string("current_position");
-
-                    ui.radio_value(
-                        self.settings.cursor_position_type_mut(),
-                        CursorPosition::CurrentLocation,
-                        current_position_name,
-                    );
-
-                    // Fixed position radio button
-                    let fixed_position_name = self.get_locale_string("fixed_position");
-                    let current_position = self.settings.cursor_position_fixed();
-                    ui.radio_value(
-                        self.settings.cursor_position_type_mut(),
-                        CursorPosition::FixedLocation(current_position.0, current_position.1),
-                        fixed_position_name,
-                    );
-
-                    if ui
-                        .button(self.get_locale_string("pick_position"))
-                        .on_hover_text_at_pointer(
-                            self.settings
+                    ui.columns(5, |cols| {
+                        cols[0].centered_and_justified(|ui| {
+                            // Current position radio button
+                            let current_position_name = self
+                                .settings
                                 .language()
-                                .get_locale_string("pick_position_desc"),
-                        )
-                        .clicked()
-                    {
-                        self.picking_position = true;
-                        // TODO: Add a visual cue that the user is picking a position
-                    }
+                                .get_locale_string("current_position");
 
-                    ui.add(
-                        egui::DragValue::new(&mut self.settings.cursor_position_fixed_mut().0)
-                            .range(0..=self.display_size.0)
-                            .prefix("x: ")
-                            .speed(1),
-                    );
-                    ui.add(
-                        egui::DragValue::new(&mut self.settings.cursor_position_fixed_mut().1)
-                            .range(0..=self.display_size.1)
-                            .prefix("y: ")
-                            .speed(1),
-                    );
+                            ui.radio_value(
+                                self.settings.cursor_position_type_mut(),
+                                CursorPosition::CurrentLocation,
+                                current_position_name,
+                            );
+                        });
+                        cols[1].centered_and_justified(|ui| {
+                            // Fixed position radio button
+                            let fixed_position_name = self.get_locale_string("fixed_position");
+                            let current_position = self.settings.cursor_position_fixed();
+                            ui.radio_value(
+                                self.settings.cursor_position_type_mut(),
+                                CursorPosition::FixedLocation(
+                                    current_position.0,
+                                    current_position.1,
+                                ),
+                                fixed_position_name,
+                            );
+                        });
+                        cols[2].centered_and_justified(|ui| {
+                            if ui
+                                .button(self.get_locale_string("pick_position"))
+                                .on_hover_text_at_pointer(
+                                    self.settings
+                                        .language()
+                                        .get_locale_string("pick_position_desc"),
+                                )
+                                .clicked()
+                            {
+                                // TODO: Add a visual cue that the user is picking a position
+                                self.picking_position = true;
+                            }
+                        });
+                        cols[3].centered_and_justified(|ui| {
+                            ui.add(
+                                egui::DragValue::new(
+                                    &mut self.settings.cursor_position_fixed_mut().0,
+                                )
+                                .range(0..=self.display_size.0)
+                                .prefix("x: ")
+                                .speed(1),
+                            );
+                        });
+                        cols[4].centered_and_justified(|ui| {
+                            ui.add(
+                                egui::DragValue::new(
+                                    &mut self.settings.cursor_position_fixed_mut().1,
+                                )
+                                .range(0..=self.display_size.1)
+                                .prefix("y: ")
+                                .speed(1),
+                            );
+                        });
+                    });
                 });
             });
 
@@ -640,16 +654,16 @@ impl ClickStormApp {
     fn ui_actions(&mut self, ui: &mut egui::Ui) {
         ui.separator();
 
-        ui.horizontal(|ui| {
+        ui.centered_and_justified(|ui| {
             ui.columns(2, |cols| {
                 let key_code_text = format!(" ({})", HOTKEY_CODE);
-                cols[0].vertical_centered_justified(|ui| {
+                cols[0].centered_and_justified(|ui| {
                     let start_text = self.get_locale_string("start") + &key_code_text;
                     if ui.button(start_text).clicked() {
                         self.start_click_storm();
                     }
                 });
-                cols[1].vertical_centered_justified(|ui| {
+                cols[1].centered_and_justified(|ui| {
                     let stop_text = self.get_locale_string("stop") + &key_code_text;
                     if ui.button(stop_text).clicked() {
                         self.stop_click_storm();
