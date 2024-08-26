@@ -20,6 +20,7 @@ fn main() -> eframe::Result {
             .with_resizable(true)
             // Start with focus on the window
             .with_active(true)
+            .with_maximize_button(false)
             // Set the window icon
             .with_icon(
                 // NOTE: Adding an icon is optional
