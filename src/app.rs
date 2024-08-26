@@ -652,7 +652,7 @@ impl ClickStormApp {
             ui.columns(2, |cols| {
                 // Note: Not localized text
                 let keycode: device_query::Keycode = self.hotkey_code.into();
-                let key_code_text = format!(" ({})", keycode.to_string());
+                let key_code_text = format!(" ({})", keycode);
                 cols[0].centered_and_justified(|ui| {
                     let enabled = !self.is_running.load(Ordering::SeqCst);
 

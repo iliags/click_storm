@@ -243,9 +243,9 @@ impl From<Keycode> for AppKeycode {
     }
 }
 
-impl Into<Keycode> for AppKeycode {
-    fn into(self) -> Keycode {
-        match self {
+impl From<AppKeycode> for Keycode {
+    fn from(val: AppKeycode) -> Self {
+        match val {
             AppKeycode::Key0 => Keycode::Key0,
             AppKeycode::Key1 => Keycode::Key1,
             AppKeycode::Key2 => Keycode::Key2,
