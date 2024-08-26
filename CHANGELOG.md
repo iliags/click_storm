@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.1.6
+
+* Translations for French, German, and Spanish (Spain)
+* UI cleanup
+
 ## 0.1.5
 
 * Click variation

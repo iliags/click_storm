@@ -9,6 +9,9 @@ use unic_langid::{langid, LanguageIdentifier};
 pub enum Language {
     #[default]
     English,
+    French,
+    German,
+    SpanishSpain,
 }
 
 impl Language {
@@ -16,6 +19,9 @@ impl Language {
     pub fn value(&self) -> LanguageIdentifier {
         match self {
             Self::English => langid!("en-US"),
+            Self::French => langid!("fr-FR"),
+            Self::German => langid!("de-DE"),
+            Self::SpanishSpain => langid!("es-ES"),
         }
     }
 
@@ -23,6 +29,9 @@ impl Language {
     pub fn as_str(&self) -> &str {
         match self {
             Self::English => "English",
+            Self::French => "Français",
+            Self::German => "Deutsch",
+            Self::SpanishSpain => "Español (España)",
         }
     }
 }
