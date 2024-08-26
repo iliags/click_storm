@@ -1,11 +1,11 @@
 # Click Storm
 
-> [!NOTE]
-> Windows Security currently marks the executable as having `Trojan:Script/Wacatac.B!ml` which is a false positive. I have submitted a request to get flag removed, however it will take some time.
-
 Click Storm is an open-source auto-clicker written in Rust.
 
 ![Screenshot](./screenshots/v0.1.5.png)
+
+> [!NOTE]
+> Windows Security currently marks the executable as having `Trojan:Script/Wacatac.B!ml` which is a false positive. I have submitted a request to get flag removed, however it will take some time.
 
 ## Notes
 
