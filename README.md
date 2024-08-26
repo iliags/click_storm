@@ -1,5 +1,8 @@
 # Click Storm
 
+> [!NOTE]
+> Windows Security currently marks the executable as having `Trojan:Script/Wacatac.B!ml` which is a false positive. I have submitted a request to get flag removed, however it will take some time.
+
 Click Storm is an open-source auto-clicker written in Rust.
 
 ![Screenshot](./screenshots/v0.1.5.png)
@@ -20,10 +23,7 @@ Some devices may prevent hardware access due to permissions, see this [permissio
 
 The fluent `ftl` files are in the `locales` folder under their respective language codes. They were translated from english using AI so they are probably wrong, feel free to submit a PR with corrections.
 
-## Antivirus Notes
-
-> [!NOTE]
-> Windows Security currently marks the executable as having `Trojan:Script/Wacatac.B!ml` which is a false positive. I have submitted a request to get flag removed, however it will take some time.
+### Antivirus
 
 When running the file through [VirusTotal](https://www.virustotal.com/), a few of the engines may flag the file as malicious. This is most likely because the application can take control of the mouse and perform hardware actions automatically. Input manipulation is generally a red-flag in the context of device security, however it is the core functionality of Click Storm as an auto-clicker.
 
