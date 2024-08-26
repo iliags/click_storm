@@ -15,8 +15,6 @@ fn main() -> eframe::Result {
             // Set the window size
             .with_inner_size([WIDTH, HEIGHT])
             .with_min_inner_size([WIDTH, HEIGHT])
-            // Always on top for easy access
-            //.with_always_on_top()
             .with_resizable(true)
             // Start with focus on the window
             .with_active(true)
