@@ -650,11 +650,13 @@ impl ClickStormApp {
             ui.columns(2, |cols| {
                 // Note: Not localized text
                 let keycode: device_query::Keycode = self.hotkey_code.into();
-                let key_code_text = format!(" ({})", keycode);
+                let key_code_text = format!(" ({})", keycode).to_owned();
                 cols[0].centered_and_justified(|ui| {
                     let enabled = !self.is_running.load(Ordering::SeqCst);
 
-                    let start_text = self.get_locale_string("start") + &key_code_text;
+                    let mut start_text = self.get_locale_string("start");
+                    start_text.push_str(&key_code_text);
+
                     let start_button = ui.add_enabled(enabled, egui::Button::new(start_text));
 
                     if start_button.clicked() {
@@ -662,7 +664,9 @@ impl ClickStormApp {
                     }
                 });
                 cols[1].centered_and_justified(|ui| {
-                    let stop_text = self.get_locale_string("stop") + &key_code_text;
+                    let mut stop_text = self.get_locale_string("stop");
+                    stop_text.push_str(&key_code_text);
+
                     if ui.button(stop_text).clicked() {
                         self.stop_click_storm();
                     }
