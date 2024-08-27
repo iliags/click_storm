@@ -48,6 +48,7 @@ strum_macros = "0.26"
 
 # Misc
 rand = "0.8"
+rhai = "1.19"
 
 
 [profile.release]
