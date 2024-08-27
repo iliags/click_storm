@@ -13,7 +13,7 @@ use strum::IntoEnumIterator;
 
 use crate::do_once::DoOnceGate;
 use crate::keycode::AppKeycode;
-use crate::rhai_interface::RhaiInterface;
+use crate::rhai_interface::{self, RhaiInterface};
 use crate::{
     localization::language::Language,
     settings::{
@@ -83,6 +83,9 @@ impl Default for ClickStormApp {
             .main_display()
             .unwrap_or_else(|_| panic!("Failed to get display size."));
 
+        let mut rhai_interface = RhaiInterface::new();
+        rhai_interface.initialize();
+
         let (sender, receiver): (Sender<ClickStormMessage>, Receiver<ClickStormMessage>) =
             channel();
 
@@ -102,7 +105,7 @@ impl Default for ClickStormApp {
             sender: Some(sender),
             is_running: Arc::new(AtomicBool::new(false)),
             key_pressed: false,
-            rhai_interface: RhaiInterface::new(),
+            rhai_interface,
         }
     }
 }
@@ -228,15 +231,15 @@ impl eframe::App for ClickStormApp {
 
                 ui.separator();
 
+                // Test buttons for development
                 #[cfg(debug_assertions)]
                 {
-                    // Debug button
-                    if ui
-                        .button("Debug Print")
-                        .on_hover_text_at_pointer("Rhai test")
-                        .clicked()
-                    {
+                    if ui.button("Test Print").clicked() {
                         self.rhai_interface.test_hello();
+                    }
+
+                    if ui.button("Test Click").clicked() {
+                        self.rhai_interface.test_click_at();
                     }
                 }
             });
