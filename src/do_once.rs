@@ -40,3 +40,27 @@ impl DoOnceGate {
         self.state == DoOnceState::WaitingForReset
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_do_once_gate() {
+        let mut do_once_gate = DoOnceGate::default();
+        assert_eq!(do_once_gate.is_active(), false);
+        assert_eq!(do_once_gate.is_waiting_for_reset(), false);
+
+        do_once_gate.set_active();
+        assert_eq!(do_once_gate.is_active(), true);
+        assert_eq!(do_once_gate.is_waiting_for_reset(), false);
+
+        do_once_gate.set_waiting();
+        assert_eq!(do_once_gate.is_active(), false);
+        assert_eq!(do_once_gate.is_waiting_for_reset(), true);
+
+        do_once_gate.reset();
+        assert_eq!(do_once_gate.is_active(), false);
+        assert_eq!(do_once_gate.is_waiting_for_reset(), false);
+    }
+}
