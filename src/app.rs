@@ -11,6 +11,7 @@ use std::thread::{self, JoinHandle};
 
 use strum::IntoEnumIterator;
 
+use crate::do_once::DoOnceGate;
 use crate::keycode::AppKeycode;
 use crate::{
     localization::language::Language,
@@ -48,10 +49,7 @@ pub struct ClickStormApp {
     picking_position: bool,
 
     #[serde(skip)]
-    waiting_for_key: bool,
-
-    #[serde(skip)]
-    waiting_for_key_release: bool,
+    wait_for_key: DoOnceGate,
 
     #[serde(skip)]
     sender: Option<Sender<ClickStormMessage>>,
@@ -96,8 +94,7 @@ impl Default for ClickStormApp {
             device_state: DeviceState::new(),
             display_size,
             picking_position: false,
-            waiting_for_key: false,
-            waiting_for_key_release: false,
+            wait_for_key: DoOnceGate::default(),
             sender: Some(sender),
             is_running: Arc::new(AtomicBool::new(false)),
             key_pressed: false,
@@ -139,7 +136,7 @@ impl eframe::App for ClickStormApp {
                 ui.menu_button("⛭", |ui| {
                     // Change hotkey button
                     ui.label(self.get_locale_string("hotkey"));
-                    let button_text = if self.waiting_for_key {
+                    let button_text = if self.wait_for_key.is_active() {
                         self.get_locale_string("press_key")
                     } else {
                         self.get_locale_string("change_hotkey")
@@ -149,7 +146,7 @@ impl eframe::App for ClickStormApp {
                         .on_hover_text_at_pointer(self.get_locale_string("change_hotkey_desc"))
                         .clicked()
                     {
-                        self.waiting_for_key = true;
+                        self.wait_for_key.set_active();
                     }
 
                     if ui
@@ -158,6 +155,7 @@ impl eframe::App for ClickStormApp {
                         .clicked()
                     {
                         self.hotkey_code = AppKeycode::F6;
+                        ui.close_menu();
                     }
 
                     ui.separator();
@@ -288,21 +286,21 @@ impl ClickStormApp {
             }
         }
 
-        if self.waiting_for_key {
+        if self.wait_for_key.is_active() {
             let keys = self.device_state.get_keys();
 
             // Get the first key pressed
             if !keys.is_empty() {
-                self.waiting_for_key = false;
-                self.waiting_for_key_release = true;
+                self.wait_for_key.set_waiting();
+
                 self.hotkey_code = AppKeycode::from(keys[0]);
                 println!("Hotkey set to: {:?}", self.hotkey_code);
             }
-        } else if self.waiting_for_key_release {
+        } else if self.wait_for_key.is_waiting_for_reset() {
             let keys = self.device_state.get_keys();
 
             if keys.is_empty() {
-                self.waiting_for_key_release = false;
+                self.wait_for_key.reset();
             }
         } else {
             let hot_key_pressed = self
