@@ -13,7 +13,8 @@ use strum::IntoEnumIterator;
 
 use crate::do_once::DoOnceGate;
 use crate::keycode::AppKeycode;
-use crate::rhai_interface::{self, RhaiInterface};
+#[cfg(feature = "scripting")]
+use crate::rhai_interface::RhaiInterface;
 use crate::{
     localization::language::Language,
     settings::{
@@ -61,6 +62,7 @@ pub struct ClickStormApp {
     #[serde(skip)]
     key_pressed: bool,
 
+    #[cfg(feature = "scripting")]
     #[serde(skip)]
     rhai_interface: RhaiInterface,
 }
@@ -83,7 +85,9 @@ impl Default for ClickStormApp {
             .main_display()
             .unwrap_or_else(|_| panic!("Failed to get display size."));
 
+        #[cfg(feature = "scripting")]
         let mut rhai_interface = RhaiInterface::new();
+        #[cfg(feature = "scripting")]
         rhai_interface.initialize();
 
         let (sender, receiver): (Sender<ClickStormMessage>, Receiver<ClickStormMessage>) =
@@ -105,6 +109,7 @@ impl Default for ClickStormApp {
             sender: Some(sender),
             is_running: Arc::new(AtomicBool::new(false)),
             key_pressed: false,
+            #[cfg(feature = "scripting")]
             rhai_interface,
         }
     }
@@ -232,7 +237,7 @@ impl eframe::App for ClickStormApp {
                 ui.separator();
 
                 // Test buttons for development
-                #[cfg(debug_assertions)]
+                #[cfg(all(debug_assertions, feature = "scripting"))]
                 {
                     if ui.button("Test Print").clicked() {
                         self.rhai_interface.test_hello();

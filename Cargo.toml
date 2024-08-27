@@ -48,7 +48,7 @@ strum_macros = "0.26"
 
 # Misc
 rand = "0.8"
-rhai = { version = "1.19", features = [
+rhai = { version = "1.19", optional = true, features = [
     "only_i32",
     "no_float",
     "no_custom_syntax",
@@ -62,3 +62,7 @@ lto = true
 # Optimize all dependencies even in debug builds
 [profile.dev.package."*"]
 opt-level = 2
+
+[features]
+default = ["scripting"]
+scripting = ["dep:rhai"]

@@ -5,14 +5,6 @@ use device_query::DeviceState;
 use enigo::{Button, Enigo, Mouse, Settings};
 use rhai::Engine;
 
-// Implementation notes:
-//  - The click loop will be re-implemented in Rhai script
-//  - The UI will behave the same except push the settings to the Rhai script instead of a custom thread
-//    - The internal scripts will be included as bytes to ensure they are not tampered with
-//    - See Scope and push_constant
-//  - Users can write their own scripts to control input
-//  - There will need to be more type conversions than initially expected.
-
 #[derive(Debug, Clone)]
 pub struct RhaiInterface {
     engine: Arc<Mutex<Engine>>,

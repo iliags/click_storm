@@ -16,6 +16,7 @@ mod keycode;
 mod do_once;
 
 /// Rhai interface module
+#[cfg(feature = "scripting")]
 mod rhai_interface;
 
 /// Application module re-export
