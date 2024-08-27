@@ -13,6 +13,7 @@ use strum::IntoEnumIterator;
 
 use crate::do_once::DoOnceGate;
 use crate::keycode::AppKeycode;
+use crate::rhai_interface::RhaiInterface;
 use crate::{
     localization::language::Language,
     settings::{
@@ -59,6 +60,9 @@ pub struct ClickStormApp {
 
     #[serde(skip)]
     key_pressed: bool,
+
+    #[serde(skip)]
+    rhai_interface: RhaiInterface,
 }
 
 #[derive(Debug, Clone)]
@@ -98,6 +102,7 @@ impl Default for ClickStormApp {
             sender: Some(sender),
             is_running: Arc::new(AtomicBool::new(false)),
             key_pressed: false,
+            rhai_interface: RhaiInterface::new(),
         }
     }
 }
@@ -222,6 +227,18 @@ impl eframe::App for ClickStormApp {
                 }
 
                 ui.separator();
+
+                #[cfg(debug_assertions)]
+                {
+                    // Debug button
+                    if ui
+                        .button("Debug Print")
+                        .on_hover_text_at_pointer("Rhai test")
+                        .clicked()
+                    {
+                        self.rhai_interface.test_hello();
+                    }
+                }
             });
         });
 

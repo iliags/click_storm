@@ -15,5 +15,8 @@ mod keycode;
 /// Do once module
 mod do_once;
 
+/// Rhai interface module
+mod rhai_interface;
+
 /// Application module re-export
 pub use app::ClickStormApp;
