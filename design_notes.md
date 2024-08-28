@@ -25,25 +25,6 @@ Implementation notes:
 
 Recording and replaying is done via tracking the user input and creating a Rhai script which can be exported for reuse. The recording feature should try to mimic the behavior in as few lines of code as possible to ensure the scripts aren't bloated.
 
-## API (WIP)
-
-Tentative API into native rust functions, optional params use the function overloading feature. Coordinates are absolute unless noted otherwise.
-
-Expected:
-
-- click at: clicks (down up) at an X/Y position optionally using a button and/or a modifier key
-- click in range: clicks (down up) within a from/to range in X/Y optionally using a button and/or a modifier key
-- move to: instantly moves to a location, if a duration is provided interpolates from the current position to the target position over time
-- drag: holds the mouse button down, moves, and releases when at the target location, optional duration
-- add: adds the input X/Y to the current X/Y, optional duration for lerping
-- wait: waits for N amount of time in milliseconds
-- wait duration: waits for N amount of time in any duration (hours, minutes, seconds, milliseconds)
-- key press: performs a key press (down up) or key chord
-- key down: Holds a key (or chord) down
-- key up: releases key (or chord) if they are down
-- is key down: checks if a key is down
-- is key up: checks if a key is up
-
 ## Feature Ideas
 
 Copied from SCAR Divi, will update later. Most of the low-level or OS specific functionality will not be implemented.

@@ -239,8 +239,12 @@ impl eframe::App for ClickStormApp {
                         self.rhai_interface.test_hello();
                     }
 
-                    if ui.button("Test Click").clicked() {
-                        self.rhai_interface.test_click_at();
+                    if ui.button("Test Script").clicked() {
+                        self.rhai_interface.test_script();
+                    }
+
+                    if ui.button("Generate Definitions").clicked() {
+                        self.rhai_interface.generate_definitions();
                     }
 
                     if self
@@ -248,7 +252,7 @@ impl eframe::App for ClickStormApp {
                         .get_keys()
                         .contains(&AppKeycode::F7.into())
                     {
-                        self.rhai_interface.test_click_at();
+                        self.rhai_interface.test_script();
                     }
                 }
             });

@@ -34,16 +34,19 @@ pub mod ScreenSizeModule {
         format!("{}x{}", object.x, object.y)
     }
 
+    /// Get the width of the screen
     #[rhai_fn(get = "width", pure)]
     pub fn get_width(object: &mut ScreenSize) -> i32 {
         object.x
     }
 
+    /// Get the height of the screen
     #[rhai_fn(get = "height", pure)]
     pub fn get_height(object: &mut ScreenSize) -> i32 {
         object.y
     }
 
+    /// Get the center coordinates of the screen
     #[rhai_fn(global, pure)]
     pub fn center(object: &mut ScreenSize) -> ScreenSize {
         object.center()

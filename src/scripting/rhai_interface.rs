@@ -53,11 +53,26 @@ impl RhaiInterface {
     }
 
     #[cfg(debug_assertions)]
-    pub fn test_click_at(&mut self) {
+    pub fn test_script(&mut self) {
         let engine = self.engine.lock().unwrap();
 
         let test_script = include_str!("../../scripts/test.rhai");
         engine.run(test_script).unwrap();
+    }
+
+    // TODO: Move this to an external binary
+    #[cfg(debug_assertions)]
+    pub fn generate_definitions(&mut self) {
+        let engine = self.engine.lock().unwrap();
+
+        //let definitions = engine.generate_metadata().unwrap();
+        //println!("{}", definitions);
+        engine
+            .definitions()
+            .with_headers(true)
+            .include_standard_packages(false)
+            .write_to_file("D:/click_storm/scripts/click_storm_api.d.rhai")
+            .unwrap();
     }
 
     /// Initialize the Rhai engine with the necessary functions and types.
@@ -173,6 +188,7 @@ impl RhaiInterface {
         let _ = enigo.key(key.into(), direction.into());
     }
 
+    /// Get the screen size.
     fn get_screen_size(&mut self) -> ScreenSize {
         match &self.screen_size {
             Some(size) => size.clone(),
