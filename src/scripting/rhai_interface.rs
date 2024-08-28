@@ -10,6 +10,8 @@ use crate::input::mouse_button::{MouseButton, MouseButtonModule};
 
 use super::screen_size::{ScreenSize, ScreenSizeModule};
 
+// TODO: Export metadata for the scripting API to use in the language server
+
 #[derive(Debug, Clone)]
 pub struct RhaiInterface {
     engine: Arc<Mutex<Engine>>,
