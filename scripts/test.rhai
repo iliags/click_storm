@@ -1,9 +1,5 @@
 // A script to test features, may not always work as expected
 
-import "click_storm_api.d.rhai";
-import "ScreenSize"
-
-
 let t = new_engine();
 
 // Click at with the specified mouse button
