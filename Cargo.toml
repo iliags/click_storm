@@ -10,7 +10,7 @@ publish = false
 build = "build.rs"
 
 [build-dependencies]
-embed-resource = { version = "2.4" }
+#embed-resource = { version = "2.4" }
 
 [lints.rust]
 unsafe_op_in_unsafe_fn = "warn"
@@ -50,7 +50,7 @@ strum_macros = "0.26"
 rand = "0.8"
 rhai = { version = "1.19", optional = true, features = [
     "only_i32",
-    "no_float",
+    "f32_float",
     "no_custom_syntax",
 ] }
 

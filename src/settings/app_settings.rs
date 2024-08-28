@@ -1,11 +1,11 @@
 use std::time::Duration;
 
-use crate::localization::locale_text::LocaleText;
-
-use super::{
-    cursor_position::CursorPosition, mouse_button::MouseButton, mouse_click::MouseClickType,
-    repeat_type::RepeatType,
+use crate::{
+    input::{mouse_button::MouseButton, mouse_click::MouseClickType},
+    localization::locale_text::LocaleText,
 };
+
+use super::{cursor_position::CursorPosition, repeat_type::RepeatType};
 
 #[derive(Debug, Default, Clone, serde::Deserialize, serde::Serialize)]
 #[serde(default)]

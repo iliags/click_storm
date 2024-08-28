@@ -9,15 +9,18 @@ mod settings;
 /// Localization module
 mod localization;
 
-/// Keycode module
-mod keycode;
-
 /// Do once module
 mod do_once;
 
-/// Rhai interface module
+/// Worker thread module
+mod worker;
+
+/// Input module
+mod input;
+
+/// Rhai scripting module
 #[cfg(feature = "scripting")]
-mod rhai_interface;
+mod scripting;
 
 /// Application module re-export
 pub use app::ClickStormApp;
