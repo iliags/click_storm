@@ -242,6 +242,14 @@ impl eframe::App for ClickStormApp {
                     if ui.button("Test Click").clicked() {
                         self.rhai_interface.test_click_at();
                     }
+
+                    if self
+                        .device_state
+                        .get_keys()
+                        .contains(&AppKeycode::F7.into())
+                    {
+                        self.rhai_interface.test_click_at();
+                    }
                 }
             });
         });
