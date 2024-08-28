@@ -55,32 +55,8 @@ impl RhaiInterface {
     pub fn test_click_at(&mut self) {
         let engine = self.engine.lock().unwrap();
 
-        let script = r#"
-            let t = new_engine();
-                        
-            // Click at with the specified mouse button
-            //let mb = MouseButton::Left;
-            //t.click_at(800, 600, mb);
-
-            // Add the coordinates to the current mouse position
-            //t.add_position(100, 100);
-
-            // Print the screen size
-            //let screen_size = t.get_screen_size();
-            //print(screen_size.to_string());
-            //print(screen_size.center().to_string());
-
-            // Enter ctrl + a
-            t.set_key(AppKeycode::Control, ButtonDirection::Press);
-            t.set_key(AppKeycode::A, ButtonDirection::Press);
-
-            t.set_key(AppKeycode::Control, ButtonDirection::Release);
-            t.set_key(AppKeycode::A, ButtonDirection::Release);
-        "#;
-        engine.run(script).unwrap();
-
-        //let script = engine.compile(script).unwrap();
-        //engine.run_ast(&script).unwrap();
+        let test_script = include_str!("../../scripts/test.rhai");
+        engine.run(test_script).unwrap();
     }
 
     /// Initialize the Rhai engine with the necessary functions and types.
