@@ -1,4 +1,5 @@
 use device_query::Keycode;
+use enigo::Key;
 use strum_macros::EnumIter;
 
 // Re-export the `Keycode` enum from the `device_query` crate.
@@ -477,6 +478,16 @@ impl From<AppKeycode> for device_query::Keycode {
 impl From<enigo::Key> for AppKeycode {
     fn from(value: enigo::Key) -> Self {
         match value {
+            Key::Num0 => AppKeycode::Key0,
+            Key::Num1 => AppKeycode::Key1,
+            Key::Num2 => AppKeycode::Key2,
+            Key::Num3 => AppKeycode::Key3,
+            Key::Num4 => AppKeycode::Key4,
+            Key::Num5 => AppKeycode::Key5,
+            Key::Num6 => AppKeycode::Key6,
+            Key::Num7 => AppKeycode::Key7,
+            Key::Num8 => AppKeycode::Key8,
+            Key::Num9 => AppKeycode::Key9,
             _ => todo!(),
         }
     }
