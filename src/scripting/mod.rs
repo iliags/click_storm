@@ -1,4 +1,3 @@
-#[cfg(feature = "scripting")]
 mod screen_size;
 
 #[cfg(feature = "scripting")]

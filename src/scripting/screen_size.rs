@@ -18,6 +18,7 @@ impl ScreenSize {
     }
 }
 
+#[cfg(feature = "scripting")]
 #[cfg_attr(feature = "scripting", export_module)]
 #[allow(non_snake_case, dead_code)]
 pub mod ScreenSizeModule {
