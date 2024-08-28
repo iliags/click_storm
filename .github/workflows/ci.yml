@@ -1,7 +1,10 @@
-name: Cargo Build & Test Main Branch
+name: Cargo Build & Test
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - dev
 
 env: 
   CARGO_TERM_COLOR: always
