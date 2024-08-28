@@ -87,7 +87,7 @@ impl RhaiInterface {
         // Register the functions
         engine.register_fn("new_engine", RhaiInterface::new);
 
-        // TODO: Add duration/lerp versions
+        // TODO: Add duration/lerp and key chord versions
         engine
             .register_fn("click_at", RhaiInterface::click_at)
             .register_fn("move_mouse", RhaiInterface::move_mouse_to)

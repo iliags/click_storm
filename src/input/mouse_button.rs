@@ -99,7 +99,7 @@ impl From<MouseButton> for enigo::Button {
 use rhai::plugin::*;
 
 #[cfg_attr(feature = "scripting", export_module)]
-#[allow(non_snake_case, dead_code)]
+#[allow(non_snake_case)]
 pub mod MouseButtonModule {
     use super::*;
 

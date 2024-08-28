@@ -360,3 +360,10 @@ impl From<AppKeycode> for Keycode {
         }
     }
 }
+
+#[cfg(feature = "scripting")]
+use rhai::plugin::*;
+
+#[cfg_attr(feature = "scripting", export_module)]
+#[allow(non_snake_case)]
+pub mod MouseButtonModule {}
