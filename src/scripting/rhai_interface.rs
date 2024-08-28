@@ -2,11 +2,15 @@
 use std::sync::{Arc, Mutex};
 
 use device_query::DeviceState;
-use enigo::{Button, Enigo, Mouse, Settings};
+use enigo::{Button, Enigo, Keyboard, Mouse, Settings};
 use rand::Rng;
 use rhai::{exported_module, Engine};
 
-use crate::input::mouse_button::{MouseButton, MouseButtonModule};
+use crate::input::{
+    button_direction::{ButtonDirection, ButtonDirectionModule},
+    keycode::{AppKeycode, AppKeycodeModule},
+    mouse_button::{MouseButton, MouseButtonModule},
+};
 
 use super::screen_size::{ScreenSize, ScreenSizeModule};
 
@@ -62,9 +66,16 @@ impl RhaiInterface {
             //t.add_position(100, 100);
 
             // Print the screen size
-            let screen_size = t.get_screen_size();
-            print(screen_size.to_string());
-            print(screen_size.center().to_string());
+            //let screen_size = t.get_screen_size();
+            //print(screen_size.to_string());
+            //print(screen_size.center().to_string());
+
+            // Enter ctrl + a
+            t.set_key(AppKeycode::Control, ButtonDirection::Press);
+            t.set_key(AppKeycode::A, ButtonDirection::Press);
+
+            t.set_key(AppKeycode::Control, ButtonDirection::Release);
+            t.set_key(AppKeycode::A, ButtonDirection::Release);
         "#;
         engine.run(script).unwrap();
 
@@ -89,6 +100,19 @@ impl RhaiInterface {
             .register_type_with_name::<ScreenSize>("ScreenSize")
             .register_static_module("ScreenSize", exported_module!(ScreenSizeModule).into());
 
+        // Register keycodes
+        engine
+            .register_type_with_name::<AppKeycode>("AppKeycode")
+            .register_static_module("AppKeycode", exported_module!(AppKeycodeModule).into());
+
+        // Register button direction
+        engine
+            .register_type_with_name::<ButtonDirection>("ButtonDirection")
+            .register_static_module(
+                "ButtonDirection",
+                exported_module!(ButtonDirectionModule).into(),
+            );
+
         // Register the functions
         engine.register_fn("new_engine", RhaiInterface::new);
 
@@ -99,6 +123,8 @@ impl RhaiInterface {
             .register_fn("add_position", RhaiInterface::add_position)
             .register_fn("drag_to", RhaiInterface::drag_to)
             .register_fn("drag_from_to", RhaiInterface::drag_from_to);
+
+        engine.register_fn("set_key", RhaiInterface::set_key);
 
         engine.register_fn("get_screen_size", RhaiInterface::get_screen_size);
 
@@ -162,6 +188,12 @@ impl RhaiInterface {
         let _ = enigo.button(button, enigo::Direction::Press);
         let _ = enigo.move_mouse(x2, y2, enigo::Coordinate::Abs);
         let _ = enigo.button(button, enigo::Direction::Release);
+    }
+
+    fn set_key(&mut self, key: AppKeycode, direction: ButtonDirection) {
+        let mut enigo = self.enigo.lock().unwrap();
+
+        let _ = enigo.key(key.into(), direction.into());
     }
 
     fn get_screen_size(&mut self) -> ScreenSize {

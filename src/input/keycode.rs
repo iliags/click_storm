@@ -66,6 +66,7 @@ pub enum AppKeycode {
     F20,
     Escape,
     Space,
+    Control,
     LControl,
     RControl,
     LShift,
@@ -184,6 +185,7 @@ impl AppKeycode {
             Self::Space => "Space",
             Self::LControl => "LControl",
             Self::RControl => "RControl",
+            Self::Control => "Control",
             Self::LShift => "LShift",
             Self::RShift => "RShift",
             Self::LAlt => "LAlt",
@@ -418,7 +420,7 @@ impl From<AppKeycode> for device_query::Keycode {
             AppKeycode::F20 => Keycode::F20,
             AppKeycode::Escape => Keycode::Escape,
             AppKeycode::Space => Keycode::Space,
-            AppKeycode::LControl => Keycode::LControl,
+            AppKeycode::LControl | AppKeycode::Control => Keycode::LControl,
             AppKeycode::RControl => Keycode::RControl,
             AppKeycode::LShift => Keycode::LShift,
             AppKeycode::RShift => Keycode::RShift,
@@ -537,7 +539,7 @@ impl From<AppKeycode> for enigo::Key {
             AppKeycode::F20 => Key::F20,
             AppKeycode::Escape => Key::Escape,
             AppKeycode::Space => Key::Space,
-            AppKeycode::LControl => Key::LControl,
+            AppKeycode::LControl | AppKeycode::Control => Key::LControl,
             AppKeycode::RControl => Key::RControl,
             AppKeycode::LShift => Key::LShift,
             AppKeycode::RShift => Key::RShift,
@@ -597,7 +599,7 @@ use rhai::plugin::*;
 #[cfg(feature = "scripting")]
 #[cfg_attr(feature = "scripting", export_module)]
 #[allow(non_snake_case, non_upper_case_globals, dead_code)]
-pub mod MouseButtonModule {
+pub mod AppKeycodeModule {
     use super::*;
 
     // Note: This is required to expose the `AppKeycode` enum to the scripting environment.
@@ -659,6 +661,7 @@ pub mod MouseButtonModule {
     pub const F20: AppKeycode = AppKeycode::F20;
     pub const Escape: AppKeycode = AppKeycode::Escape;
     pub const Space: AppKeycode = AppKeycode::Space;
+    pub const Control: AppKeycode = AppKeycode::Control;
     pub const LControl: AppKeycode = AppKeycode::LControl;
     pub const RControl: AppKeycode = AppKeycode::RControl;
     pub const LShift: AppKeycode = AppKeycode::LShift;

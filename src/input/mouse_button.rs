@@ -110,8 +110,8 @@ pub mod MouseButtonModule {
 
     /// Return the current variant of `MouseButton`.
     #[rhai_fn(global, get = "enum_type", pure)]
-    pub fn get_type(button_enum: &mut MouseButton) -> String {
-        button_enum.as_str().to_string()
+    pub fn get_type(value: &mut MouseButton) -> String {
+        value.as_str().to_string()
     }
 
     /// Return the value of `MouseButton`.
@@ -122,8 +122,8 @@ pub mod MouseButtonModule {
 
     // Printing
     #[rhai_fn(global, name = "to_string", name = "to_debug", pure)]
-    pub fn to_string(button_enum: &mut MouseButton) -> String {
-        format!("{button_enum:?}")
+    pub fn to_string(value: &mut MouseButton) -> String {
+        format!("{value:?}")
     }
 
     // '==' and '!=' operators
