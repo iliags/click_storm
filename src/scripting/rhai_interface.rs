@@ -10,7 +10,8 @@ use crate::input::mouse_button::{MouseButton, MouseButtonModule};
 
 use super::screen_size::{ScreenSize, ScreenSizeModule};
 
-// TODO: Export metadata for the scripting API to use in the language server
+// TODO: Export metadata for the scripting API to use in a language server
+// See: https://rhai.rs/book/engine/metadata/definitions.html
 
 #[derive(Debug, Clone)]
 pub struct RhaiInterface {
@@ -18,6 +19,7 @@ pub struct RhaiInterface {
     enigo: Arc<Mutex<Enigo>>,
     device: DeviceState,
     rng: rand::rngs::ThreadRng,
+    screen_size: Option<ScreenSize>,
 }
 
 impl RhaiInterface {
@@ -31,6 +33,7 @@ impl RhaiInterface {
             enigo: Arc::new(Mutex::new(enigo)),
             device: DeviceState::new(),
             rng: rand::thread_rng(),
+            screen_size: None,
         }
     }
 
@@ -162,13 +165,20 @@ impl RhaiInterface {
     }
 
     fn get_screen_size(&mut self) -> ScreenSize {
-        // TODO: Cache the result
-        let enigo = self.enigo.lock().unwrap();
-        let screen_size = enigo
-            .main_display()
-            .unwrap_or_else(|_| panic!("Failed to get screen size."));
+        match &self.screen_size {
+            Some(size) => size.clone(),
+            None => {
+                let enigo = self.enigo.lock().unwrap();
+                let screen_size = enigo
+                    .main_display()
+                    .unwrap_or_else(|_| panic!("Failed to get screen size."));
 
-        screen_size.into()
+                let size: ScreenSize = screen_size.into();
+                self.screen_size = Some(size.clone());
+
+                size.clone()
+            }
+        }
     }
 
     /// Get a random number within the specified range (min inclusive, max inclusive).
