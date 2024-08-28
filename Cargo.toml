@@ -50,7 +50,8 @@ strum_macros = "0.26"
 rand = "0.8"
 rhai = { version = "1.19", optional = true, features = [
     "only_i32",
-    "f32_float",
+    #"f32_float",
+    "no_float",
     "no_custom_syntax",
 ] }
 

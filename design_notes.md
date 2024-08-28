@@ -31,7 +31,6 @@ Tentative API into native rust functions, optional params use the function overl
 
 Expected:
 
-- screen_size: returns the screen size X/Y in pixels (maybe add QoL functions like screen center)
 - click at: clicks (down up) at an X/Y position optionally using a button and/or a modifier key
 - click in range: clicks (down up) within a from/to range in X/Y optionally using a button and/or a modifier key
 - move to: instantly moves to a location, if a duration is provided interpolates from the current position to the target position over time
