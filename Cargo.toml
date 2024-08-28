@@ -65,5 +65,5 @@ lto = true
 opt-level = 2
 
 [features]
-default = ["scripting"]
+#default = ["scripting"]
 scripting = ["dep:rhai"]
