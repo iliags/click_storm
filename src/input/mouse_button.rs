@@ -100,17 +100,12 @@ use rhai::plugin::*;
 
 #[cfg(feature = "scripting")]
 #[cfg_attr(feature = "scripting", export_module)]
-#[allow(non_snake_case)]
+#[allow(non_snake_case, non_upper_case_globals)]
 pub mod MouseButtonModule {
     use super::*;
 
-    #[allow(non_upper_case_globals)]
     pub const Left: MouseButton = MouseButton::Left;
-
-    #[allow(non_upper_case_globals)]
     pub const Right: MouseButton = MouseButton::Right;
-
-    #[allow(non_upper_case_globals)]
     pub const Middle: MouseButton = MouseButton::Middle;
 
     /// Return the current variant of `MouseButton`.
@@ -119,6 +114,7 @@ pub mod MouseButtonModule {
         button_enum.as_str().to_string()
     }
 
+    /// Return the value of `MouseButton`.
     #[rhai_fn(global, get = "value", pure)]
     pub fn get_value(_: &mut MouseButton) -> Dynamic {
         Dynamic::UNIT
