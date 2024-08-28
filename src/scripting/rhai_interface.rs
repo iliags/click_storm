@@ -17,6 +17,7 @@ use super::screen_size::{ScreenSize, ScreenSizeModule};
 // TODO: Export metadata for the scripting API to use in a language server
 // See: https://rhai.rs/book/engine/metadata/definitions.html
 
+// TODO: Find a way to exclude the evaluation engine from the data passed to the script
 #[derive(Debug, Clone)]
 pub struct RhaiInterface {
     engine: Arc<Mutex<Engine>>,
