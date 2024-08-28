@@ -2,8 +2,10 @@
 use std::sync::{Arc, Mutex};
 
 use device_query::DeviceState;
-use enigo::{Button, Enigo, Mouse, Settings};
-use rhai::Engine;
+use enigo::{Enigo, Mouse, Settings};
+use rhai::{exported_module, Engine};
+
+use crate::input::mouse_button::{MouseButton, MouseButtonModule};
 
 #[derive(Debug, Clone)]
 pub struct RhaiInterface {
@@ -42,7 +44,8 @@ impl RhaiInterface {
         let script = r#"
             //click_at(100, 100, Button::Left);
             let t = new_rh();
-            t.click_at(800, 600);
+            let mb = MouseButton::Left;
+            t.click_at(800, 600, mb);
         "#;
         engine.run(script).unwrap();
     }
@@ -50,23 +53,30 @@ impl RhaiInterface {
     /// Initialize the Rhai engine with the necessary functions and types.
     pub fn initialize(&mut self) {
         let mut engine = self.engine.lock().unwrap();
+
         // Register the mouse button enum
-        engine.register_type::<Button>();
+        engine
+            .register_type_with_name::<MouseButton>("MouseButton")
+            .register_static_module("MouseButton", exported_module!(MouseButtonModule).into());
+
+        // Register the scripting interface
         engine.register_type::<RhaiInterface>();
 
+        // Register the functions
         engine.register_fn("new_rh", RhaiInterface::new);
         engine.register_fn("click_at", RhaiInterface::click_at);
     }
 
-    fn click_at(&mut self, x: i32, y: i32) {
-        //, mouse_button: Button) {
+    fn click_at(&mut self, x: i32, y: i32, mouse_button: MouseButton) {
+        println!(
+            "Clicking at ({}, {}) with button {:?}",
+            x,
+            y,
+            mouse_button.clone()
+        );
+
         let mut enigo = self.enigo.lock().unwrap();
         let _ = enigo.move_mouse(x, y, enigo::Coordinate::Abs);
-        //let _ = self.enigo.button(mouse_button, enigo::Direction::Click);
-        //println!("Clicking at ({}, {}) with button {:?}", x, y, mouse_button);
-        println!("Clicking at ({}, {}) ", x, y);
+        let _ = enigo.button(mouse_button.into(), enigo::Direction::Click);
     }
-
-    // TODO
-    //pub fn execute_click_storm(&mut self, app_settings: AppSettings) {}
 }

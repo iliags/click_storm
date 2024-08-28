@@ -12,7 +12,7 @@ use enigo::{Button, Enigo, Mouse, Settings};
 use rand::Rng;
 
 use crate::{
-    input::{mouse_button::MouseButton, mouse_click::MouseClickType},
+    input::mouse_click::MouseClickType,
     settings::{
         app_settings::AppSettings, cursor_position::CursorPosition, repeat_type::RepeatType,
     },
@@ -65,11 +65,7 @@ pub fn worker_thread(receiver: Receiver<ClickStormMessage>) {
                             let mut rand = rand::thread_rng();
 
                             // Get the mouse button to click with
-                            let mouse_button = match settings_clone.mouse_button() {
-                                MouseButton::Left => Button::Left,
-                                MouseButton::Middle => Button::Middle,
-                                MouseButton::Right => Button::Right,
-                            };
+                            let mouse_button = settings_clone.mouse_button().into();
 
                             let mut current_count = 0;
 

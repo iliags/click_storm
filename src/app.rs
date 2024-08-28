@@ -447,7 +447,9 @@ impl ClickStormApp {
                             .show_ui(ui, |ui| {
                                 // Iterate over the click types
                                 let mut current_value = self.settings.mouse_button().clone();
-                                for mouse_button in MouseButton::iter() {
+                                const MOUSE_BUTTONS: &[MouseButton] =
+                                    &[MouseButton::Left, MouseButton::Right, MouseButton::Middle];
+                                for mouse_button in MOUSE_BUTTONS {
                                     // Get the locale string for the click type
                                     let mouse_button_locale = self
                                         .settings
@@ -457,7 +459,7 @@ impl ClickStormApp {
                                     // Select the click type
                                     ui.selectable_value(
                                         &mut current_value,
-                                        mouse_button,
+                                        mouse_button.clone(),
                                         mouse_button_locale,
                                     );
                                 }

@@ -35,6 +35,12 @@ mouse_button = Mouse Button
 left = Left
 middle = Middle
 right = Right
+back = Back
+forward = Forward
+scroll_up = Scroll Up
+scroll_down = Scroll Down
+scroll_left = Scroll Left
+scroll_right = Scroll Right
 
 # Repeat options
 repeat_options = Repeat Options
