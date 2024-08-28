@@ -66,7 +66,6 @@ pub enum AppKeycode {
     F20,
     Escape,
     Space,
-    Control,
     LControl,
     RControl,
     LShift,
@@ -185,7 +184,6 @@ impl AppKeycode {
             Self::Space => "Space",
             Self::LControl => "LControl",
             Self::RControl => "RControl",
-            Self::Control => "Control",
             Self::LShift => "LShift",
             Self::RShift => "RShift",
             Self::LAlt => "LAlt",
@@ -420,7 +418,7 @@ impl From<AppKeycode> for device_query::Keycode {
             AppKeycode::F20 => Keycode::F20,
             AppKeycode::Escape => Keycode::Escape,
             AppKeycode::Space => Keycode::Space,
-            AppKeycode::LControl | AppKeycode::Control => Keycode::LControl,
+            AppKeycode::LControl => Keycode::LControl,
             AppKeycode::RControl => Keycode::RControl,
             AppKeycode::LShift => Keycode::LShift,
             AppKeycode::RShift => Keycode::RShift,
@@ -539,7 +537,7 @@ impl From<AppKeycode> for enigo::Key {
             AppKeycode::F20 => Key::F20,
             AppKeycode::Escape => Key::Escape,
             AppKeycode::Space => Key::Space,
-            AppKeycode::LControl | AppKeycode::Control => Key::LControl,
+            AppKeycode::LControl => Key::LControl,
             AppKeycode::RControl => Key::RControl,
             AppKeycode::LShift => Key::LShift,
             AppKeycode::RShift => Key::RShift,
@@ -661,16 +659,20 @@ pub mod AppKeycodeModule {
     pub const F20: AppKeycode = AppKeycode::F20;
     pub const Escape: AppKeycode = AppKeycode::Escape;
     pub const Space: AppKeycode = AppKeycode::Space;
-    pub const Control: AppKeycode = AppKeycode::Control;
+    pub const Control: AppKeycode = AppKeycode::LControl;
     pub const LControl: AppKeycode = AppKeycode::LControl;
     pub const RControl: AppKeycode = AppKeycode::RControl;
+    pub const Shift: AppKeycode = AppKeycode::LShift;
     pub const LShift: AppKeycode = AppKeycode::LShift;
     pub const RShift: AppKeycode = AppKeycode::RShift;
+    pub const Alt: AppKeycode = AppKeycode::LAlt;
     pub const LAlt: AppKeycode = AppKeycode::LAlt;
     pub const RAlt: AppKeycode = AppKeycode::RAlt;
     pub const Command: AppKeycode = AppKeycode::Command;
+    pub const Option: AppKeycode = AppKeycode::LOption;
     pub const LOption: AppKeycode = AppKeycode::LOption;
     pub const ROption: AppKeycode = AppKeycode::ROption;
+    pub const Meta: AppKeycode = AppKeycode::LMeta;
     pub const LMeta: AppKeycode = AppKeycode::LMeta;
     pub const RMeta: AppKeycode = AppKeycode::RMeta;
     pub const Enter: AppKeycode = AppKeycode::Enter;
