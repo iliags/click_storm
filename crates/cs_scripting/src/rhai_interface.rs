@@ -70,7 +70,6 @@ impl RhaiInterface {
     /// Initialize the Rhai engine with the necessary functions and types.
     pub fn initialize(&mut self) {
         // Register the scripting interface
-        //engine.register_type::<RhaiInterface>();
         self.engine.register_type::<ClickStormInterface>();
 
         // Register the mouse button enum
