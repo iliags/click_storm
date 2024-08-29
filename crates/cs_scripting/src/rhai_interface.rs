@@ -22,6 +22,12 @@ pub struct RhaiInterface {
     engine: Rc<Mutex<Engine>>,
 }
 
+impl Default for RhaiInterface {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl RhaiInterface {
     /// Create a new engine instance
     pub fn new() -> Self {
