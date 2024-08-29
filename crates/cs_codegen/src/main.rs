@@ -11,10 +11,8 @@ fn main() {
     let mut interface = RhaiInterface::new();
     interface.initialize();
 
-    let engine = interface.get_engine();
-    let engine = engine.lock().unwrap();
-
-    engine
+    interface
+        .get_engine()
         .definitions()
         .with_headers(true)
         .include_standard_packages(false)

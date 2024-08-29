@@ -118,8 +118,6 @@ impl UIPanel for ScriptPanel {
     }
 
     fn stop(&mut self) {
-        println!("Stopping script");
-
         self.is_running.store(false, Ordering::SeqCst);
 
         if let Some(thread) = self.thread.take() {
@@ -164,6 +162,7 @@ impl UIPanel for ScriptPanel {
     fn reset(&mut self) {}
 
     fn exit(&mut self) {
+        println!("Shutting down script");
         self.stop();
     }
 
