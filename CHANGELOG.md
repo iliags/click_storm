@@ -2,7 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
-## WIP
+## 0.2.1
+
+* Fix Mac build
 
 ## 0.2.0
 

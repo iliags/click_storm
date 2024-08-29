@@ -557,7 +557,8 @@ impl From<AppKeycode> for enigo::Key {
             AppKeycode::End => Key::End,
             AppKeycode::PageUp => Key::PageUp,
             AppKeycode::PageDown => Key::PageDown,
-            AppKeycode::Insert => Key::Insert,
+            // TODO: Check if this is correct
+            AppKeycode::Insert => Key::Other(45),
             AppKeycode::Delete => Key::Delete,
             AppKeycode::Numpad0 => Key::Unicode('0'),
             AppKeycode::Numpad1 => Key::Unicode('1'),
