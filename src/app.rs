@@ -6,11 +6,13 @@ use crate::do_once::DoOnceGate;
 use crate::localization::language::Language;
 use crate::localization::locale_text::LocaleText;
 use crate::ui::clicker::{self, ClickerPanel};
-use crate::ui::script::{self, ScriptPanel};
 use crate::ui::UIPanel;
 
 #[cfg(feature = "scripting")]
 use cs_scripting::rhai_interface::RhaiInterface;
+
+#[cfg(feature = "scripting")]
+use crate::ui::script::{self, ScriptPanel};
 
 // Wishlist:
 // - Record and playback mouse movements
@@ -55,6 +57,7 @@ impl Default for ClickStormApp {
 
         let panels: Vec<Box<dyn UIPanel>> = vec![
             Box::new(ClickerPanel::default()),
+            #[cfg(feature = "scripting")]
             Box::new(ScriptPanel::default()),
         ];
 
@@ -82,7 +85,10 @@ impl eframe::App for ClickStormApp {
             if panel.as_any().downcast_ref::<ClickerPanel>().is_some() {
                 let clicker_panel = panel.as_any().downcast_ref::<ClickerPanel>().unwrap();
                 eframe::set_value(storage, clicker::CLICKER_PANEL_KEY, clicker_panel);
-            } else if panel.as_any().downcast_ref::<ScriptPanel>().is_some() {
+            }
+
+            #[cfg(feature = "scripting")]
+            if panel.as_any().downcast_ref::<ScriptPanel>().is_some() {
                 let script_panel = panel.as_any().downcast_ref::<ScriptPanel>().unwrap();
                 eframe::set_value(storage, script::SCRIPT_PANEL_KEY, script_panel);
             }
@@ -201,13 +207,16 @@ impl eframe::App for ClickStormApp {
 
                 ui.separator();
 
-                for (index, panel) in self.panels.iter().enumerate() {
-                    let panel_name = panel.name();
+                #[cfg(feature = "scripting")]
+                {
+                    for (index, panel) in self.panels.iter().enumerate() {
+                        let panel_name = panel.name();
 
-                    ui.radio_value(&mut self.active_panel, index, panel_name);
+                        ui.radio_value(&mut self.active_panel, index, panel_name);
+                    }
+
+                    ui.separator();
                 }
-
-                ui.separator();
 
                 // Test buttons for development
                 #[cfg(all(debug_assertions, feature = "scripting"))]
@@ -268,7 +277,11 @@ impl ClickStormApp {
                         .downcast_mut::<ClickerPanel>()
                         .unwrap()
                         .load(clicker_panel);
-                } else if panel.as_any().downcast_ref::<ScriptPanel>().is_some() {
+                }
+
+                // Note: I apparently can't use cfg on an else if
+                #[cfg(feature = "scripting")]
+                if panel.as_any().downcast_ref::<ScriptPanel>().is_some() {
                     let script_panel: ScriptPanel =
                         eframe::get_value(storage, script::SCRIPT_PANEL_KEY).unwrap_or_default();
                     panel

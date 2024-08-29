@@ -4,6 +4,7 @@ use crate::localization::locale_text::LocaleText;
 pub mod clicker;
 
 /// Script panel
+#[cfg(feature = "scripting")]
 pub mod script;
 
 pub(crate) trait UIPanel {
@@ -35,6 +36,7 @@ pub(crate) trait UIPanel {
     fn set_language(&mut self, language: LocaleText);
 
     /// Get the panel name
+    #[allow(dead_code)]
     fn name(&self) -> &str;
 
     fn as_any(&mut self) -> &mut dyn std::any::Any;
