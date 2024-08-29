@@ -1,26 +1,28 @@
 module static;
 
-fn add_position(_: RhaiInterface, _: int, _: int) -> ;
+fn add_position(_: ClickStormInterface, _: int, _: int) -> ;
 
-fn click_at(_: RhaiInterface, _: int, _: int, _: MouseButton) -> ;
+fn click_at(_: ClickStormInterface, _: int, _: int, _: MouseButton) -> ;
 
-fn drag_from_to(_: RhaiInterface, _: int, _: int, _: int, _: int, _: MouseButton) -> ;
+fn click_within(_: ClickStormInterface, _: int, _: int, _: int, _: int, _: MouseButton) -> ;
 
-fn drag_to(_: RhaiInterface, _: int, _: int, _: MouseButton) -> ;
+fn drag_from_to(_: ClickStormInterface, _: int, _: int, _: int, _: int, _: MouseButton) -> ;
 
-fn get_screen_size(_: RhaiInterface) -> ScreenSize;
+fn drag_to(_: ClickStormInterface, _: int, _: int, _: MouseButton) -> ;
 
-fn move_mouse(_: RhaiInterface, _: int, _: int) -> ;
+fn get_screen_size(_: ClickStormInterface) -> ScreenSize;
 
-fn new_engine() -> RhaiInterface;
+fn move_mouse(_: ClickStormInterface, _: int, _: int) -> ;
 
-fn rand_bool(_: RhaiInterface) -> bool;
+fn new_engine() -> ClickStormInterface;
 
-fn rand_range(_: RhaiInterface, _: int, _: int) -> int;
+fn rand_bool(_: ClickStormInterface) -> bool;
 
-fn rand_range_excl(_: RhaiInterface, _: int, _: int) -> int;
+fn rand_range(_: ClickStormInterface, _: int, _: int) -> int;
 
-fn set_key(_: RhaiInterface, _: AppKeycode, _: ButtonDirection) -> ;
+fn rand_range_excl(_: ClickStormInterface, _: int, _: int) -> int;
+
+fn set_key(_: ClickStormInterface, _: AppKeycode, _: ButtonDirection) -> ;
 
 module AppKeycode {
 const A: AppKeycode;
