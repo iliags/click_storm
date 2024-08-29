@@ -1,0 +1,22 @@
+[package]
+name = "cs_hal"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+enigo = { workspace = true }
+device_query = { workspace = true }
+serde = { workspace = true }
+strum = { workspace = true }
+strum_macros = { workspace = true }
+rhai = { workspace = true, optional = true, features = [
+    "only_i32",
+    "f32_float",
+    "no_custom_syntax",
+    "metadata",
+    "internals",
+] }
+
+[features]
+default = []
+scripting = ["dep:rhai"]

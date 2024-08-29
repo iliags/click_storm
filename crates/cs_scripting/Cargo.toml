@@ -1,0 +1,25 @@
+[package]
+name = "cs_scripting"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cs_hal = { workspace = true }
+enigo = { workspace = true }
+device_query = { workspace = true }
+rand = { workspace = true }
+rhai = { workspace = true, optional = true, features = [
+    "only_i32",
+    "f32_float",
+    "no_custom_syntax",
+    "metadata",
+    "internals",
+] }
+
+[lints]
+workspace = true
+
+
+[features]
+default = []
+scripting = ["dep:rhai"]
