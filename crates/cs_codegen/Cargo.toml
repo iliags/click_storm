@@ -10,6 +10,8 @@ rhai = { workspace = true, optional = true, features = [
     "only_i32",
     "no_float",
     "no_custom_syntax",
+    "no_position",
+    "no_closure",
     "metadata",
     "internals",
 ] }
