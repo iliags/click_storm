@@ -16,7 +16,6 @@ pub const TEST_SCRIPT: &str = include_str!("../../../scripts/test.rhai");
 /// The Rhai scripting interface
 #[derive(Debug)]
 pub struct RhaiInterface {
-    // Note: Using Arc because this might be shared between threads, not sure yet
     engine: Engine,
 }
 

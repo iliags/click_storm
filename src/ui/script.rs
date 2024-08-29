@@ -77,13 +77,15 @@ impl UIPanel for ScriptPanel {
         // Test buttons for development
         #[cfg(debug_assertions)]
         {
-            if ui.button("Test Print").clicked() {
-                self.rhai_interface.test_hello();
-            }
+            ui.horizontal(|ui| {
+                if ui.button("Test Print").clicked() {
+                    self.rhai_interface.test_hello();
+                }
 
-            if ui.button("Load test script").clicked() {
-                self.script = cs_scripting::rhai_interface::TEST_SCRIPT.to_string();
-            }
+                if ui.button("Load test script").clicked() {
+                    self.script = cs_scripting::rhai_interface::TEST_SCRIPT.to_string();
+                }
+            });
         }
     }
 
@@ -162,7 +164,7 @@ impl UIPanel for ScriptPanel {
     fn reset(&mut self) {}
 
     fn exit(&mut self) {
-        println!("Shutting down script");
+        println!("Script shutting down");
         self.stop();
     }
 

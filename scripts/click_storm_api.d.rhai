@@ -4,6 +4,8 @@ fn add_position(_: ClickStormInterface, _: int, _: int) -> ;
 
 fn click_at(_: ClickStormInterface, _: int, _: int, _: MouseButton) -> ;
 
+fn click_storm() -> ClickStormInterface;
+
 fn click_within(_: ClickStormInterface, _: int, _: int, _: int, _: int, _: MouseButton) -> ;
 
 fn drag_from_to(_: ClickStormInterface, _: int, _: int, _: int, _: int, _: MouseButton) -> ;
@@ -13,8 +15,6 @@ fn drag_to(_: ClickStormInterface, _: int, _: int, _: MouseButton) -> ;
 fn get_screen_size(_: ClickStormInterface) -> ScreenSize;
 
 fn move_mouse(_: ClickStormInterface, _: int, _: int) -> ;
-
-fn new_engine() -> ClickStormInterface;
 
 fn rand_bool(_: ClickStormInterface) -> bool;
 
