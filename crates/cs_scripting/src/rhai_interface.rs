@@ -45,7 +45,7 @@ impl RhaiInterface {
     pub fn test_script(&mut self) {
         let engine = self.engine.lock().unwrap();
 
-        let test_script = include_str!("../scripts/test.rhai");
+        let test_script = include_str!("../../../scripts/test.rhai");
         engine.run(test_script).unwrap();
     }
 
