@@ -1,10 +1,9 @@
 use std::{
     sync::{
         atomic::{AtomicBool, Ordering},
-        mpsc::{channel, Receiver, Sender},
         Arc,
     },
-    thread,
+    thread::{self, JoinHandle},
 };
 
 use cs_hal::input::{mouse_button::MouseButton, mouse_click::MouseClickType};
@@ -18,7 +17,7 @@ use crate::{
     settings::{
         app_settings::AppSettings, cursor_position::CursorPosition, repeat_type::RepeatType,
     },
-    worker::{self, ClickStormMessage},
+    worker::{self},
 };
 
 use super::UIPanel;
@@ -46,10 +45,10 @@ pub struct ClickerPanel {
     picking_position: bool,
 
     #[serde(skip)]
-    sender: Option<Sender<ClickStormMessage>>,
+    is_running: Arc<AtomicBool>,
 
     #[serde(skip)]
-    is_running: Arc<AtomicBool>,
+    thread: Option<JoinHandle<()>>,
 }
 
 impl Default for ClickerPanel {
@@ -63,14 +62,6 @@ impl Default for ClickerPanel {
             .main_display()
             .unwrap_or_else(|_| panic!("Failed to get display size."));
 
-        let (sender, receiver): (Sender<ClickStormMessage>, Receiver<ClickStormMessage>) =
-            channel();
-
-        //TODO: This might be able to be reduced from 1+1 threads to 1 thread
-        thread::spawn(move || {
-            worker::worker_thread(receiver);
-        });
-
         Self {
             settings: AppSettings::default(),
             language: LocaleText::default(),
@@ -79,8 +70,8 @@ impl Default for ClickerPanel {
             device_state: DeviceState::new(),
             display_size,
             picking_position: false,
-            sender: Some(sender),
             is_running: Arc::new(AtomicBool::new(false)),
+            thread: None,
         }
     }
 }
@@ -108,33 +99,25 @@ impl UIPanel for ClickerPanel {
     }
 
     fn start(&mut self) {
-        if self.is_running.load(Ordering::SeqCst) {
+        if self.is_running() {
             return;
         }
 
-        match self.sender.as_ref() {
-            Some(sender) => {
-                let _ = sender.send(ClickStormMessage::Start(
-                    self.settings.clone(),
-                    Arc::clone(&self.is_running),
-                ));
-                self.is_running.store(true, Ordering::SeqCst);
-            }
-            None => {
-                println!("Error sending message: Sender is None");
-            }
-        }
+        self.is_running.store(true, Ordering::SeqCst);
+
+        let settings_clone = self.settings.clone();
+        let running_clone = Arc::clone(&self.is_running);
+
+        self.thread = Some(thread::spawn(move || {
+            worker::worker_thread(settings_clone, running_clone);
+        }));
     }
 
     fn stop(&mut self) {
-        match self.sender.as_ref() {
-            Some(sender) => {
-                let _ = sender.send(ClickStormMessage::Stop);
-                self.is_running.store(false, Ordering::SeqCst);
-            }
-            None => {
-                println!("Error sending message: Sender is None");
-            }
+        self.is_running.store(false, Ordering::SeqCst);
+
+        if let Some(thread) = self.thread.take() {
+            let _ = thread.join();
         }
     }
 
@@ -161,16 +144,7 @@ impl UIPanel for ClickerPanel {
     }
 
     fn exit(&mut self) {
-        match self.sender.as_ref() {
-            Some(sender) => {
-                let _ = sender.send(ClickStormMessage::Shutdown);
-            }
-            None => {
-                println!("Error sending message: Sender is None");
-                // This should clean up the inner thread if it's still running
-                self.is_running.store(false, Ordering::SeqCst);
-            }
-        }
+        self.stop();
     }
 
     fn set_language(&mut self, language: LocaleText) {
