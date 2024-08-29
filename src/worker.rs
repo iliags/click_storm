@@ -142,7 +142,6 @@ pub fn worker_thread(receiver: Receiver<ClickStormMessage>) {
                                     }
                                     RepeatType::Turbo => {
                                         // TODO: Check if this works with left handed mice
-                                        // TODO: If LMB/Primary is pressed, release and press again, otherwise press and release
                                         if device.get_mouse().button_pressed[1] {
                                             //println!("Turbo click");
                                             let _ = enigo
