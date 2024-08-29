@@ -9,7 +9,6 @@ use std::sync::{Arc, Mutex};
 #[derive(Debug, Clone)]
 pub struct ClickStormInterface {
     enigo: Arc<Mutex<Enigo>>,
-    //device: DeviceState,
     rng: rand::rngs::ThreadRng,
     screen_size: Option<ScreenSize>,
 }
@@ -22,7 +21,6 @@ impl ClickStormInterface {
 
         Self {
             enigo: Arc::new(Mutex::new(enigo)),
-            //device: DeviceState::new(),
             rng: rand::thread_rng(),
             screen_size: None,
         }

@@ -20,6 +20,7 @@ Recording and replaying is done via tracking the user input and creating a Rhai 
 
 - Script file watcher (for external editing)
 - Hot reload
+- Visual scripting
 
 Copied from SCAR Divi, will update later.
 
