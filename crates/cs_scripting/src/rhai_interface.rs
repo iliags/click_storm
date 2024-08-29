@@ -15,6 +15,7 @@ use super::cs_interface::ClickStormInterface;
 /// The Rhai scripting interface
 #[derive(Debug, Clone)]
 pub struct RhaiInterface {
+    // Note: Using Arc because this might be shared between threads, not sure yet
     engine: Arc<Mutex<Engine>>,
 }
 
