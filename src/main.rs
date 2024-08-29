@@ -8,21 +8,19 @@ fn main() -> eframe::Result {
     const WIDTH: f32 = 615.0;
     const HEIGHT: f32 = 300.0;
 
-    // TODO: Add an options file that is read in at startup
-    // TODO: If the file doesn't exist, create it with default values
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             // Set the window size
             .with_inner_size([WIDTH, HEIGHT])
             .with_min_inner_size([WIDTH, HEIGHT])
+            // Allow resizing the window
             .with_resizable(true)
             // Start with focus on the window
             .with_active(true)
-            .with_maximize_button(false)
+            // Disable the minimize button
             .with_minimize_button(false)
-            // Set the window icon
+            // Set the window icon (optional)
             .with_icon(
-                // NOTE: Adding an icon is optional
                 eframe::icon_data::from_png_bytes(&include_bytes!("../assets/icon-256.png")[..])
                     .expect("Failed to load icon"),
             ),
