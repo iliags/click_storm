@@ -1,0 +1,17 @@
+[package]
+name = "cs_codegen"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rhai = { workspace = true, optional = true, features = [
+    "only_i32",
+    "no_float",
+    "no_custom_syntax",
+    "metadata",
+    "internals",
+] }
+
+[features]
+default = ["scripting"]
+scripting = ["dep:rhai"]

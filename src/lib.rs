@@ -15,12 +15,5 @@ mod do_once;
 /// Worker thread module
 mod worker;
 
-/// Input module
-mod input;
-
-/// Rhai scripting module
-#[cfg(feature = "scripting")]
-mod scripting;
-
 /// Application module re-export
 pub use app::ClickStormApp;

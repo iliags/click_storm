@@ -1,5 +1,3 @@
-use rhai::plugin::*;
-
 #[derive(Debug, Clone, PartialEq)]
 pub struct ScreenSize {
     x: i32,
@@ -17,6 +15,9 @@ impl ScreenSize {
         (self.x / 2, self.y / 2).into()
     }
 }
+
+#[cfg(feature = "scripting")]
+use rhai::plugin::*;
 
 #[cfg(feature = "scripting")]
 #[cfg_attr(feature = "scripting", export_module)]

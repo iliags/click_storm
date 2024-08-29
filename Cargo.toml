@@ -5,19 +5,71 @@ authors = ["James Lennon"]
 edition = "2021"
 include = ["LICENSE-APACHE", "LICENSE-MIT", "**/*.rs", "Cargo.toml"]
 license = "MIT/Apache-2.0"
-resolver = "2"
 publish = false
 build = "build.rs"
+default-run = "click_storm"
 
 [build-dependencies]
 #embed-resource = { version = "2.4" }
 
-[lints.rust]
+# Click Storm application
+[[bin]]
+name = "click_storm"
+path = "src/main.rs"
+
+# Code generation, currently generates the definition files for the scripting engine LSP
+[[bin]]
+name = "cs_codegen"
+path = "crates/cs_codegen/src/main.rs"
+
+[workspace]
+members = ["crates/*"]
+resolver = "2"
+
+[workspace.lints.rust]
 unsafe_op_in_unsafe_fn = "warn"
 missing_docs = "warn"
 unsafe_code = "deny"
 
+[workspace.dependencies]
+cs_hal = { path = "crates/cs_hal" }
+cs_scripting = { path = "crates/cs_scripting" }
+
+# Hardware control
+enigo = "0.2"
+device_query = "2.1"
+
+# Serialization 
+serde = { version = "1", features = ["derive"] }
+
+# Enum helpers
+strum = "0.26"
+strum_macros = "0.26"
+
+# Scripting
+rhai = { version = "1.19" }
+
+# Misc
+rand = "0.8"
+
 [dependencies]
+cs_hal = { workspace = true }
+cs_scripting = { workspace = true }
+
+enigo = { workspace = true }
+device_query = { workspace = true }
+serde = { workspace = true }
+strum = { workspace = true }
+strum_macros = { workspace = true }
+rand = { workspace = true }
+rhai = { workspace = true, optional = true, features = [
+    "only_i32",
+    "no_float",
+    "no_custom_syntax",
+    "metadata",
+    "internals",
+] }
+
 egui = "0.28"
 eframe = { version = "0.28", default-features = false, features = [
     "accesskit",     # Make egui compatible with screen readers. NOTE: adds a lot of dependencies.
@@ -35,26 +87,6 @@ unic-langid = "0.9"
 log = "0.4"
 env_logger = "0.11"
 
-# Serialization for persistence
-serde = { version = "1", features = ["derive"] }
-
-# Hardware control
-enigo = "0.2"
-device_query = "2.1"
-
-# Enum helpers
-strum = "0.26"
-strum_macros = "0.26"
-
-# Misc
-rand = "0.8"
-rhai = { version = "1.19", optional = true, features = [
-    "only_i32",
-    "no_float",
-    "no_custom_syntax",
-    "metadata",
-    "internals",
-] }
 
 [profile.release]
 opt-level = 2

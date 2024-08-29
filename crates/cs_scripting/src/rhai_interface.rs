@@ -1,34 +1,35 @@
 use std::sync::{Arc, Mutex};
 
+use cs_hal::{
+    display::screen_size::{ScreenSize, ScreenSizeModule},
+    input::{
+        button_direction::{ButtonDirection, ButtonDirectionModule},
+        keycode::{AppKeycode, AppKeycodeModule},
+        mouse_button::{MouseButton, MouseButtonModule},
+    },
+};
 use rhai::{exported_module, Engine};
 
-use crate::input::{
-    button_direction::{ButtonDirection, ButtonDirectionModule},
-    keycode::{AppKeycode, AppKeycodeModule},
-    mouse_button::{MouseButton, MouseButtonModule},
-};
-
-use super::{
-    cs_interface::ClickStormInterface,
-    screen_size::{ScreenSize, ScreenSizeModule},
-};
+use super::cs_interface::ClickStormInterface;
 
 // TODO: Export metadata for the scripting API to use in a language server
 // See: https://rhai.rs/book/engine/metadata/definitions.html
 
-// TODO: Find a way to exclude the evaluation engine from the data passed to the script
+/// The Rhai scripting interface
 #[derive(Debug, Clone)]
 pub struct RhaiInterface {
     engine: Arc<Mutex<Engine>>,
 }
 
 impl RhaiInterface {
+    /// Create a new engine instance
     pub fn new() -> Self {
         Self {
             engine: Arc::new(Mutex::new(Engine::new())),
         }
     }
 
+    /// Test hello world
     #[cfg(debug_assertions)]
     pub fn test_hello(&mut self) {
         let engine = self.engine.lock().unwrap();
@@ -39,21 +40,21 @@ impl RhaiInterface {
         println!("Result: {}", result);
     }
 
+    /// Run the test script
     #[cfg(debug_assertions)]
     pub fn test_script(&mut self) {
         let engine = self.engine.lock().unwrap();
 
-        let test_script = include_str!("../../scripts/test.rhai");
+        let test_script = include_str!("../scripts/test.rhai");
         engine.run(test_script).unwrap();
     }
 
     // TODO: Move this to an external binary
+    /// Generate LSP definitions
     #[cfg(debug_assertions)]
     pub fn generate_definitions(&mut self) {
         let engine = self.engine.lock().unwrap();
 
-        //let definitions = engine.generate_metadata().unwrap();
-        //println!("{}", definitions);
         engine
             .definitions()
             .with_headers(true)

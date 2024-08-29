@@ -1,9 +1,8 @@
 use std::time::Duration;
 
-use crate::{
-    input::{mouse_button::MouseButton, mouse_click::MouseClickType},
-    localization::locale_text::LocaleText,
-};
+use cs_hal::input::{mouse_button::MouseButton, mouse_click::MouseClickType};
+
+use crate::localization::locale_text::LocaleText;
 
 use super::{cursor_position::CursorPosition, repeat_type::RepeatType};
 

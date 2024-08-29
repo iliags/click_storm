@@ -7,15 +7,13 @@ use std::{
     thread::{self, JoinHandle},
 };
 
+use cs_hal::input::mouse_click::MouseClickType;
 use device_query::{DeviceQuery, DeviceState};
 use enigo::{Button, Enigo, Mouse, Settings};
 use rand::Rng;
 
-use crate::{
-    input::mouse_click::MouseClickType,
-    settings::{
-        app_settings::AppSettings, cursor_position::CursorPosition, repeat_type::RepeatType,
-    },
+use crate::settings::{
+    app_settings::AppSettings, cursor_position::CursorPosition, repeat_type::RepeatType,
 };
 
 #[derive(Debug, Clone)]

@@ -1,11 +1,10 @@
+use cs_hal::{
+    display::screen_size::ScreenSize,
+    input::{button_direction::ButtonDirection, keycode::AppKeycode, mouse_button::MouseButton},
+};
 use enigo::{Button, Enigo, Keyboard, Mouse, Settings};
 use rand::Rng;
 use std::sync::{Arc, Mutex};
-
-use super::screen_size::ScreenSize;
-use crate::input::{
-    button_direction::ButtonDirection, keycode::AppKeycode, mouse_button::MouseButton,
-};
 
 #[derive(Debug, Clone)]
 pub struct ClickStormInterface {

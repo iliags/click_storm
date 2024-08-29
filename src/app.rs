@@ -1,3 +1,7 @@
+use cs_hal::input::keycode::AppKeycode;
+use cs_hal::input::mouse_button::MouseButton;
+use cs_hal::input::mouse_click::MouseClickType;
+
 use device_query::{DeviceQuery, DeviceState, MouseState};
 use egui::Margin;
 use enigo::{Enigo, Mouse, Settings};
@@ -11,10 +15,6 @@ use strum::IntoEnumIterator;
 
 use crate::do_once::DoOnceGate;
 
-use crate::input::keycode::AppKeycode;
-use crate::input::mouse_button::MouseButton;
-use crate::input::mouse_click::MouseClickType;
-
 use crate::worker::{self, ClickStormMessage};
 use crate::{
     localization::language::Language,
@@ -24,7 +24,7 @@ use crate::{
 };
 
 #[cfg(feature = "scripting")]
-use crate::scripting::rhai_interface::RhaiInterface;
+use cs_scripting::rhai_interface::RhaiInterface;
 
 // Wishlist:
 // - Record and playback mouse movements
