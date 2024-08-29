@@ -9,9 +9,6 @@ use crate::ui::clicker::{self, ClickerPanel};
 use crate::ui::UIPanel;
 
 #[cfg(feature = "scripting")]
-use cs_scripting::rhai_interface::RhaiInterface;
-
-#[cfg(feature = "scripting")]
 use crate::ui::script::{self, ScriptPanel};
 
 // Wishlist:
@@ -42,19 +39,10 @@ pub struct ClickStormApp {
 
     #[serde(skip)]
     key_pressed: bool,
-
-    #[cfg(feature = "scripting")]
-    #[serde(skip)]
-    rhai_interface: RhaiInterface,
 }
 
 impl Default for ClickStormApp {
     fn default() -> Self {
-        #[cfg(feature = "scripting")]
-        let mut rhai_interface = RhaiInterface::new();
-        #[cfg(feature = "scripting")]
-        rhai_interface.initialize();
-
         let panels: Vec<Box<dyn UIPanel>> = vec![
             Box::new(ClickerPanel::default()),
             #[cfg(feature = "scripting")]
@@ -69,8 +57,6 @@ impl Default for ClickStormApp {
             device_state: DeviceState::new(),
             wait_for_key: DoOnceGate::default(),
             key_pressed: false,
-            #[cfg(feature = "scripting")]
-            rhai_interface,
         }
     }
 }
@@ -216,26 +202,6 @@ impl eframe::App for ClickStormApp {
                     }
 
                     ui.separator();
-                }
-
-                // Test buttons for development
-                #[cfg(all(debug_assertions, feature = "scripting"))]
-                {
-                    if ui.button("Test Print").clicked() {
-                        self.rhai_interface.test_hello();
-                    }
-
-                    if ui.button("Test Script").clicked() {
-                        self.rhai_interface.test_script();
-                    }
-
-                    if self
-                        .device_state
-                        .get_keys()
-                        .contains(&AppKeycode::F7.into())
-                    {
-                        //self.rhai_interface.test_script();
-                    }
                 }
             });
         });
