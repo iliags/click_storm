@@ -2,16 +2,11 @@ use std::time::Duration;
 
 use cs_hal::input::{mouse_button::MouseButton, mouse_click::MouseClickType};
 
-use crate::localization::locale_text::LocaleText;
-
 use super::{cursor_position::CursorPosition, repeat_type::RepeatType};
 
 #[derive(Debug, Default, Clone, serde::Deserialize, serde::Serialize)]
 #[serde(default)]
 pub struct AppSettings {
-    // Language
-    language: LocaleText,
-
     // Interval components
     interval_hours: usize,
     interval_minutes: usize,
@@ -40,9 +35,7 @@ impl AppSettings {
     }
 
     pub fn reset(&mut self) {
-        let language = self.language.clone();
         *self = Self::new();
-        self.language = language;
     }
 
     /// Get the click interval duration
@@ -71,16 +64,6 @@ impl AppSettings {
 
     pub fn click_interval_milliseconds(&self) -> u64 {
         self.interval_milliseconds as u64
-    }
-
-    /// Get the current language
-    pub fn language(&self) -> &LocaleText {
-        &self.language
-    }
-
-    /// Get a mutable reference to the current language
-    pub fn language_mut(&mut self) -> &mut LocaleText {
-        &mut self.language
     }
 
     pub fn interval_hours_mut(&mut self) -> &mut usize {

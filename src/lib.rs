@@ -15,5 +15,8 @@ mod do_once;
 /// Worker thread module
 mod worker;
 
+/// User interface module
+mod ui;
+
 /// Application module re-export
 pub use app::ClickStormApp;
