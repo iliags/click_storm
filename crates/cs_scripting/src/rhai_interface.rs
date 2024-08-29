@@ -1,4 +1,4 @@
-use std::sync::{Arc, Mutex};
+use std::{rc::Rc, sync::Mutex};
 
 use cs_hal::{
     display::screen_size::{ScreenSize, ScreenSizeModule},
@@ -12,18 +12,21 @@ use rhai::{exported_module, Engine};
 
 use super::cs_interface::ClickStormInterface;
 
+/// The test script
+pub const TEST_SCRIPT: &str = include_str!("../../../scripts/test.rhai");
+
 /// The Rhai scripting interface
 #[derive(Debug, Clone)]
 pub struct RhaiInterface {
     // Note: Using Arc because this might be shared between threads, not sure yet
-    engine: Arc<Mutex<Engine>>,
+    engine: Rc<Mutex<Engine>>,
 }
 
 impl RhaiInterface {
     /// Create a new engine instance
     pub fn new() -> Self {
         Self {
-            engine: Arc::new(Mutex::new(Engine::new())),
+            engine: Rc::new(Mutex::new(Engine::new())),
         }
     }
 
@@ -43,12 +46,19 @@ impl RhaiInterface {
     pub fn test_script(&mut self) {
         let engine = self.engine.lock().unwrap();
 
-        let test_script = include_str!("../../../scripts/test.rhai");
-        engine.run(test_script).unwrap();
+        engine.run(TEST_SCRIPT).unwrap();
+    }
+
+    /// Run a script
+    pub fn run_script(&mut self, script: &str) -> Result<(), Box<rhai::EvalAltResult>> {
+        let engine = self.engine.lock().unwrap();
+
+        // TODO: Propogate errors
+        engine.run(script)
     }
 
     /// Get the engine instance
-    pub fn get_engine(&self) -> Arc<Mutex<Engine>> {
+    pub fn get_engine(&self) -> Rc<Mutex<Engine>> {
         self.engine.clone()
     }
 

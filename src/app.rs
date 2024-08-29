@@ -304,7 +304,8 @@ impl ClickStormApp {
                 let keycode: device_query::Keycode = self.hotkey_code.into();
                 let key_code_text = format!(" ({})", keycode).to_owned();
                 cols[0].centered_and_justified(|ui| {
-                    let enabled = !self.panels[self.active_panel].is_running();
+                    let enabled = !self.panels[self.active_panel].is_running()
+                        && self.panels[self.active_panel].can_start();
 
                     let mut start_text = self.get_locale_string("start");
                     start_text.push_str(&key_code_text);
