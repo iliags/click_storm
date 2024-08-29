@@ -41,7 +41,7 @@ impl ClickStormInterface {
         let _ = enigo.button(mouse_button.into(), enigo::Direction::Click);
     }
 
-    // Click within the specified specified area, X/Y starts at the top left corner.
+    // Click at a random point within the specified specified area, X/Y starts at the top left corner.
     pub(super) fn click_within(
         &mut self,
         x: i32,
@@ -99,6 +99,7 @@ impl ClickStormInterface {
         let _ = enigo.button(button, enigo::Direction::Release);
     }
 
+    /// Set the state of the specified key.
     pub(super) fn set_key(&mut self, key: AppKeycode, direction: ButtonDirection) {
         let mut enigo = self.enigo.lock().unwrap();
 
