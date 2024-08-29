@@ -12,9 +12,6 @@ use rhai::{exported_module, Engine};
 
 use super::cs_interface::ClickStormInterface;
 
-// TODO: Export metadata for the scripting API to use in a language server
-// See: https://rhai.rs/book/engine/metadata/definitions.html
-
 /// The Rhai scripting interface
 #[derive(Debug, Clone)]
 pub struct RhaiInterface {
