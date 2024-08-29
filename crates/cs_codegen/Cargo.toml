@@ -8,7 +8,7 @@ cs_scripting = { workspace = true }
 cs_hal = { workspace = true }
 rhai = { workspace = true, optional = true, features = [
     "only_i32",
-    "no_float",
+    "f32_float",
     "no_custom_syntax",
     "no_position",
     "no_closure",

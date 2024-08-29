@@ -10,7 +10,7 @@ device_query = { workspace = true }
 rand = { workspace = true }
 rhai = { workspace = true, optional = true, features = [
     "only_i32",
-    "no_float",
+    "f32_float",
     "no_custom_syntax",
     "metadata",
     "internals",

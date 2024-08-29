@@ -12,6 +12,7 @@ t.add_position(100, 100);
 // Print the screen size
 let screen_size = t.get_screen_size();
 print(screen_size.to_string());
+//sleep(0.1);
 print(screen_size.center().to_string());
 
 // Enter ctrl + a
