@@ -83,7 +83,7 @@ impl RhaiInterface {
             );
 
         // Register the functions
-        engine.register_fn("new_engine", ClickStormInterface::new);
+        engine.register_fn("new_click_storm", ClickStormInterface::new);
 
         // TODO: Add duration/lerp and key chord versions
         engine

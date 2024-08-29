@@ -1,23 +1,34 @@
 // A script to test features, may not always work as expected
 
-let t = new_engine();
+// Create a new click storm object
+let cs = new_click_storm();
+
+const SLEEP_TIME = 0.25;
+const USE_SLEEP = false;
 
 // Click at with the specified mouse button
 //let mb = MouseButton::Left;
-//t.click_at(800, 600, mb);
+//cs.click_at(800, 600, mb);
+
+if USE_SLEEP {
+    sleep(SLEEP_TIME);
+}
 
 // Add the coordinates to the current mouse position
-t.add_position(100, 100);
+cs.add_position(100, 100);
+
+if USE_SLEEP {
+    sleep(SLEEP_TIME);
+}
 
 // Print the screen size
-let screen_size = t.get_screen_size();
+let screen_size = cs.get_screen_size();
 print(screen_size.to_string());
-//sleep(0.1);
 print(screen_size.center().to_string());
 
 // Enter ctrl + a
-//t.set_key(AppKeycode::Control, ButtonDirection::Press);
-//t.set_key(AppKeycode::A, ButtonDirection::Press);
+//cs.set_key(AppKeycode::Control, ButtonDirection::Press);
+//cs.set_key(AppKeycode::A, ButtonDirection::Press);
 
-//t.set_key(AppKeycode::Control, ButtonDirection::Release);
-//t.set_key(AppKeycode::A, ButtonDirection::Release);
+//cs.set_key(AppKeycode::Control, ButtonDirection::Release);
+//cs.set_key(AppKeycode::A, ButtonDirection::Release);
