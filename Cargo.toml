@@ -10,7 +10,7 @@ build = "build.rs"
 default-run = "click_storm"
 
 [build-dependencies]
-#embed-resource = { version = "2.4" }
+embed-resource = { version = "2.4" }
 
 # Click Storm application
 [[bin]]
@@ -21,6 +21,7 @@ path = "src/main.rs"
 [[bin]]
 name = "cs_codegen"
 path = "crates/cs_codegen/src/main.rs"
+required-features = ["scripting"]
 
 [workspace]
 members = ["crates/*"]
@@ -97,5 +98,5 @@ lto = true
 opt-level = 2
 
 [features]
-default = ["scripting"]
+#default = ["scripting"]
 scripting = ["dep:rhai", "cs_hal/scripting", "cs_scripting/scripting"]
