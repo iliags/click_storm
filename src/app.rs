@@ -1,15 +1,13 @@
 use cs_hal::input::keycode::AppKeycode;
-
 use device_query::{DeviceQuery, DeviceState};
-use enigo::{Enigo, Mouse, Settings};
-
 use strum::IntoEnumIterator;
 
 use crate::do_once::DoOnceGate;
-
-use crate::localization::locale_text::LocaleText;
-
 use crate::localization::language::Language;
+use crate::localization::locale_text::LocaleText;
+use crate::ui::clicker::{self, ClickerPanel};
+use crate::ui::script::{self, ScriptPanel};
+use crate::ui::UIPanel;
 
 #[cfg(feature = "scripting")]
 use cs_scripting::rhai_interface::RhaiInterface;
@@ -21,13 +19,6 @@ use cs_scripting::rhai_interface::RhaiInterface;
 // - Write a lint or comp-time check to find unused/mismatched keys in the localization files
 // - Disable widgets that are not applicable when certain settings are selected
 
-/*
-let language = self.language.clone();
-        *self = Self::new();
-        self.language = language;
-
-*/
-
 /// Application state
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
@@ -35,6 +26,11 @@ pub struct ClickStormApp {
     hotkey_code: AppKeycode,
 
     language: LocaleText,
+
+    active_panel: usize,
+
+    #[serde(skip)]
+    panels: Vec<Box<dyn UIPanel>>,
 
     #[serde(skip)]
     device_state: DeviceState,
@@ -57,9 +53,16 @@ impl Default for ClickStormApp {
         #[cfg(feature = "scripting")]
         rhai_interface.initialize();
 
+        let panels: Vec<Box<dyn UIPanel>> = vec![
+            Box::new(ClickerPanel::default()),
+            Box::new(ScriptPanel::default()),
+        ];
+
         Self {
             hotkey_code: AppKeycode::F6,
             language: LocaleText::default(),
+            active_panel: 0,
+            panels,
             device_state: DeviceState::new(),
             wait_for_key: DoOnceGate::default(),
             key_pressed: false,
@@ -73,11 +76,23 @@ impl eframe::App for ClickStormApp {
     /// Called by the frame work to save state before shutdown.
     fn save(&mut self, storage: &mut dyn eframe::Storage) {
         eframe::set_value(storage, eframe::APP_KEY, self);
+
+        // TODO: Find an easier way to save the panel state
+        for panel in self.panels.iter_mut() {
+            if panel.as_any().downcast_ref::<ClickerPanel>().is_some() {
+                let clicker_panel = panel.as_any().downcast_ref::<ClickerPanel>().unwrap();
+                eframe::set_value(storage, clicker::CLICKER_PANEL_KEY, clicker_panel);
+            } else if panel.as_any().downcast_ref::<ScriptPanel>().is_some() {
+                let script_panel = panel.as_any().downcast_ref::<ScriptPanel>().unwrap();
+                eframe::set_value(storage, script::SCRIPT_PANEL_KEY, script_panel);
+            }
+        }
     }
 
     fn on_exit(&mut self, _gl: Option<&eframe::glow::Context>) {
-        // Send message to thread to stop click storm
-        // TODO
+        for panel in self.panels.iter_mut() {
+            panel.exit();
+        }
     }
 
     /// Called each time the UI needs repainting, which may be many times per second.
@@ -87,6 +102,7 @@ impl eframe::App for ClickStormApp {
 
         // Handle input
         self.handle_input();
+        self.panels[self.active_panel].handle_input();
 
         // Top panel
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
@@ -120,7 +136,6 @@ impl eframe::App for ClickStormApp {
 
                     // Language selection
                     ui.label(self.get_locale_string("language"));
-                    // TODO
 
                     egui::ComboBox::from_label("")
                         .selected_text(self.language.get_language().as_str())
@@ -131,6 +146,10 @@ impl eframe::App for ClickStormApp {
                                 ui.selectable_value(&mut lang, language.clone(), language_string);
                             }
                             self.language.set_language(lang);
+
+                            for panel in self.panels.iter_mut() {
+                                panel.set_language(self.language.clone());
+                            }
                         });
 
                     ui.separator();
@@ -177,9 +196,15 @@ impl eframe::App for ClickStormApp {
                     .on_hover_text_at_pointer(self.get_locale_string("reset"))
                     .clicked()
                 {
-                    // TODO
-                    //self.settings.reset();
-                    //self.default_ui_values();
+                    self.panels[self.active_panel].reset();
+                }
+
+                ui.separator();
+
+                for (index, panel) in self.panels.iter().enumerate() {
+                    let panel_name = panel.name();
+
+                    ui.radio_value(&mut self.active_panel, index, panel_name);
                 }
 
                 ui.separator();
@@ -200,14 +225,17 @@ impl eframe::App for ClickStormApp {
                         .get_keys()
                         .contains(&AppKeycode::F7.into())
                     {
-                        self.rhai_interface.test_script();
+                        //self.rhai_interface.test_script();
                     }
                 }
             });
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            // TODO: panels
+            self.panels[self.active_panel].show(ctx, ui);
+
+            ui.separator();
+
             self.ui_actions(ui);
         });
     }
@@ -221,7 +249,37 @@ impl ClickStormApp {
 
         // Load previous app state (if any).
         if let Some(storage) = cc.storage {
-            return eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default();
+            let mut value: ClickStormApp =
+                eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default();
+
+            // Make sure the active panel is within bounds
+            if value.active_panel >= value.panels.len() {
+                value.active_panel = 0;
+            }
+
+            // Load the panel state
+            // TODO Find a better way to load the panel state
+            for panel in value.panels.iter_mut() {
+                if panel.as_any().downcast_ref::<ClickerPanel>().is_some() {
+                    let clicker_panel: ClickerPanel =
+                        eframe::get_value(storage, clicker::CLICKER_PANEL_KEY).unwrap_or_default();
+                    panel
+                        .as_any()
+                        .downcast_mut::<ClickerPanel>()
+                        .unwrap()
+                        .load(clicker_panel);
+                } else if panel.as_any().downcast_ref::<ScriptPanel>().is_some() {
+                    let script_panel: ScriptPanel =
+                        eframe::get_value(storage, script::SCRIPT_PANEL_KEY).unwrap_or_default();
+                    panel
+                        .as_any()
+                        .downcast_mut::<ScriptPanel>()
+                        .unwrap()
+                        .load(script_panel);
+                }
+            }
+
+            return value;
         }
 
         Default::default()
@@ -252,17 +310,7 @@ impl ClickStormApp {
 
             if hot_key_pressed && !self.key_pressed {
                 self.key_pressed = true;
-
-                // TODO
-                /*
-                if self.is_running.load(Ordering::SeqCst) {
-                    //println!("Stop");
-                    self.stop_click_storm();
-                } else {
-                    //println!("Start");
-                    self.start_click_storm();
-                }
-                */
+                self.panels[self.active_panel].toggle();
             } else if self.key_pressed && !hot_key_pressed {
                 self.key_pressed = false;
             }
@@ -277,9 +325,7 @@ impl ClickStormApp {
                 let keycode: device_query::Keycode = self.hotkey_code.into();
                 let key_code_text = format!(" ({})", keycode).to_owned();
                 cols[0].centered_and_justified(|ui| {
-                    // TODO
-                    //let enabled = !self.is_running.load(Ordering::SeqCst);
-                    let enabled = false;
+                    let enabled = !self.panels[self.active_panel].is_running();
 
                     let mut start_text = self.get_locale_string("start");
                     start_text.push_str(&key_code_text);
@@ -287,7 +333,7 @@ impl ClickStormApp {
                     let start_button = ui.add_enabled(enabled, egui::Button::new(start_text));
 
                     if start_button.clicked() {
-                        self.start_click_storm();
+                        self.panels[self.active_panel].start();
                     }
                 });
                 cols[1].centered_and_justified(|ui| {
@@ -295,7 +341,7 @@ impl ClickStormApp {
                     stop_text.push_str(&key_code_text);
 
                     if ui.button(stop_text).clicked() {
-                        self.stop_click_storm();
+                        self.panels[self.active_panel].stop();
                     }
                     ui.end_row();
                 });
@@ -306,14 +352,5 @@ impl ClickStormApp {
     #[inline]
     fn get_locale_string(&self, key: &str) -> String {
         self.language.get_locale_string(key)
-    }
-
-    fn start_click_storm(&mut self) {
-        // Send message to thread to start click storm
-        // Include a copy of the settings
-        // Use a UI cue while the storm is running, maybe darken the UI
-    }
-    fn stop_click_storm(&mut self) {
-        // Send message to thread to stop click storm
     }
 }

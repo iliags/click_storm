@@ -23,10 +23,12 @@ use crate::{
 
 use super::UIPanel;
 
+pub const CLICKER_PANEL_KEY: &str = "clicker_panel";
+
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)]
 #[derive(Debug)]
-pub struct Clicker {
+pub struct ClickerPanel {
     settings: AppSettings,
     cursor_position_fixed: (i32, i32),
     repeat_count: usize,
@@ -50,7 +52,7 @@ pub struct Clicker {
     is_running: Arc<AtomicBool>,
 }
 
-impl Default for Clicker {
+impl Default for ClickerPanel {
     fn default() -> Self {
         // TODO: Handle error
         let enigo = Enigo::new(&Settings::default()).unwrap_or_else(|_| {
@@ -64,6 +66,7 @@ impl Default for Clicker {
         let (sender, receiver): (Sender<ClickStormMessage>, Receiver<ClickStormMessage>) =
             channel();
 
+        //TODO: This might be able to be reduced from 1+1 threads to 1 thread
         thread::spawn(move || {
             worker::worker_thread(receiver);
         });
@@ -82,7 +85,7 @@ impl Default for Clicker {
     }
 }
 
-impl UIPanel for Clicker {
+impl UIPanel for ClickerPanel {
     fn show(&mut self, ctx: &egui::Context, ui: &mut egui::Ui) {
         if self.is_running.load(Ordering::SeqCst) {
             // Darken the UI
@@ -173,9 +176,38 @@ impl UIPanel for Clicker {
     fn set_language(&mut self, language: LocaleText) {
         self.language = language;
     }
+
+    fn toggle(&mut self) {
+        if self.is_running.load(Ordering::SeqCst) {
+            //println!("Stop");
+            self.stop();
+        } else {
+            //println!("Start");
+            self.start();
+        }
+    }
+
+    fn is_running(&self) -> bool {
+        self.is_running.load(Ordering::SeqCst)
+    }
+
+    fn name(&self) -> &str {
+        // TODO: Get the localized string
+        "Clicker"
+    }
+
+    fn as_any(&mut self) -> &mut dyn std::any::Any {
+        self
+    }
 }
 
-impl Clicker {
+impl ClickerPanel {
+    pub fn load(&mut self, value: ClickerPanel) {
+        self.settings = value.settings;
+        self.cursor_position_fixed = value.cursor_position_fixed;
+        self.repeat_count = value.repeat_count;
+    }
+
     fn ui_interval(&mut self, ui: &mut egui::Ui) {
         let interval_frame = egui::Frame::default()
             .stroke(ui.visuals().widgets.noninteractive.bg_stroke)
