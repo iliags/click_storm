@@ -1,4 +1,8 @@
+#![allow(dead_code, unused_imports)]
+
 use cs_scripting::rhai_interface::RhaiInterface;
+use device_query::DeviceQuery;
+use egui::Margin;
 
 use std::{
     sync::{
@@ -32,13 +36,12 @@ pub struct ScriptPanel {
     #[serde(skip)]
     finished: Arc<AtomicBool>,
 
-    // TODO: Debug only
     #[serde(skip)]
-    rhai_interface: RhaiInterface,
+    device_state: device_query::DeviceState,
 
     // TODO: Debug only
     #[serde(skip)]
-    device_state: device_query::DeviceState,
+    rhai_interface: RhaiInterface,
 
     // TODO: Debug only
     #[serde(skip)]
@@ -56,10 +59,11 @@ impl Default for ScriptPanel {
             script: String::new(),
             thread: None,
             finished: Arc::new(AtomicBool::new(false)),
+            device_state: device_query::DeviceState::new(),
 
             // TODO: Debug only
             rhai_interface,
-            device_state: device_query::DeviceState::new(),
+
             debug_key: false,
         }
     }
@@ -67,8 +71,6 @@ impl Default for ScriptPanel {
 
 impl UIPanel for ScriptPanel {
     fn show(&mut self, _ctx: &egui::Context, ui: &mut egui::Ui) {
-        ui.label("Script Panel");
-
         if self.finished.load(Ordering::SeqCst) {
             self.finished.store(false, Ordering::SeqCst);
             self.stop();
@@ -77,6 +79,7 @@ impl UIPanel for ScriptPanel {
         // Test buttons for development
         #[cfg(debug_assertions)]
         {
+            /*
             ui.horizontal(|ui| {
                 if ui.button("Test Print").clicked() {
                     self.rhai_interface.test_hello();
@@ -86,7 +89,39 @@ impl UIPanel for ScriptPanel {
                     self.script = cs_scripting::rhai_interface::TEST_SCRIPT.to_string();
                 }
             });
+             */
         }
+
+        ui.group(|ui| {
+            ui.columns(3, |cols| {
+                cols[0].group(|ui| {
+                    //ui.heading("Script");
+                    ui.label(egui::RichText::new("MyScript.rhai"));
+
+                    ui.horizontal(|ui| {
+                        if ui.button("Open").clicked() {
+                            // Open file dialog
+                        }
+                        ui.separator();
+
+                        if ui.button("Reload").clicked() {
+                            // Reload script
+                        }
+                    });
+                });
+                cols[2].group(|ui| {
+                    //ui.heading("Misc");
+                    let cursor_pos = self.device_state.get_mouse().coords;
+                    let cursor_pos = format!("🖱: ({}, {})", cursor_pos.0, cursor_pos.1);
+                    ui.label(egui::RichText::new(cursor_pos).size(18.0));
+                    ui.label(egui::RichText::new("ASDF").size(18.0));
+                });
+            });
+        });
+
+        ui.group(|ui| {
+            ui.label("Script output");
+        });
     }
 
     fn start(&mut self) {

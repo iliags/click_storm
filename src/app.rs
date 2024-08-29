@@ -209,8 +209,6 @@ impl eframe::App for ClickStormApp {
         egui::CentralPanel::default().show(ctx, |ui| {
             self.panels[self.active_panel].show(ctx, ui);
 
-            ui.separator();
-
             self.ui_actions(ui);
         });
     }
@@ -297,6 +295,7 @@ impl ClickStormApp {
     }
 
     fn ui_actions(&mut self, ui: &mut egui::Ui) {
+        //ui.with_layout(egui::Layout::bottom_up(egui::Align::Center), |ui| {
         ui.centered_and_justified(|ui| {
             ui.columns(2, |cols| {
                 // TODO: Change between run script and start click storm
@@ -327,6 +326,7 @@ impl ClickStormApp {
                 });
             });
         });
+        //});
     }
 
     #[inline]
