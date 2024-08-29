@@ -97,9 +97,9 @@ impl RhaiInterface {
 
         // Register the functions
         self.engine
-            .register_fn("new_click_storm", ClickStormInterface::new);
+            .register_fn("click_storm", ClickStormInterface::new);
 
-        // TODO: Add duration/lerp and key chord versions
+        // Click and drag related
         self.engine
             .register_fn("click_at", ClickStormInterface::click_at)
             .register_fn("click_within", ClickStormInterface::click_within)
@@ -108,12 +108,15 @@ impl RhaiInterface {
             .register_fn("drag_to", ClickStormInterface::drag_to)
             .register_fn("drag_from_to", ClickStormInterface::drag_from_to);
 
+        // Keyboard related
         self.engine
             .register_fn("set_key", ClickStormInterface::set_key);
 
+        // Screen size related
         self.engine
             .register_fn("get_screen_size", ClickStormInterface::get_screen_size);
 
+        // Random number related
         self.engine
             .register_fn("rand_range", ClickStormInterface::rand_range)
             .register_fn("rand_range_excl", ClickStormInterface::rand_range_excl)
