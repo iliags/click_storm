@@ -884,6 +884,8 @@ dependencies = [
 name = "cs_codegen"
 version = "0.1.0"
 dependencies = [
+ "cs_hal",
+ "cs_scripting",
  "rhai",
 ]
 

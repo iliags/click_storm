@@ -66,8 +66,8 @@ rhai = { workspace = true, optional = true, features = [
     "only_i32",
     "no_float",
     "no_custom_syntax",
+    # TODO: Check if this is needed
     "metadata",
-    "internals",
 ] }
 
 egui = "0.28"
@@ -98,4 +98,4 @@ opt-level = 2
 
 [features]
 default = ["scripting"]
-scripting = ["dep:rhai"]
+scripting = ["dep:rhai", "cs_hal/scripting", "cs_scripting/scripting"]

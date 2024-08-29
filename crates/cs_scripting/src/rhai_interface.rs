@@ -49,18 +49,9 @@ impl RhaiInterface {
         engine.run(test_script).unwrap();
     }
 
-    // TODO: Move this to an external binary
-    /// Generate LSP definitions
-    #[cfg(debug_assertions)]
-    pub fn generate_definitions(&mut self) {
-        let engine = self.engine.lock().unwrap();
-
-        engine
-            .definitions()
-            .with_headers(true)
-            .include_standard_packages(false)
-            .write_to_file("D:/click_storm/scripts/click_storm_api.d.rhai")
-            .unwrap();
+    /// Get the engine instance
+    pub fn get_engine(&self) -> Arc<Mutex<Engine>> {
+        self.engine.clone()
     }
 
     /// Initialize the Rhai engine with the necessary functions and types.

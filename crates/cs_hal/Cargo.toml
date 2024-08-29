@@ -18,6 +18,5 @@ rhai = { workspace = true, optional = true, features = [
 ] }
 
 [features]
-default = ["scripting"]
-#default = []
+default = []
 scripting = ["dep:rhai"]

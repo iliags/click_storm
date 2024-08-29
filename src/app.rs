@@ -243,10 +243,6 @@ impl eframe::App for ClickStormApp {
                         self.rhai_interface.test_script();
                     }
 
-                    if ui.button("Generate Definitions").clicked() {
-                        self.rhai_interface.generate_definitions();
-                    }
-
                     if self
                         .device_state
                         .get_keys()
