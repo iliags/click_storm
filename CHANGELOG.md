@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
+## WIP
+
 ## 0.2.0
 
 * Embedded [Rhai](https://rhai.rs/) scripting engine, scripting features will be enabled in a later version
