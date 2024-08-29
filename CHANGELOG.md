@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.2.0 (WIP)
+
+* Embedded [Rhai](https://rhai.rs/) scripting engine
+  * Scripting related features are locked behind the `scripting` feature flag when building
+  * The API is still in heavy development, it will likely change between versions
+* Refactored code into workspace with crates
+  * `cs_codegen`: CLI tool that generates the API definitions (single file) in the current folder
+  * `cs_hal`: Hardware abstraction layer
+  * `cs_scripting`: Scripting engine access point and API definition
+* Disabled minimize because the app stops receiving input when that happens
+* Re-enabled maximize
+
 ## 0.1.7
 
 * Disabled always on top
