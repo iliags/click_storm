@@ -1,6 +1,4 @@
-use cs_hal::input::keycode::AppKeycode;
 use cs_scripting::rhai_interface::RhaiInterface;
-use device_query::DeviceQuery;
 
 use std::{
     sync::{
@@ -146,6 +144,9 @@ impl UIPanel for ScriptPanel {
     fn handle_input(&mut self) {
         #[cfg(debug_assertions)]
         {
+            use cs_hal::input::keycode::AppKeycode;
+            use device_query::DeviceQuery;
+
             let hotkey_pressed = self
                 .device_state
                 .get_keys()
