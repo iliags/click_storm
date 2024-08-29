@@ -50,11 +50,17 @@ impl RhaiInterface {
     }
 
     /// Run a script
-    pub fn run_script(&mut self, script: &str) -> Result<(), Box<rhai::EvalAltResult>> {
+    pub fn run_script(&mut self, script: &str) -> Result<(), String> {
         let engine = self.engine.lock().unwrap();
 
         // TODO: Propogate errors
-        engine.run(script)
+        match engine.run(script) {
+            Ok(_) => Ok(()),
+            Err(err) => {
+                eprintln!("Error: {}", err);
+                Err(err.to_string())
+            }
+        }
     }
 
     /// Get the engine instance

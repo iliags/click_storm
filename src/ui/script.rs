@@ -1,11 +1,11 @@
 use cs_hal::input::keycode::AppKeycode;
 use cs_scripting::rhai_interface::RhaiInterface;
 use device_query::DeviceQuery;
-use egui::mutex::Mutex;
+
 use std::{
     sync::{
         atomic::{AtomicBool, Ordering},
-        mpsc, Arc,
+        Arc,
     },
     thread::{self, JoinHandle},
 };
@@ -31,6 +31,9 @@ pub struct ScriptPanel {
     #[serde(skip)]
     thread: Option<JoinHandle<()>>,
 
+    #[serde(skip)]
+    finished: Arc<AtomicBool>,
+
     // TODO: Debug only
     #[serde(skip)]
     rhai_interface: RhaiInterface,
@@ -54,6 +57,7 @@ impl Default for ScriptPanel {
             is_running: Arc::new(AtomicBool::new(false)),
             script: String::new(),
             thread: None,
+            finished: Arc::new(AtomicBool::new(false)),
 
             // TODO: Debug only
             rhai_interface,
@@ -67,6 +71,11 @@ impl UIPanel for ScriptPanel {
     fn show(&mut self, _ctx: &egui::Context, ui: &mut egui::Ui) {
         ui.label("Script Panel");
 
+        if self.finished.load(Ordering::SeqCst) {
+            self.finished.store(false, Ordering::SeqCst);
+            self.stop();
+        }
+
         // Test buttons for development
         #[cfg(debug_assertions)]
         {
@@ -74,10 +83,8 @@ impl UIPanel for ScriptPanel {
                 self.rhai_interface.test_hello();
             }
 
-            if ui.button("Test Script").clicked() {
-                //self.rhai_interface.test_script();
+            if ui.button("Load test script").clicked() {
                 self.script = cs_scripting::rhai_interface::TEST_SCRIPT.to_string();
-                self.start();
             }
         }
     }
@@ -90,31 +97,26 @@ impl UIPanel for ScriptPanel {
         println!("Starting script");
         self.is_running.store(true, Ordering::SeqCst);
 
-        let script = self.script.clone();
+        let finished = self.finished.clone();
 
-        let (tx_script, rx_master) = mpsc::channel();
-        let tx_script = Mutex::new(tx_script);
+        let script = self.script.clone();
 
         self.thread = Some(thread::spawn(move || {
             let mut rhai_interface = RhaiInterface::new();
             rhai_interface.initialize();
 
-            tx_script.lock().send(()).unwrap();
-
-            /*
-            let result = rhai_interface.run_script(&script);
-            match result {
+            match rhai_interface.run_script(&script) {
                 Ok(_) => {
-                    println!("Script ran successfully");
+                    println!("Script finished");
+                    finished.store(true, Ordering::SeqCst);
                 }
                 Err(err) => {
-                    println!("Script failed: {:?}", err);
+                    // TODO: Push error to user facing console
+                    eprintln!("Error: {}", err);
+                    finished.store(true, Ordering::SeqCst);
                 }
             }
-             */
         }));
-
-        let value = rx_master.try_recv().unwrap();
     }
 
     fn stop(&mut self) {
