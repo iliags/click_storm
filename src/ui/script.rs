@@ -96,7 +96,13 @@ impl UIPanel for ScriptPanel {
         ui.group(|ui| {
             ui.columns(3, |cols| {
                 cols[0].group(|ui| {
-                    ui.label(egui::RichText::new("MyScript.rhai"));
+                    let file_name = match self.script.get_filename() {
+                        Some(file_name) => file_name,
+                        None => "None".to_string(),
+                    };
+
+                    ui.label(file_name);
+
                     ui.horizontal(|ui| {
                         ui.add_enabled_ui(!self.script.is_default(), |ui| {
                             if ui.button(self.get_locale_string("new")).clicked() {
