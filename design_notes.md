@@ -12,6 +12,12 @@ Misc notes for development.
 
 Rhai is a scripting language which can be embedded inside a Rust program. The idea is to allow users to write their own input scripts in addition to the default behavior. Ideally the scripting feature can be disabled to allow the base implementation to remain relatively untouched.
 
+### Potential Future Work
+
+If Rhai needs to have extensive modification, it will need to have a formal grammar and internal IDE features exposed as Rust crates. The biggest potential requirement would be implementing a bytecode because it currently uses AST interpretation.
+
+Unreal uses a stack-based VM (so does Rhai if I understand it correctly), but register VM's provide much better performance. Since Rhai doesn't have a GC, there are some implementation limitations, but that's fine. Perhaps a `no-gc` mode can be implemented on top of whatever the final result is.
+
 ## Record/Replay
 
 Recording and replaying is done via tracking the user input and creating a Rhai script which can be exported for reuse. The recording feature should try to mimic the behavior in as few lines of code as possible to ensure the scripts aren't bloated.
