@@ -1,3 +1,5 @@
+use std::sync::{Arc, Mutex};
+
 use cs_hal::{
     display::screen_size::{ScreenSize, ScreenSizeModule},
     input::{
@@ -7,6 +9,8 @@ use cs_hal::{
     },
 };
 use rhai::{exported_module, Engine};
+
+use crate::output_log::OutputLog;
 
 use super::cs_interface::ClickStormInterface;
 
@@ -49,8 +53,16 @@ impl RhaiInterface {
     }
 
     /// Run a script
-    pub fn run_script(&mut self, script: &str) -> Result<(), String> {
-        // TODO: Propogate errors
+    pub fn run_script(
+        &mut self,
+        script: &str,
+        output_log: Arc<Mutex<OutputLog>>,
+    ) -> Result<(), String> {
+        let output_log = output_log.clone();
+        self.engine.on_print(move |msg| {
+            output_log.lock().unwrap().log(msg);
+        });
+
         match self.engine.run(script) {
             Ok(_) => Ok(()),
             Err(err) => {

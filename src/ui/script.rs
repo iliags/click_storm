@@ -1,9 +1,11 @@
 #![allow(dead_code, unused_imports)]
 
 use cs_hal::input::keycode::AppKeycode;
-use cs_scripting::rhai_interface::RhaiInterface;
+use cs_scripting::{output_log::OutputLog, rhai_interface::RhaiInterface};
 use device_query::DeviceQuery;
 use egui::{Margin, TextBuffer};
+
+use egui_code_editor::{CodeEditor, ColorTheme, Syntax};
 
 use std::{
     sync::{
@@ -13,7 +15,7 @@ use std::{
     thread::{self, JoinHandle},
 };
 
-use super::{output_log::OutputLog, UIPanel};
+use super::UIPanel;
 use crate::localization::locale_text::LocaleText;
 
 pub const SCRIPT_PANEL_KEY: &str = "script_panel";
@@ -85,22 +87,6 @@ impl UIPanel for ScriptPanel {
             self.stop();
         }
 
-        // Test buttons for development
-        #[cfg(debug_assertions)]
-        {
-            /*
-            ui.horizontal(|ui| {
-                if ui.button("Test Print").clicked() {
-                    self.rhai_interface.test_hello();
-                }
-
-                if ui.button("Load test script").clicked() {
-                    self.script = cs_scripting::rhai_interface::TEST_SCRIPT.to_string();
-                }
-            });
-             */
-        }
-
         ui.group(|ui| {
             ui.columns(3, |cols| {
                 cols[0].group(|ui| {
@@ -111,11 +97,13 @@ impl UIPanel for ScriptPanel {
                         if ui.button("Open").clicked() {
                             // Open file dialog
                         }
+                        /*
                         ui.separator();
 
                         if ui.button("Reload").clicked() {
                             // Reload script
                         }
+                         */
                     });
                 });
                 cols[2].group(|ui| {
@@ -128,50 +116,83 @@ impl UIPanel for ScriptPanel {
             });
         });
 
-        ui.group(|ui| {
-            ui.label("Script output");
+        egui::CollapsingHeader::new("Script")
+            .default_open(true)
+            .show(ui, |ui| {
+                ui.group(|ui| {
+                    egui::ScrollArea::vertical()
+                        .id_source("text_editor")
+                        .max_height(256.0)
+                        .show(ui, |ui| {
+                            let mut text_buffer = self.script.clone().to_string();
+                            CodeEditor::default()
+                                .id_source("code editor")
+                                .with_rows(12)
+                                .with_fontsize(12.0)
+                                .with_theme(ColorTheme::GRUVBOX)
+                                .with_syntax(Syntax::rust())
+                                .with_numlines(true)
+                                .show(ui, &mut text_buffer);
 
-            /* TODO: Add later
-            let theme = egui_extras::syntax_highlighting::CodeTheme::from_memory(ui.ctx());
+                            /*
+                               let mut text_buffer = self.script.clone().to_string();
 
-            let mut layouter = |ui: &egui::Ui, string: &str, wrap_width: f32| {
-                let mut layout_job =
-                    egui_extras::syntax_highlighting::highlight(ui.ctx(), &theme, string, "rs");
-                layout_job.wrap.max_width = wrap_width;
-                ui.fonts(|f| f.layout_job(layout_job))
-            };
-            ui.add(
-                    egui::TextEdit::multiline(&mut text_buffer)
-                        .font(egui::TextStyle::Monospace) // for cursor height
-                        .code_editor()
-                        .desired_rows(10)
-                        .lock_focus(true)
-                        .desired_width(f32::INFINITY)
-                        .layouter(&mut layouter),
-                );
-             */
-
-            egui::ScrollArea::vertical().show(ui, |ui| {
-                //let mut text_buffer = "Hello, world!\nEverywhere is a newline\n123456".to_string();
-                /*
-                let mut text_buffer = "Hello, world!\n\
-                Error: Syntax error: Expecting ';' to terminate this statement (line 16, position 1)\n\
-                ".to_string();
-                 */
-
-                let output_log = self.output_log.lock().unwrap();
-                let mut text_buffer = output_log.get_log_copy();
-
-                ui.add(
-                    egui::TextEdit::multiline(&mut text_buffer)
-                        .font(egui::TextStyle::Monospace) // for cursor height
-                        .code_editor()
-                        .desired_rows(10)
-                        .lock_focus(true)
-                        .desired_width(f32::INFINITY),
-                );
+                               ui.add(
+                                   egui::TextEdit::multiline(&mut text_buffer)
+                                       .id("source_code".into())
+                                       .font(egui::TextStyle::Monospace) // for cursor height
+                                       .code_editor()
+                                       .desired_rows(8)
+                                       .lock_focus(true)
+                                       .desired_width(f32::INFINITY),
+                               );
+                            */
+                        });
+                });
             });
-        });
+
+        egui::CollapsingHeader::new("Log")
+            .default_open(true)
+            .show(ui, |ui| {
+                ui.group(|ui| {
+                    /* TODO: Add later
+                    let theme = egui_extras::syntax_highlighting::CodeTheme::from_memory(ui.ctx());
+
+                    let mut layouter = |ui: &egui::Ui, string: &str, wrap_width: f32| {
+                        let mut layout_job =
+                            egui_extras::syntax_highlighting::highlight(ui.ctx(), &theme, string, "rs");
+                        layout_job.wrap.max_width = wrap_width;
+                        ui.fonts(|f| f.layout_job(layout_job))
+                    };
+                    ui.add(
+                            egui::TextEdit::multiline(&mut text_buffer)
+                                .font(egui::TextStyle::Monospace) // for cursor height
+                                .code_editor()
+                                .desired_rows(10)
+                                .lock_focus(true)
+                                .desired_width(f32::INFINITY)
+                                .layouter(&mut layouter),
+                        );
+                     */
+
+                    egui::ScrollArea::vertical()
+                        .id_source("output_log")
+                        .show(ui, |ui| {
+                            let output_log = self.output_log.lock().unwrap();
+                            let mut text_buffer = output_log.get_log_copy();
+
+                            ui.add(
+                                egui::TextEdit::multiline(&mut text_buffer)
+                                    .font(egui::TextStyle::Monospace) // for cursor height
+                                    .code_editor()
+                                    .desired_rows(6)
+                                    .lock_focus(true)
+                                    .desired_width(f32::INFINITY)
+                                    .cursor_at_end(true),
+                            );
+                        });
+                });
+            });
     }
 
     fn start(&mut self) {
@@ -196,7 +217,7 @@ impl UIPanel for ScriptPanel {
             rhai_interface.initialize();
 
             let mut result_message = String::new();
-            match rhai_interface.run_script(&script) {
+            match rhai_interface.run_script(&script, output_log.clone()) {
                 Ok(_) => {
                     result_message.push_str("Script finished successfully");
                 }
@@ -251,6 +272,19 @@ impl UIPanel for ScriptPanel {
                 self.script = cs_scripting::rhai_interface::TEST_SCRIPT.to_string();
                 self.start();
             } else if self.debug_key && !hotkey_pressed {
+                self.debug_key = false;
+            }
+
+            let hotkey_pressed2 = self
+                .device_state
+                .get_keys()
+                .contains(&AppKeycode::F8.into());
+
+            if !self.debug_key && hotkey_pressed2 {
+                self.debug_key = true;
+
+                self.script = cs_scripting::rhai_interface::TEST_SCRIPT.to_string();
+            } else if self.debug_key && !hotkey_pressed2 {
                 self.debug_key = false;
             }
         }

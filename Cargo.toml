@@ -78,6 +78,7 @@ eframe = { version = "0.28", default-features = false, features = [
     "glow",          # Use the glow rendering backend. Alternative: "wgpu".
     "persistence",   # Enable restoring app state when restarting the app.
 ] }
+egui_code_editor = "0.2"
 
 # Syntax highlighting
 #syntect = "5.2"

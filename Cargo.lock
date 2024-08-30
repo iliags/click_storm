@@ -714,6 +714,7 @@ dependencies = [
  "device_query",
  "eframe",
  "egui",
+ "egui_code_editor",
  "enigo",
  "env_logger",
  "fluent",
@@ -1097,6 +1098,15 @@ dependencies = [
  "web-time",
  "webbrowser",
  "winit",
+]
+
+[[package]]
+name = "egui_code_editor"
+version = "0.2.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9bd4d6760a30bb64fe382f85db5b7c66b63dc52d7777213ddad1112d9d0f28ae"
+dependencies = [
+ "egui",
 ]
 
 [[package]]
