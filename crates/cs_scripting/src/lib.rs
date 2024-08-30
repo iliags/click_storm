@@ -9,3 +9,6 @@ pub mod rhai_interface;
 
 /// Simple output log
 pub mod output_log;
+
+/// Simple script representation
+pub mod script;

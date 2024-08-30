@@ -165,9 +165,8 @@ impl UIPanel for ClickerPanel {
         self.is_running.load(Ordering::SeqCst)
     }
 
-    fn name(&self) -> &str {
-        // TODO: Get the localized string
-        "Clicker"
+    fn name(&self) -> String {
+        self.get_locale_string("clicker").to_owned()
     }
 
     fn as_any(&mut self) -> &mut dyn std::any::Any {

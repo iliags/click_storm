@@ -5,6 +5,10 @@ version = Version:{" "}
 source = Source code
 reset = Reset
 
+# Panels
+clicker = Clicker
+script = Script
+
 # Settings menu
 hotkey = Hotkey
 change_hotkey = Change Hotkey
@@ -63,3 +67,11 @@ position_desc = The position to click
 # Actions
 start = Start
 stop = Stop
+
+# Scripting
+log = Log
+
+# File
+new = New
+open = Open
+save = Save

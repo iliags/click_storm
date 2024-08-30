@@ -1,0 +1,98 @@
+use std::path::PathBuf;
+
+/// Simple script structure
+///
+/// The script_buffer is used as the primary workspace, the script is used to store the last saved
+#[derive(Debug, Default)]
+pub struct Script {
+    script: String,
+    script_buffer: String,
+    script_path: Option<PathBuf>,
+}
+
+impl Script {
+    /// Create a new script
+    pub fn new() -> Self {
+        Self {
+            script: String::new(),
+            script_buffer: String::new(),
+            script_path: None,
+        }
+    }
+
+    /// Load a script from a file
+    pub fn load(&mut self, path: Option<PathBuf>) {
+        match path {
+            Some(path) => {
+                let script = std::fs::read_to_string(&path).unwrap();
+                //let mut script = Script::new();
+                self.set_script(script);
+                self.set_script_path(Some(path));
+            }
+            None => {
+                println!("No path provided to load script from");
+            }
+        }
+    }
+
+    /// Set the script
+    pub fn set_script(&mut self, script: String) {
+        self.script_buffer = script.clone();
+        self.script = script.clone();
+    }
+
+    /// Get the script path
+    pub fn set_script_path(&mut self, script_path: Option<PathBuf>) {
+        self.script_path = script_path;
+    }
+
+    /// Check if the script has changes
+    pub fn has_changes(&self) -> bool {
+        self.script_buffer != self.script
+    }
+
+    /// Save the script buffer to the script, returns true if the script is new
+    pub fn save(&mut self) -> bool {
+        self.script = self.script_buffer.clone();
+        self.script_path.is_none()
+    }
+
+    /// Get the script
+    pub fn get_ref(&self) -> &str {
+        &self.script_buffer
+    }
+
+    /// Get a copy of the script
+    pub fn get_copy(&self) -> String {
+        self.script_buffer.clone()
+    }
+
+    /// Get the script (mutable)
+    pub fn get_mut(&mut self) -> &mut String {
+        &mut self.script_buffer
+    }
+
+    /// Get the script path
+    pub fn get_path(&self) -> Option<PathBuf> {
+        self.script_path.clone()
+    }
+
+    /// Check if the script is empty
+    pub fn is_empty(&self) -> bool {
+        self.script_buffer.is_empty()
+    }
+
+    /// Check if the script is the default empty script
+    pub fn is_default(&self) -> bool {
+        self.script_buffer.is_empty() && self.script.is_empty() && self.script_path.is_none()
+    }
+
+    /// Get the filename
+    pub fn get_filename(&self) -> Option<String> {
+        self.script_path
+            .as_ref()
+            .and_then(|path| path.file_name())
+            .and_then(|name| name.to_str())
+            .map(|name| name.to_string())
+    }
+}

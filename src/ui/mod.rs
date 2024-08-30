@@ -39,7 +39,7 @@ pub(crate) trait UIPanel {
 
     /// Get the panel name
     #[allow(dead_code)]
-    fn name(&self) -> &str;
+    fn name(&self) -> String;
 
     fn as_any(&mut self) -> &mut dyn std::any::Any;
 

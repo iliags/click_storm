@@ -1,13 +1,15 @@
 #![allow(dead_code, unused_imports)]
 
 use cs_hal::input::keycode::AppKeycode;
-use cs_scripting::{output_log::OutputLog, rhai_interface::RhaiInterface};
+use cs_scripting::{output_log::OutputLog, rhai_interface::RhaiInterface, script::Script};
 use device_query::DeviceQuery;
 use egui::{Margin, TextBuffer};
 
 use egui_code_editor::{CodeEditor, ColorTheme, Syntax};
+use rfd::FileDialog;
 
 use std::{
+    hash::Hash,
     sync::{
         atomic::{AtomicBool, Ordering},
         Arc, Mutex,
@@ -19,6 +21,10 @@ use super::UIPanel;
 use crate::localization::locale_text::LocaleText;
 
 pub const SCRIPT_PANEL_KEY: &str = "script_panel";
+
+// TODO: Code editor settings
+// - Color theme
+// - Font size
 
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)]
@@ -34,7 +40,7 @@ pub struct ScriptPanel {
     is_running: Arc<AtomicBool>,
 
     #[serde(skip)]
-    script: String,
+    script: Script,
 
     #[serde(skip)]
     thread: Option<JoinHandle<()>>,
@@ -66,7 +72,7 @@ impl Default for ScriptPanel {
             hotkey_code: AppKeycode::F6.into(),
             language: LocaleText::default(),
             is_running: Arc::new(AtomicBool::new(false)),
-            script: String::new(),
+            script: Script::default(),
             thread: None,
             finished: Arc::new(AtomicBool::new(false)),
             device_state: device_query::DeviceState::new(),
@@ -90,108 +96,89 @@ impl UIPanel for ScriptPanel {
         ui.group(|ui| {
             ui.columns(3, |cols| {
                 cols[0].group(|ui| {
-                    //ui.heading("Script");
                     ui.label(egui::RichText::new("MyScript.rhai"));
-
                     ui.horizontal(|ui| {
-                        if ui.button("Open").clicked() {
-                            // Open file dialog
-                        }
-                        /*
+                        ui.add_enabled_ui(!self.script.is_default(), |ui| {
+                            if ui.button(self.get_locale_string("new")).clicked() {
+                                // TODO: Check if there are changes, show a dialog if so
+
+                                self.script = Script::default();
+                            }
+                        });
+
                         ui.separator();
 
-                        if ui.button("Reload").clicked() {
-                            // Reload script
+                        if ui.button(self.get_locale_string("open")).clicked() {
+                            // TODO: Check for changes
+                            self.load_file();
                         }
-                         */
+
+                        ui.separator();
+
+                        if ui.button(self.get_locale_string("save")).clicked() {
+                            self.save_file();
+                        }
                     });
+                });
+                cols[1].group(|ui| {
+                    ui.heading("Actions");
                 });
                 cols[2].group(|ui| {
                     //ui.heading("Misc");
                     let cursor_pos = self.device_state.get_mouse().coords;
                     let cursor_pos = format!("🖱: ({}, {})", cursor_pos.0, cursor_pos.1);
-                    ui.label(egui::RichText::new(cursor_pos).size(18.0));
-                    ui.label(egui::RichText::new("ASDF").size(18.0));
+                    ui.label(egui::RichText::new(cursor_pos).size(16.0));
+                    //ui.label(egui::RichText::new("ASDF").size(18.0));
                 });
             });
         });
 
-        egui::CollapsingHeader::new("Script")
-            .default_open(true)
+        egui::ScrollArea::vertical()
+            .id_source("scripting")
             .show(ui, |ui| {
-                ui.group(|ui| {
-                    egui::ScrollArea::vertical()
-                        .id_source("text_editor")
-                        .max_height(256.0)
-                        .show(ui, |ui| {
-                            let mut text_buffer = self.script.clone().to_string();
-                            CodeEditor::default()
-                                .id_source("code editor")
-                                .with_rows(12)
-                                .with_fontsize(12.0)
-                                .with_theme(ColorTheme::GRUVBOX)
-                                .with_syntax(Syntax::rust())
-                                .with_numlines(true)
-                                .show(ui, &mut text_buffer);
-
-                            /*
-                               let mut text_buffer = self.script.clone().to_string();
-
-                               ui.add(
-                                   egui::TextEdit::multiline(&mut text_buffer)
-                                       .id("source_code".into())
-                                       .font(egui::TextStyle::Monospace) // for cursor height
-                                       .code_editor()
-                                       .desired_rows(8)
-                                       .lock_focus(true)
-                                       .desired_width(f32::INFINITY),
-                               );
-                            */
+                egui::CollapsingHeader::new(self.get_locale_string("script"))
+                    .default_open(true)
+                    .show(ui, |ui| {
+                        ui.group(|ui| {
+                            egui::ScrollArea::vertical()
+                                .id_source("text_editor")
+                                .max_height(256.0)
+                                .show(ui, |ui| {
+                                    //let mut text_buffer = self.script.clone().to_string();
+                                    CodeEditor::default()
+                                        .id_source("code editor")
+                                        .with_rows(12)
+                                        .with_fontsize(13.0)
+                                        .with_theme(ColorTheme::SONOKAI)
+                                        .with_syntax(Syntax::rust())
+                                        .with_numlines(true)
+                                        .show(ui, self.script.get_mut());
+                                });
                         });
-                });
-            });
+                    });
 
-        egui::CollapsingHeader::new("Log")
-            .default_open(true)
-            .show(ui, |ui| {
-                ui.group(|ui| {
-                    /* TODO: Add later
-                    let theme = egui_extras::syntax_highlighting::CodeTheme::from_memory(ui.ctx());
+                egui::CollapsingHeader::new(self.get_locale_string("log"))
+                    .default_open(true)
+                    .show(ui, |ui| {
+                        ui.group(|ui| {
+                            egui::ScrollArea::vertical()
+                                .id_source("output_log")
+                                .show(ui, |ui| {
+                                    let output_log = self.output_log.lock().unwrap();
+                                    let mut text_buffer = output_log.get_log_copy();
 
-                    let mut layouter = |ui: &egui::Ui, string: &str, wrap_width: f32| {
-                        let mut layout_job =
-                            egui_extras::syntax_highlighting::highlight(ui.ctx(), &theme, string, "rs");
-                        layout_job.wrap.max_width = wrap_width;
-                        ui.fonts(|f| f.layout_job(layout_job))
-                    };
-                    ui.add(
-                            egui::TextEdit::multiline(&mut text_buffer)
-                                .font(egui::TextStyle::Monospace) // for cursor height
-                                .code_editor()
-                                .desired_rows(10)
-                                .lock_focus(true)
-                                .desired_width(f32::INFINITY)
-                                .layouter(&mut layouter),
-                        );
-                     */
-
-                    egui::ScrollArea::vertical()
-                        .id_source("output_log")
-                        .show(ui, |ui| {
-                            let output_log = self.output_log.lock().unwrap();
-                            let mut text_buffer = output_log.get_log_copy();
-
-                            ui.add(
-                                egui::TextEdit::multiline(&mut text_buffer)
-                                    .font(egui::TextStyle::Monospace) // for cursor height
-                                    .code_editor()
-                                    .desired_rows(6)
-                                    .lock_focus(true)
-                                    .desired_width(f32::INFINITY)
-                                    .cursor_at_end(true),
-                            );
+                                    ui.add(
+                                        egui::TextEdit::multiline(&mut text_buffer)
+                                            .font(egui::TextStyle::Monospace) // for cursor height
+                                            .code_editor()
+                                            .desired_rows(6)
+                                            .lock_focus(true)
+                                            .desired_width(f32::INFINITY)
+                                            .cursor_at_end(true),
+                                    );
+                                });
                         });
-                });
+                    });
             });
     }
 
@@ -204,7 +191,7 @@ impl UIPanel for ScriptPanel {
         self.is_running.store(true, Ordering::SeqCst);
 
         let finished = self.finished.clone();
-        let script = self.script.clone();
+        let script = self.script.get_copy();
 
         // Clear the output log
         self.output_log.lock().unwrap().clear();
@@ -256,6 +243,8 @@ impl UIPanel for ScriptPanel {
     }
 
     fn handle_input(&mut self) {
+        // TODO: Save keybinding
+
         #[cfg(debug_assertions)]
         {
             use cs_hal::input::keycode::AppKeycode;
@@ -269,7 +258,8 @@ impl UIPanel for ScriptPanel {
             if !self.debug_key && hotkey_pressed {
                 self.debug_key = true;
                 //self.rhai_interface.test_script();
-                self.script = cs_scripting::rhai_interface::TEST_SCRIPT.to_string();
+                self.script
+                    .set_script(cs_scripting::rhai_interface::TEST_SCRIPT.to_string());
                 self.start();
             } else if self.debug_key && !hotkey_pressed {
                 self.debug_key = false;
@@ -283,7 +273,8 @@ impl UIPanel for ScriptPanel {
             if !self.debug_key && hotkey_pressed2 {
                 self.debug_key = true;
 
-                self.script = cs_scripting::rhai_interface::TEST_SCRIPT.to_string();
+                self.script
+                    .set_script(cs_scripting::rhai_interface::TEST_SCRIPT.to_string());
             } else if self.debug_key && !hotkey_pressed2 {
                 self.debug_key = false;
             }
@@ -301,9 +292,8 @@ impl UIPanel for ScriptPanel {
         self.language = language;
     }
 
-    fn name(&self) -> &str {
-        // TODO: Get the localized string
-        "Script"
+    fn name(&self) -> String {
+        self.get_locale_string("script").to_owned()
     }
 
     fn as_any(&mut self) -> &mut dyn std::any::Any {
@@ -322,5 +312,34 @@ impl UIPanel for ScriptPanel {
 impl ScriptPanel {
     pub fn load(&mut self, _value: ScriptPanel) {
         // TODO
+    }
+
+    #[inline]
+    fn get_locale_string(&self, key: &str) -> String {
+        self.language.get_locale_string(key)
+    }
+
+    fn save_file(&mut self) {
+        if self.script.save() {
+            let files = FileDialog::new()
+                .add_filter("rhai", &["rhai"])
+                .set_directory("/")
+                .save_file();
+
+            println!("{:?}", files);
+
+            self.script.set_script_path(files);
+        }
+    }
+
+    fn load_file(&mut self) {
+        let files = FileDialog::new()
+            .add_filter("rhai", &["rhai"])
+            .set_directory("/")
+            .pick_file();
+
+        println!("{:?}", files);
+
+        self.script.load(files);
     }
 }
