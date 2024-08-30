@@ -17,7 +17,7 @@ default-run = "click_storm"
 name = "click_storm"
 path = "src/main.rs"
 
-# Code generation, currently generates the definition files for the scripting engine LSP
+# Currently used to generate the definition files for the scripting engine LSP
 [[bin]]
 name = "cs_codegen"
 path = "crates/cs_codegen/src/main.rs"
