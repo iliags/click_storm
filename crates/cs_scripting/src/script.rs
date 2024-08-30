@@ -48,13 +48,21 @@ impl Script {
 
     /// Check if the script has changes
     pub fn has_changes(&self) -> bool {
-        self.script_buffer != self.script
+        self.script_buffer != self.script && self.script_path.is_some()
     }
 
     /// Save the script buffer to the script, returns true if the script is new
     pub fn save(&mut self) -> bool {
         self.script = self.script_buffer.clone();
-        self.script_path.is_none()
+
+        match self.script_path.is_none() {
+            true => true,
+            false => {
+                let path = self.script_path.as_ref().unwrap();
+                std::fs::write(path, &self.script_buffer).unwrap();
+                false
+            }
+        }
     }
 
     /// Get the script
@@ -94,5 +102,18 @@ impl Script {
             .and_then(|path| path.file_name())
             .and_then(|name| name.to_str())
             .map(|name| name.to_string())
+    }
+
+    /// Reload the script from disk
+    pub fn reload_from_disk(&mut self) {
+        if let Some(path) = self.script_path.clone() {
+            let script = std::fs::read_to_string(&path).unwrap();
+            self.set_script(script);
+        }
+    }
+
+    /// Check if the script has a path
+    pub fn has_path(&self) -> bool {
+        self.script_path.is_some()
     }
 }

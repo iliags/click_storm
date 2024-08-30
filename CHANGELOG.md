@@ -2,7 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
-## WIP
+## 0.2.2 WIP
+
+* Script execution
+* Basic script editor with log output
+  * VSCode is still recommended for larger scripts
+
+Modified ftl keys (needs retranslating):
+
+* change_hotkey_desc
+* actions
+* start
+* stop
+* log
+* misc
+* none
+* new
+* open
+* save
+* reload
+* back
+* forward
+* scroll (up, down, left, right)
 
 ## 0.2.1
 

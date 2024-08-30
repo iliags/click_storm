@@ -12,7 +12,7 @@ script = Script
 # Settings menu
 hotkey = Hotkey
 change_hotkey = Change Hotkey
-change_hotkey_desc = Change the hotkey to start and stop the clicker
+change_hotkey_desc = Change the hotkey to start and stop
 press_key = Press a key
 reset_hotkey = Reset Hotkey
 reset_hotkey_desc = Reset the hotkey to the default value
@@ -65,13 +65,17 @@ pick_position_desc = Click anywhere on the screen to set the position
 position_desc = The position to click
 
 # Actions
+actions = Actions
 start = Start
 stop = Stop
 
 # Scripting
 log = Log
+misc = Misc
+none = None
 
 # File
 new = New
 open = Open
 save = Save
+reload = Reload

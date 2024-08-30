@@ -96,12 +96,21 @@ impl UIPanel for ScriptPanel {
         ui.group(|ui| {
             ui.columns(3, |cols| {
                 cols[0].group(|ui| {
-                    let file_name = match self.script.get_filename() {
-                        Some(file_name) => file_name,
-                        None => "None".to_string(),
-                    };
+                    // Use the filename as the title
+                    ui.vertical_centered(|ui| {
+                        let file_name = match self.script.get_filename() {
+                            Some(file_name) => file_name,
+                            None => self.get_locale_string("none"),
+                        };
 
-                    ui.label(file_name);
+                        let file_name = if self.script.has_changes() {
+                            format!("{}*", file_name)
+                        } else {
+                            file_name
+                        };
+
+                        ui.label(file_name);
+                    });
 
                     ui.horizontal(|ui| {
                         ui.add_enabled_ui(!self.script.is_default(), |ui| {
@@ -121,20 +130,62 @@ impl UIPanel for ScriptPanel {
 
                         ui.separator();
 
+                        ui.add_enabled_ui(self.script.has_path(), |ui| {
+                            if ui.button(self.get_locale_string("reload")).clicked() {
+                                self.script.reload_from_disk();
+                            }
+                        });
+
+                        ui.separator();
+
                         if ui.button(self.get_locale_string("save")).clicked() {
                             self.save_file();
                         }
                     });
                 });
                 cols[1].group(|ui| {
-                    ui.heading("Actions");
+                    ui.vertical_centered(|ui| {
+                        ui.label(self.get_locale_string("actions"));
+                    });
+
+                    //ui.centered_and_justified(|ui| {
+                    ui.columns(2, |cols| {
+                        // TODO: Change between run script and start click storm
+                        // Note: Not localized text
+                        let keycode: device_query::Keycode = self.hotkey_code.into();
+                        let key_code_text = format!(" ({})", keycode).to_owned();
+                        cols[0].vertical_centered(|ui| {
+                            let enabled = !self.is_running() && self.can_start();
+
+                            let mut start_text = self.get_locale_string("start");
+                            start_text.push_str(&key_code_text);
+
+                            let start_button =
+                                ui.add_enabled(enabled, egui::Button::new(start_text));
+
+                            if start_button.clicked() {
+                                self.start();
+                            }
+                        });
+                        cols[1].vertical_centered(|ui| {
+                            let mut stop_text = self.get_locale_string("stop");
+                            stop_text.push_str(&key_code_text);
+
+                            if ui.button(stop_text).clicked() {
+                                self.stop();
+                            }
+                            ui.end_row();
+                        });
+                    });
+                    //});
                 });
                 cols[2].group(|ui| {
-                    //ui.heading("Misc");
+                    ui.vertical_centered(|ui| {
+                        ui.label(self.get_locale_string("misc"));
+                    });
                     let cursor_pos = self.device_state.get_mouse().coords;
                     let cursor_pos = format!("🖱: ({}, {})", cursor_pos.0, cursor_pos.1);
                     ui.label(egui::RichText::new(cursor_pos).size(16.0));
-                    //ui.label(egui::RichText::new("ASDF").size(18.0));
                 });
             });
         });
@@ -334,7 +385,15 @@ impl ScriptPanel {
 
             println!("{:?}", files);
 
-            self.script.set_script_path(files);
+            match files {
+                Some(file) => {
+                    self.script.set_script_path(Some(file));
+                    self.script.save();
+                }
+                None => {
+                    println!("No file selected");
+                }
+            }
         }
     }
 

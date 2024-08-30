@@ -490,7 +490,6 @@ impl ClickerPanel {
     }
 
     fn ui_actions(&mut self, ui: &mut egui::Ui) {
-        //ui.with_layout(egui::Layout::bottom_up(egui::Align::Center), |ui| {
         ui.centered_and_justified(|ui| {
             ui.columns(2, |cols| {
                 // TODO: Change between run script and start click storm
@@ -520,7 +519,6 @@ impl ClickerPanel {
                 });
             });
         });
-        //});
     }
 
     #[inline]
