@@ -24,6 +24,8 @@ Modified ftl keys (needs retranslating):
 * back
 * forward
 * scroll (up, down, left, right)
+* clicker
+* script
 
 ## 0.2.1
 
