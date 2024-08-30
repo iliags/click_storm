@@ -4,7 +4,7 @@
  <img width="20%" src="./assets/icon-256.png", alt-text="logo">
 </p>
 
-Click Storm is an open-source auto-clicker and input automation tool written in Rust. Download the latest version [here](https://github.com/iliags/click_storm/releases). See the [wiki](https://github.com/iliags/click_storm/wiki) for documentation.
+Click Storm is an open-source auto-clicker and input automation tool written in Rust. [Download the latest version](https://github.com/iliags/click_storm/releases/latest) or [visit the wiki](https://github.com/iliags/click_storm/wiki) for documentation.
 
 > [!NOTE]
 > Windows Security has marked the executable as having `Trojan:Script/Wacatac.B!ml` in the past, which is a false positive.
