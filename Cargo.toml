@@ -79,6 +79,13 @@ eframe = { version = "0.28", default-features = false, features = [
     "persistence",   # Enable restoring app state when restarting the app.
 ] }
 
+# Syntax highlighting
+#syntect = "5.2"
+#egui_extras = { version = "0.28", default-features = false, features = [
+#    "syntect",
+#    "serde",
+#] }
+
 # Localization
 fluent = "0.16"
 fluent-templates = "0.10"

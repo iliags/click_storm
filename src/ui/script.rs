@@ -3,17 +3,17 @@
 use cs_hal::input::keycode::AppKeycode;
 use cs_scripting::rhai_interface::RhaiInterface;
 use device_query::DeviceQuery;
-use egui::Margin;
+use egui::{Margin, TextBuffer};
 
 use std::{
     sync::{
         atomic::{AtomicBool, Ordering},
-        Arc,
+        Arc, Mutex,
     },
     thread::{self, JoinHandle},
 };
 
-use super::UIPanel;
+use super::{output_log::OutputLog, UIPanel};
 use crate::localization::locale_text::LocaleText;
 
 pub const SCRIPT_PANEL_KEY: &str = "script_panel";
@@ -43,6 +43,9 @@ pub struct ScriptPanel {
     #[serde(skip)]
     device_state: device_query::DeviceState,
 
+    #[serde(skip)]
+    output_log: Arc<Mutex<OutputLog>>,
+
     // TODO: Debug only
     #[serde(skip)]
     rhai_interface: RhaiInterface,
@@ -65,6 +68,7 @@ impl Default for ScriptPanel {
             thread: None,
             finished: Arc::new(AtomicBool::new(false)),
             device_state: device_query::DeviceState::new(),
+            output_log: Arc::new(Mutex::new(OutputLog::new())),
 
             // TODO: Debug only
             rhai_interface,
@@ -126,6 +130,47 @@ impl UIPanel for ScriptPanel {
 
         ui.group(|ui| {
             ui.label("Script output");
+
+            /* TODO: Add later
+            let theme = egui_extras::syntax_highlighting::CodeTheme::from_memory(ui.ctx());
+
+            let mut layouter = |ui: &egui::Ui, string: &str, wrap_width: f32| {
+                let mut layout_job =
+                    egui_extras::syntax_highlighting::highlight(ui.ctx(), &theme, string, "rs");
+                layout_job.wrap.max_width = wrap_width;
+                ui.fonts(|f| f.layout_job(layout_job))
+            };
+            ui.add(
+                    egui::TextEdit::multiline(&mut text_buffer)
+                        .font(egui::TextStyle::Monospace) // for cursor height
+                        .code_editor()
+                        .desired_rows(10)
+                        .lock_focus(true)
+                        .desired_width(f32::INFINITY)
+                        .layouter(&mut layouter),
+                );
+             */
+
+            egui::ScrollArea::vertical().show(ui, |ui| {
+                //let mut text_buffer = "Hello, world!\nEverywhere is a newline\n123456".to_string();
+                /*
+                let mut text_buffer = "Hello, world!\n\
+                Error: Syntax error: Expecting ';' to terminate this statement (line 16, position 1)\n\
+                ".to_string();
+                 */
+
+                let output_log = self.output_log.lock().unwrap();
+                let mut text_buffer = output_log.get_log_copy();
+
+                ui.add(
+                    egui::TextEdit::multiline(&mut text_buffer)
+                        .font(egui::TextStyle::Monospace) // for cursor height
+                        .code_editor()
+                        .desired_rows(10)
+                        .lock_focus(true)
+                        .desired_width(f32::INFINITY),
+                );
+            });
         });
     }
 
@@ -138,24 +183,32 @@ impl UIPanel for ScriptPanel {
         self.is_running.store(true, Ordering::SeqCst);
 
         let finished = self.finished.clone();
-
         let script = self.script.clone();
+
+        // Clear the output log
+        self.output_log.lock().unwrap().clear();
+
+        // Clone the output log for the thread
+        let output_log = self.output_log.clone();
 
         self.thread = Some(thread::spawn(move || {
             let mut rhai_interface = RhaiInterface::new();
             rhai_interface.initialize();
 
+            let mut result_message = String::new();
             match rhai_interface.run_script(&script) {
                 Ok(_) => {
-                    println!("Script finished");
-                    finished.store(true, Ordering::SeqCst);
+                    result_message.push_str("Script finished successfully");
                 }
                 Err(err) => {
-                    // TODO: Push error to user facing console
-                    eprintln!("Error: {}", err);
-                    finished.store(true, Ordering::SeqCst);
+                    result_message.push_str(&err);
                 }
             }
+
+            let mut output_log = output_log.lock().unwrap();
+            output_log.log(&result_message);
+
+            finished.store(true, Ordering::SeqCst);
         }));
     }
 
@@ -194,7 +247,9 @@ impl UIPanel for ScriptPanel {
 
             if !self.debug_key && hotkey_pressed {
                 self.debug_key = true;
-                self.rhai_interface.test_script();
+                //self.rhai_interface.test_script();
+                self.script = cs_scripting::rhai_interface::TEST_SCRIPT.to_string();
+                self.start();
             } else if self.debug_key && !hotkey_pressed {
                 self.debug_key = false;
             }

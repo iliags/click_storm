@@ -2,6 +2,9 @@ use cs_hal::input::keycode::AppKeycode;
 
 use crate::localization::locale_text::LocaleText;
 
+/// Simple output log
+mod output_log;
+
 /// Clicker panel
 pub mod clicker;
 
