@@ -2,9 +2,9 @@ name: Cargo Build & Test
 
 on:
   workflow_dispatch:
- #push:
- #   branches:
- #     - dev
+  push:
+      branches:
+        - dev
 
 env: 
   CARGO_TERM_COLOR: always
@@ -13,6 +13,7 @@ jobs:
   build_and_test:
     name: Latest
     runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.message, 'run tests')
     strategy:
       matrix:
         toolchain:
