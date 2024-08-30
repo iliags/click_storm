@@ -148,9 +148,7 @@ impl UIPanel for ScriptPanel {
                         ui.label(self.get_locale_string("actions"));
                     });
 
-                    //ui.centered_and_justified(|ui| {
                     ui.columns(2, |cols| {
-                        // TODO: Change between run script and start click storm
                         // Note: Not localized text
                         let keycode: device_query::Keycode = self.hotkey_code.into();
                         let key_code_text = format!(" ({})", keycode).to_owned();
@@ -177,7 +175,6 @@ impl UIPanel for ScriptPanel {
                             ui.end_row();
                         });
                     });
-                    //});
                 });
                 cols[2].group(|ui| {
                     ui.vertical_centered(|ui| {
