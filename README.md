@@ -1,11 +1,15 @@
 # Click Storm
 
-Click Storm is an open-source auto-clicker written in Rust.
+Click Storm is an open-source auto-clicker and input automation tool written in Rust. Download the latest version [here](https://github.com/iliags/click_storm/releases). See the [wiki](https://github.com/iliags/click_storm/wiki) for documentation.
 
-![Screenshot](./screenshots/v0.1.5.png)
+![logo](./assets/icon-256.png)
 
 > [!NOTE]
 > Windows Security has marked the executable as having `Trojan:Script/Wacatac.B!ml` in the past, which is a false positive.
+
+## Clicker vs Scripting
+
+The clicker mode is for spamming the mouse button quickly. For a more customized approach, scripting is available using [Rhai](https://rhai.rs/book/language/).
 
 ## Notes
 
