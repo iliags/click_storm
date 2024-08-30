@@ -1,3 +1,5 @@
+use cs_hal::input::keycode::AppKeycode;
+
 use crate::localization::locale_text::LocaleText;
 
 /// Clicker panel
@@ -40,6 +42,8 @@ pub(crate) trait UIPanel {
     fn name(&self) -> &str;
 
     fn as_any(&mut self) -> &mut dyn std::any::Any;
+
+    fn set_hotkey(&mut self, hotkey: AppKeycode);
 
     fn can_start(&self) -> bool {
         true

@@ -208,8 +208,6 @@ impl eframe::App for ClickStormApp {
 
         egui::CentralPanel::default().show(ctx, |ui| {
             self.panels[self.active_panel].show(ctx, ui);
-
-            self.ui_actions(ui);
         });
     }
 }
@@ -272,6 +270,10 @@ impl ClickStormApp {
 
                 self.hotkey_code = AppKeycode::from(keys[0]);
                 println!("Hotkey set to: {:?}", self.hotkey_code);
+
+                for panel in self.panels.iter_mut() {
+                    panel.set_hotkey(self.hotkey_code);
+                }
             }
         } else if self.wait_for_key.is_waiting_for_reset() {
             let keys = self.device_state.get_keys();
@@ -292,41 +294,6 @@ impl ClickStormApp {
                 self.key_pressed = false;
             }
         }
-    }
-
-    fn ui_actions(&mut self, ui: &mut egui::Ui) {
-        //ui.with_layout(egui::Layout::bottom_up(egui::Align::Center), |ui| {
-        ui.centered_and_justified(|ui| {
-            ui.columns(2, |cols| {
-                // TODO: Change between run script and start click storm
-                // Note: Not localized text
-                let keycode: device_query::Keycode = self.hotkey_code.into();
-                let key_code_text = format!(" ({})", keycode).to_owned();
-                cols[0].centered_and_justified(|ui| {
-                    let enabled = !self.panels[self.active_panel].is_running()
-                        && self.panels[self.active_panel].can_start();
-
-                    let mut start_text = self.get_locale_string("start");
-                    start_text.push_str(&key_code_text);
-
-                    let start_button = ui.add_enabled(enabled, egui::Button::new(start_text));
-
-                    if start_button.clicked() {
-                        self.panels[self.active_panel].start();
-                    }
-                });
-                cols[1].centered_and_justified(|ui| {
-                    let mut stop_text = self.get_locale_string("stop");
-                    stop_text.push_str(&key_code_text);
-
-                    if ui.button(stop_text).clicked() {
-                        self.panels[self.active_panel].stop();
-                    }
-                    ui.end_row();
-                });
-            });
-        });
-        //});
     }
 
     #[inline]

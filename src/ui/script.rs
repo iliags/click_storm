@@ -1,5 +1,6 @@
 #![allow(dead_code, unused_imports)]
 
+use cs_hal::input::keycode::AppKeycode;
 use cs_scripting::rhai_interface::RhaiInterface;
 use device_query::DeviceQuery;
 use egui::Margin;
@@ -21,6 +22,9 @@ pub const SCRIPT_PANEL_KEY: &str = "script_panel";
 #[serde(default)]
 #[derive(Debug)]
 pub struct ScriptPanel {
+    #[serde(skip)]
+    hotkey_code: AppKeycode,
+
     #[serde(skip)]
     language: LocaleText,
 
@@ -54,6 +58,7 @@ impl Default for ScriptPanel {
         rhai_interface.initialize();
 
         Self {
+            hotkey_code: AppKeycode::F6.into(),
             language: LocaleText::default(),
             is_running: Arc::new(AtomicBool::new(false)),
             script: String::new(),
@@ -218,6 +223,10 @@ impl UIPanel for ScriptPanel {
 
     fn can_start(&self) -> bool {
         !self.script.is_empty()
+    }
+
+    fn set_hotkey(&mut self, hotkey: AppKeycode) {
+        self.hotkey_code = hotkey;
     }
 }
 
