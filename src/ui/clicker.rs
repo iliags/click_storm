@@ -504,7 +504,7 @@ impl ClickerPanel {
 
                     let start_button = ui.add_enabled(
                         enabled,
-                        egui::Button::new(start_text).min_size(egui::vec2(1.0, 1.0)),
+                        egui::Button::new(start_text).min_size(egui::vec2(10.0, 30.0)),
                     );
 
                     if start_button.clicked() {
@@ -512,12 +512,15 @@ impl ClickerPanel {
                     }
                 });
                 cols[1].centered_and_justified(|ui| {
-                    let mut stop_text = self.get_locale_string("stop");
-                    stop_text.push_str(&key_code_text);
+                    ui.add_enabled_ui(self.is_running(), |ui| {
+                        let mut stop_text = self.get_locale_string("stop");
+                        stop_text.push_str(&key_code_text);
 
-                    if ui.button(stop_text).clicked() {
-                        self.stop();
-                    }
+                        if ui.button(stop_text).clicked() {
+                            self.stop();
+                        }
+                    });
+
                     ui.end_row();
                 });
             });
