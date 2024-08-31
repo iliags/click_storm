@@ -73,9 +73,6 @@ pub struct ScriptPanel {
 
 impl Default for ScriptPanel {
     fn default() -> Self {
-        let mut rhai_interface = RhaiInterface::new();
-        rhai_interface.initialize();
-
         // Example gen
         let mut next_view_nr = 0;
         let mut gen_pane = || {
@@ -86,7 +83,7 @@ impl Default for ScriptPanel {
 
         let mut tiles = egui_tiles::Tiles::default();
 
-        let log_panel = LogPanel {
+        let _log_panel = LogPanel {
             output_log: Arc::new(Mutex::new(OutputLog::new())),
         };
 
@@ -117,7 +114,7 @@ impl Default for ScriptPanel {
             panes: tree,
 
             // TODO: Debug only
-            rhai_interface,
+            rhai_interface: RhaiInterface::new(),
 
             debug_key: false,
         }
@@ -314,7 +311,6 @@ impl UIPanel for ScriptPanel {
 
         self.thread = Some(thread::spawn(move || {
             let mut rhai_interface = RhaiInterface::new();
-            rhai_interface.initialize();
 
             let mut result_message = String::new();
             match rhai_interface.run_script(&script, output_log.clone()) {

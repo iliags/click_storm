@@ -982,7 +982,6 @@ version = "0.1.0"
 dependencies = [
  "device_query",
  "enigo",
- "rhai",
  "serde",
  "strum",
  "strum_macros",

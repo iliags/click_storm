@@ -1,16 +1,18 @@
 use std::sync::{Arc, Mutex};
 
 use cs_hal::{
-    display::screen_size::{ScreenSize, ScreenSizeModule},
-    input::{
-        button_direction::{ButtonDirection, ButtonDirectionModule},
-        keycode::{AppKeycode, AppKeycodeModule},
-        mouse_button::{MouseButton, MouseButtonModule},
-    },
+    display::screen_size::ScreenSize,
+    input::{button_direction::ButtonDirection, keycode::AppKeycode, mouse_button::MouseButton},
 };
 use rhai::{exported_module, Engine};
 
-use crate::output_log::OutputLog;
+use crate::{
+    hal::{
+        button_direction::ButtonDirectionModule, keycode::AppKeycodeModule,
+        mouse_button::MouseButtonModule, screen_size::ScreenSizeModule,
+    },
+    output_log::OutputLog,
+};
 
 use super::cs_interface::ClickStormInterface;
 
@@ -32,9 +34,14 @@ impl Default for RhaiInterface {
 impl RhaiInterface {
     /// Create a new engine instance
     pub fn new() -> Self {
-        Self {
+        let mut new_self = Self {
             engine: Engine::new(),
-        }
+        };
+
+        // Initialize the engine with necessary functions and types
+        new_self.initialize();
+
+        new_self
     }
 
     /// Test hello world
@@ -79,7 +86,7 @@ impl RhaiInterface {
     }
 
     /// Initialize the Rhai engine with the necessary functions and types.
-    pub fn initialize(&mut self) {
+    fn initialize(&mut self) {
         // Register the scripting interface
         self.engine.register_type::<ClickStormInterface>();
 

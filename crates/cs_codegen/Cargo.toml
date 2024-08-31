@@ -18,4 +18,4 @@ rhai = { workspace = true, optional = true, features = [
 
 [features]
 default = ["scripting"]
-scripting = ["dep:rhai", "cs_scripting/scripting", "cs_hal/scripting"]
+scripting = ["dep:rhai", "cs_scripting/scripting"]

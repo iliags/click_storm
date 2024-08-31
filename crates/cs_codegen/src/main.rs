@@ -8,8 +8,7 @@ fn main() {
 fn main() {
     use cs_scripting::rhai_interface::RhaiInterface;
 
-    let mut interface = RhaiInterface::new();
-    interface.initialize();
+    let interface = RhaiInterface::new();
 
     interface
         .get_engine()
