@@ -1,11 +1,16 @@
 #![allow(dead_code, unused_imports)]
 
 use cs_hal::input::keycode::AppKeycode;
-use cs_scripting::{output_log::OutputLog, rhai_interface::RhaiInterface, script::Script};
+use cs_scripting::{
+    output_log::OutputLog,
+    rhai_interface::RhaiInterface,
+    script::{self, Script},
+};
 use device_query::DeviceQuery;
-use egui::{Margin, TextBuffer};
+use egui::{output, Margin, TextBuffer};
 
 use egui_code_editor::{CodeEditor, ColorTheme, Syntax, DEFAULT_THEMES};
+use egui_tiles::TileId;
 use rfd::FileDialog;
 
 use std::{
@@ -17,7 +22,9 @@ use std::{
     thread::{self, current, JoinHandle},
 };
 
-use super::UIPanel;
+use super::{
+    output_log::OutputLogPane, script_editor::ScriptEditorPane, Pane, TreeBehavior, UIPanel,
+};
 use crate::{do_once::DoOnceGate, localization::locale_text::LocaleText};
 
 pub const SCRIPT_PANEL_KEY: &str = "script_panel";
@@ -34,6 +41,11 @@ pub struct ScriptPanel {
     theme: usize,
 
     script: Script,
+
+    panes: egui_tiles::Tree<Pane>,
+
+    #[serde(skip)]
+    behavior: TreeBehavior,
 
     #[serde(skip)]
     hotkey_code: AppKeycode,
@@ -59,9 +71,6 @@ pub struct ScriptPanel {
     #[serde(skip)]
     output_log: Arc<Mutex<OutputLog>>,
 
-    #[serde(skip)]
-    panes: egui_tiles::Tree<Pane>,
-
     // TODO: Debug only
     #[serde(skip)]
     rhai_interface: RhaiInterface,
@@ -73,35 +82,14 @@ pub struct ScriptPanel {
 
 impl Default for ScriptPanel {
     fn default() -> Self {
-        // Example gen
-        let mut next_view_nr = 0;
-        let mut gen_pane = || {
-            let pane = Pane { nr: next_view_nr };
-            next_view_nr += 1;
-            pane
-        };
-
-        let mut tiles = egui_tiles::Tiles::default();
-
-        let _log_panel = LogPanel {
-            output_log: Arc::new(Mutex::new(OutputLog::new())),
-        };
-
-        let mut tabs = vec![];
-        tabs.push({
-            //let children = (0..2).map(|_| tiles.insert_pane(gen_pane())).collect();
-            let children = vec![tiles.insert_pane(gen_pane()), tiles.insert_pane(gen_pane())];
-            tiles.insert_vertical_tile(children)
-        });
-
-        let root = tiles.insert_tab_tile(tabs);
-
-        let tree = egui_tiles::Tree::new("my_tree", root, tiles);
-        // Example gen end
-
-        Self {
+        println!("ScriptPanel::default()");
+        let mut new_self = Self {
             font_size: 13.0,
             theme: 7,
+            panes: egui_tiles::Tree::new("None", TileId::from_u64(0), egui_tiles::Tiles::default()),
+
+            // Serde skips
+            behavior: TreeBehavior {},
             hotkey_code: AppKeycode::F6,
             save_gate: DoOnceGate::default(),
             language: LocaleText::default(),
@@ -111,13 +99,36 @@ impl Default for ScriptPanel {
             finished: Arc::new(AtomicBool::new(false)),
             device_state: device_query::DeviceState::new(),
             output_log: Arc::new(Mutex::new(OutputLog::new())),
-            panes: tree,
 
             // TODO: Debug only
             rhai_interface: RhaiInterface::new(),
-
             debug_key: false,
-        }
+        };
+
+        let mut tiles = egui_tiles::Tiles::default();
+
+        let mut tabs = vec![];
+        tabs.push({
+            let output_pane = OutputLogPane::new(new_self.output_log.clone());
+            let output_pane = Pane::OutputLog(output_pane);
+
+            let script_pane = ScriptEditorPane::default();
+            let script_pane = Pane::ScriptEditor(script_pane);
+
+            let children = vec![
+                tiles.insert_pane(script_pane),
+                tiles.insert_pane(output_pane),
+            ];
+            tiles.insert_vertical_tile(children)
+        });
+
+        let root = tiles.insert_tab_tile(tabs);
+
+        let tree = egui_tiles::Tree::new("my_tree", root, tiles);
+
+        new_self.panes = tree;
+
+        new_self
     }
 }
 
@@ -128,9 +139,9 @@ impl UIPanel for ScriptPanel {
             self.stop();
         }
 
-        let mut behavior = TreeBehavior {};
+        self.panes.ui(&mut self.behavior, ui);
 
-        self.panes.ui(&mut behavior, ui);
+        //self.panes.ui(&mut self.behavior, ui);
 
         /*
 
@@ -325,8 +336,28 @@ impl UIPanel for ScriptPanel {
             let mut output_log = output_log.lock().unwrap();
             output_log.log(&result_message);
 
+            println!("{}", result_message);
+
             finished.store(true, Ordering::SeqCst);
         }));
+
+        let output_log = self.output_log.lock().unwrap();
+        let text = output_log.get_log_copy();
+
+        if !text.is_empty() {
+            for (_id, tile) in self.panes.tiles.iter_mut() {
+                match tile {
+                    egui_tiles::Tile::Pane(pane) => match pane {
+                        Pane::OutputLog(output_pane) => {
+                            output_pane.output_log = self.output_log.clone();
+                            //println!("Output log: {}", text);
+                        }
+                        _ => {}
+                    },
+                    _ => {}
+                }
+            }
+        }
     }
 
     fn stop(&mut self) {
@@ -475,6 +506,7 @@ impl ScriptPanel {
         self.font_size = value.font_size;
         self.theme = value.theme;
         self.script = value.script;
+        self.panes = value.panes;
     }
 
     #[inline]
@@ -513,111 +545,4 @@ impl ScriptPanel {
 
         self.script.load(files);
     }
-}
-
-#[derive(Debug)]
-struct Pane {
-    nr: usize,
-}
-
-struct TreeBehavior {}
-
-struct LogPanel {
-    output_log: Arc<Mutex<OutputLog>>,
-}
-
-impl egui_tiles::Behavior<Pane> for LogPanel {
-    fn pane_ui(
-        &mut self,
-        ui: &mut egui::Ui,
-        _tile_id: egui_tiles::TileId,
-        pane: &mut Pane,
-    ) -> egui_tiles::UiResponse {
-        // Give each pane a unique color:
-        let color = egui::epaint::Hsva::new(0.103 * pane.nr as f32, 0.3, 0.1, 1.0);
-        ui.painter().rect_filled(ui.max_rect(), 0.0, color);
-
-        ui.label(format!("The contents of pane {}.", pane.nr));
-
-        egui::ScrollArea::vertical()
-            .id_source("output_log")
-            .show(ui, |ui| {
-                let output_log = self.output_log.lock().unwrap();
-                let mut text_buffer = output_log.get_log_copy();
-
-                ui.add(
-                    egui::TextEdit::multiline(&mut text_buffer)
-                        .font(egui::TextStyle::Monospace)
-                        .code_editor()
-                        .desired_rows(6)
-                        .lock_focus(true)
-                        .desired_width(f32::INFINITY)
-                        .cursor_at_end(true),
-                );
-            });
-
-        // You can make your pane draggable like so:
-        if ui
-            .add(egui::Button::new("Drag me!").sense(egui::Sense::drag()))
-            .drag_started()
-        {
-            egui_tiles::UiResponse::DragStarted
-        } else {
-            egui_tiles::UiResponse::None
-        }
-    }
-
-    fn tab_title_for_pane(&mut self, pane: &Pane) -> egui::WidgetText {
-        format!("Pane {}", pane.nr).into()
-    }
-}
-
-impl egui_tiles::Behavior<Pane> for TreeBehavior {
-    fn pane_ui(
-        &mut self,
-        ui: &mut egui::Ui,
-        _tile_id: egui_tiles::TileId,
-        pane: &mut Pane,
-    ) -> egui_tiles::UiResponse {
-        // Give each pane a unique color:
-        let color = egui::epaint::Hsva::new(0.103 * pane.nr as f32, 0.3, 0.1, 1.0);
-        ui.painter().rect_filled(ui.max_rect(), 0.0, color);
-
-        ui.label(format!("The contents of pane {}.", pane.nr));
-
-        // You can make your pane draggable like so:
-        if ui
-            .add(egui::Button::new("Drag me!").sense(egui::Sense::drag()))
-            .drag_started()
-        {
-            egui_tiles::UiResponse::DragStarted
-        } else {
-            egui_tiles::UiResponse::None
-        }
-    }
-
-    fn tab_title_for_pane(&mut self, pane: &Pane) -> egui::WidgetText {
-        format!("Pane {}", pane.nr).into()
-    }
-}
-
-fn create_tree() -> egui_tiles::Tree<Pane> {
-    let mut next_view_nr = 0;
-    let mut gen_pane = || {
-        let pane = Pane { nr: next_view_nr };
-        next_view_nr += 1;
-        pane
-    };
-
-    let mut tiles = egui_tiles::Tiles::default();
-
-    let mut tabs = vec![];
-    tabs.push({
-        let children = (0..2).map(|_| tiles.insert_pane(gen_pane())).collect();
-        tiles.insert_vertical_tile(children)
-    });
-
-    let root = tiles.insert_tab_tile(tabs);
-
-    egui_tiles::Tree::new("my_tree", root, tiles)
 }
