@@ -10,6 +10,7 @@ use device_query::DeviceQuery;
 use egui::{output, Margin, TextBuffer};
 
 use egui_code_editor::{CodeEditor, ColorTheme, Syntax, DEFAULT_THEMES};
+use egui_dock::{DockArea, DockState, NodeIndex, Style, TabViewer};
 use rfd::FileDialog;
 
 use std::{
@@ -21,9 +22,7 @@ use std::{
     thread::{self, current, JoinHandle},
 };
 
-use super::{
-    output_log::OutputLogPane, script_editor::ScriptEditorPane, Pane, TreeBehavior, UIPanel,
-};
+use super::UIPanel;
 use crate::{do_once::DoOnceGate, localization::locale_text::LocaleText};
 
 pub const SCRIPT_PANEL_KEY: &str = "script_panel";
@@ -36,14 +35,8 @@ const RESET_EMOJI: &str = "⟳";
 #[serde(default)]
 #[derive(Debug)]
 pub struct ScriptPanel {
-    font_size: f32,
-    theme: usize,
-
-    script: Script,
-
-    //panes: egui_tiles::Tree<Pane>,
-    #[serde(skip)]
-    behavior: TreeBehavior,
+    panels: Panels,
+    tree: DockState<String>,
 
     #[serde(skip)]
     hotkey_code: AppKeycode,
@@ -66,6 +59,7 @@ pub struct ScriptPanel {
     #[serde(skip)]
     device_state: device_query::DeviceState,
 
+    // TODO: Change to RwLock since it is only written to in the worker thread
     #[serde(skip)]
     output_log: Arc<Mutex<OutputLog>>,
 
@@ -80,19 +74,15 @@ pub struct ScriptPanel {
 
 impl Default for ScriptPanel {
     fn default() -> Self {
-        println!("ScriptPanel::default()");
         let mut new_self = Self {
-            font_size: 13.0,
-            theme: 7,
-            //panes: egui_tiles::Tree::new("None", TileId::from_u64(0), egui_tiles::Tiles::default()),
+            panels: Panels::default(),
+            tree: DockState::new(vec![]),
 
             // Serde skips
-            behavior: TreeBehavior {},
             hotkey_code: AppKeycode::F6,
             save_gate: DoOnceGate::default(),
             language: LocaleText::default(),
             is_running: Arc::new(AtomicBool::new(false)),
-            script: Script::default(),
             thread: None,
             finished: Arc::new(AtomicBool::new(false)),
             device_state: device_query::DeviceState::new(),
@@ -103,43 +93,30 @@ impl Default for ScriptPanel {
             debug_key: false,
         };
 
-        /*
-        let mut tiles = egui_tiles::Tiles::default();
+        let mut dock_state = DockState::new(vec!["ScriptEditor".to_owned()]);
 
-        let mut tabs = vec![];
-        tabs.push({
-            let output_pane = OutputLogPane::new(new_self.output_log.clone());
-            let output_pane = Pane::OutputLog(output_pane);
+        let [_, _] = dock_state.main_surface_mut().split_below(
+            NodeIndex::root(),
+            0.7,
+            vec!["OutputLog".to_owned()],
+        );
 
-            let script_pane = ScriptEditorPane::default();
-            let script_pane = Pane::ScriptEditor(script_pane);
-
-            let children = vec![
-                tiles.insert_pane(script_pane),
-                tiles.insert_pane(output_pane),
-            ];
-            tiles.insert_vertical_tile(children)
-        });
-
-        let root = tiles.insert_tab_tile(tabs);
-
-        let tree = egui_tiles::Tree::new("my_tree", root, tiles);
-
-        new_self.panes = tree;
-         */
+        new_self.tree = dock_state;
 
         new_self
     }
 }
 
 impl UIPanel for ScriptPanel {
-    fn show(&mut self, _ctx: &egui::Context, ui: &mut egui::Ui) {
+    fn show(&mut self, ctx: &egui::Context, _ui: &mut egui::Ui) {
         if self.finished.load(Ordering::SeqCst) {
             self.finished.store(false, Ordering::SeqCst);
             self.stop();
         }
 
-        //self.panes.ui(&mut self.behavior, ui);
+        DockArea::new(&mut self.tree)
+            .style(Style::from_egui(ctx.style().as_ref()))
+            .show(ctx, &mut self.panels);
 
         /*
 
@@ -310,7 +287,7 @@ impl UIPanel for ScriptPanel {
         self.is_running.store(true, Ordering::SeqCst);
 
         let finished = self.finished.clone();
-        let script = self.script.get_copy();
+        let script = self.panels.script.get_copy();
 
         // Clear the output log
         self.output_log.lock().unwrap().clear();
@@ -389,7 +366,8 @@ impl UIPanel for ScriptPanel {
             if !self.debug_key && hotkey_pressed {
                 self.debug_key = true;
                 //self.rhai_interface.test_script();
-                self.script
+                self.panels
+                    .script
                     .set_script(cs_scripting::rhai_interface::TEST_SCRIPT.to_string());
                 self.start();
             } else if self.debug_key && !hotkey_pressed {
@@ -404,7 +382,8 @@ impl UIPanel for ScriptPanel {
             if !self.debug_key && hotkey_pressed2 {
                 self.debug_key = true;
 
-                self.script
+                self.panels
+                    .script
                     .set_script(cs_scripting::rhai_interface::TEST_SCRIPT.to_string());
             } else if self.debug_key && !hotkey_pressed2 {
                 self.debug_key = false;
@@ -432,7 +411,7 @@ impl UIPanel for ScriptPanel {
     }
 
     fn can_start(&self) -> bool {
-        !self.script.is_empty()
+        !self.panels.script.is_empty()
     }
 
     fn set_hotkey(&mut self, hotkey: AppKeycode) {
@@ -449,10 +428,10 @@ impl UIPanel for ScriptPanel {
                 ui.separator();
 
                 if ui.button(RESET_EMOJI).clicked() {
-                    self.font_size = 13.0;
+                    self.panels.font_size = 13.0;
                 }
             });
-            ui.add(egui::Slider::new(&mut self.font_size, 8.0..=24.0));
+            ui.add(egui::Slider::new(&mut self.panels.font_size, 8.0..=24.0));
 
             ui.separator();
 
@@ -462,14 +441,14 @@ impl UIPanel for ScriptPanel {
                 ui.separator();
 
                 if ui.button(RESET_EMOJI).clicked() {
-                    self.theme = 7;
+                    self.panels.theme = 7;
                 }
             });
 
             ui.horizontal(|ui| {
                 egui::Grid::new("themes").num_columns(2).show(ui, |ui| {
                     for (i, theme) in DEFAULT_THEMES.iter().enumerate() {
-                        ui.radio_value(&mut self.theme, i, theme.name);
+                        ui.radio_value(&mut self.panels.theme, i, theme.name);
 
                         if i % 3 == 1 {
                             ui.end_row();
@@ -483,10 +462,9 @@ impl UIPanel for ScriptPanel {
 
 impl ScriptPanel {
     pub fn load(&mut self, value: ScriptPanel) {
-        self.font_size = value.font_size;
-        self.theme = value.theme;
-        self.script = value.script;
-        //self.panes = value.panes;
+        self.tree = value.tree;
+        self.panels = value.panels;
+        self.panels.output_log = self.output_log.clone();
     }
 
     #[inline]
@@ -495,7 +473,7 @@ impl ScriptPanel {
     }
 
     fn save_file(&mut self) {
-        if self.script.save() {
+        if self.panels.script.save() {
             let files = FileDialog::new()
                 .add_filter("rhai", &["rhai"])
                 .set_directory("/")
@@ -505,8 +483,8 @@ impl ScriptPanel {
 
             match files {
                 Some(file) => {
-                    self.script.set_script_path(Some(file));
-                    self.script.save();
+                    self.panels.script.set_script_path(Some(file));
+                    self.panels.script.save();
                 }
                 None => {
                     println!("No file selected");
@@ -523,6 +501,99 @@ impl ScriptPanel {
 
         println!("{:?}", files);
 
-        self.script.load(files);
+        self.panels.script.load(files);
+    }
+
+    fn output_log(&mut self, ui: &mut egui::Ui) {
+        ui.label("My output log");
+    }
+
+    fn script_editor(&mut self, ui: &mut egui::Ui) {
+        ui.label("My script editor");
+    }
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+struct Panels {
+    script: Script,
+    font_size: f32,
+    theme: usize,
+
+    #[serde(skip)]
+    output_log: Arc<Mutex<OutputLog>>,
+}
+
+impl TabViewer for Panels {
+    type Tab = String;
+
+    fn title(&mut self, tab: &mut Self::Tab) -> egui::WidgetText {
+        match tab.as_str() {
+            "OutputLog" => "Output Log".into(),
+            "ScriptEditor" => "Script Editor".into(),
+            _ => "Unknown".into(),
+        }
+    }
+
+    fn ui(&mut self, ui: &mut egui::Ui, tab: &mut Self::Tab) {
+        match tab.as_str() {
+            "OutputLog" => {
+                self.output_log(ui);
+            }
+            "ScriptEditor" => {
+                self.script_editor(ui);
+            }
+            _ => {}
+        }
+    }
+}
+
+impl Default for Panels {
+    fn default() -> Self {
+        Self {
+            script: Script::default(),
+            font_size: 13.0,
+            theme: 7,
+            output_log: Arc::new(Mutex::new(OutputLog::new())),
+        }
+    }
+}
+
+impl Panels {
+    pub fn new(output_log: Arc<Mutex<OutputLog>>) -> Self {
+        Self {
+            script: Script::default(),
+            font_size: 13.0,
+            theme: 7,
+            output_log,
+        }
+    }
+
+    fn output_log(&mut self, ui: &mut egui::Ui) {
+        egui::ScrollArea::vertical()
+            .id_source("output_log")
+            .show(ui, |ui| {
+                let output_log = self.output_log.lock().unwrap();
+                let mut text_buffer = output_log.get_log_copy();
+
+                ui.add(
+                    egui::TextEdit::multiline(&mut text_buffer)
+                        .font(egui::TextStyle::Monospace)
+                        .code_editor()
+                        .desired_rows(6)
+                        .lock_focus(true)
+                        .desired_width(f32::INFINITY)
+                        .cursor_at_end(true),
+                );
+            });
+    }
+    fn script_editor(&mut self, ui: &mut egui::Ui) {
+        CodeEditor::default()
+            .id_source("code editor")
+            .with_rows(18)
+            .with_fontsize(self.font_size)
+            .with_theme(DEFAULT_THEMES[self.theme])
+            .with_syntax(Syntax::rust())
+            .with_numlines(true)
+            .show(ui, self.script.get_mut());
     }
 }

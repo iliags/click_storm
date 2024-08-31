@@ -79,8 +79,7 @@ eframe = { version = "0.28", default-features = false, features = [
     "persistence",   # Enable restoring app state when restarting the app.
 ] }
 egui_code_editor = "0.2"
-#egui_tiles = "0.9"
-egui_dock = "0.13"
+egui_dock = { version = "0.13", features = ["serde"] }
 
 # File dialog
 rfd = "0.14"
