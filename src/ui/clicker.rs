@@ -494,9 +494,6 @@ impl ClickerPanel {
     fn ui_actions(&mut self, ui: &mut egui::Ui) {
         ui.centered_and_justified(|ui| {
             ui.columns(2, |cols| {
-                // TODO: Change between run script and start click storm
-                // Note: Not localized text
-
                 let keycode: device_query::Keycode = self.hotkey_code.into();
                 let key_code_text = format!(" ({})", keycode).to_owned();
                 cols[0].centered_and_justified(|ui| {
