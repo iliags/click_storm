@@ -12,7 +12,11 @@ fn drag_from_to_rel(_: ClickStormInterface, _: int, _: int, _: int, _: int, _: M
 
 fn drag_to(_: ClickStormInterface, _: int, _: int, _: MouseButton) -> ;
 
+fn get_mouse_position(_: ClickStormInterface) -> MouseButton;
+
 fn get_screen_size(_: ClickStormInterface) -> ScreenSize;
+
+fn move_mouse_to(_: ClickStormInterface, _: ScreenSize) -> ;
 
 fn move_mouse_to(_: ClickStormInterface, _: int, _: int) -> ;
 
@@ -25,6 +29,8 @@ fn rand_bool(_: ClickStormInterface, _: float) -> bool;
 fn rand_range(_: ClickStormInterface, _: int, _: int) -> int;
 
 fn rand_range_excl(_: ClickStormInterface, _: int, _: int) -> int;
+
+fn scroll(_: ClickStormInterface, _: int) -> ;
 
 fn set_key(_: ClickStormInterface, _: AppKeycode, _: ButtonDirection) -> ;
 
@@ -298,33 +304,13 @@ fn to_string(value: ButtonDirection) -> String;
 }
 
 module MouseButton {
-const Left: MouseButton;
+fn get x(value: MousePosition) -> int;
 
-const Middle: MouseButton;
+fn get y(value: MousePosition) -> int;
 
-const Right: MouseButton;
+fn to_debug(value: MousePosition) -> String;
 
-const ScrollDown: MouseButton;
-
-const ScrollLeft: MouseButton;
-
-const ScrollRight: MouseButton;
-
-const ScrollUp: MouseButton;
-
-op !=(MouseButton, MouseButton) -> bool;
-
-op ==(MouseButton, MouseButton) -> bool;
-
-/// Return the current variant of `MouseButton`.
-fn get enum_type(value: MouseButton) -> String;
-
-/// Return the value of `MouseButton`.
-fn get value(_: MouseButton) -> ?;
-
-fn to_debug(value: MouseButton) -> String;
-
-fn to_string(value: MouseButton) -> String;
+fn to_string(value: MousePosition) -> String;
 }
 
 module ScreenSize {
