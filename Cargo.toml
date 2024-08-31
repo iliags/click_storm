@@ -10,7 +10,7 @@ build = "build.rs"
 default-run = "click_storm"
 
 [build-dependencies]
-embed-resource = { version = "2.4" }
+#embed-resource = { version = "2.4" }
 
 # Click Storm application
 [[bin]]
