@@ -5,6 +5,10 @@ version = Version:{" "}
 source = Code source
 reset = Réinitialiser
 
+# Panels
+clicker = Clic
+script = Scénario
+
 # Settings menu
 hotkey = Raccourci
 change_hotkey = Changer le raccourci
@@ -20,6 +24,7 @@ hours = Heures
 minutes = Minutes
 seconds = Secondes
 milliseconds = Millisecondes
+milliseconds_warning = 0ms n'est pas recommandé
 click_interval_desc = L'intervalle entre chaque clic
 variation_desc = La variation de l'intervalle entre chaque clic
 repeat_variation = Variation (ms):
@@ -35,6 +40,12 @@ mouse_button = Bouton de souris
 left = Gauche
 middle = Milieu
 right = Droite
+back = Retour
+forward = Avant
+scroll_up = Faites défiler vers le haut
+scroll_down = Faites défiler vers le bas
+scroll_left = Faites défiler vers la gauche
+scroll_right = Faites défiler vers la droite
 
 # Repeat options
 repeat_options = Options de répétition
@@ -55,5 +66,21 @@ pick_position_desc = Cliquez sur le bouton pour choisir la position du clic
 position_desc = La position du clic
 
 # Actions
+actions = Actes
 start = Démarrer
 stop = Arrêter
+
+# Scripting
+log = Journal
+misc = Divers
+none = Aucun
+font_size = Taille de la police
+theme = Thème
+run = Exécuter
+
+# File
+new = Nouveau
+open = Ouvrir
+save = Enregistrer
+reload = Recharger
+reload_tooltip = Recharger le script depuis le fichier sur le disque

@@ -5,10 +5,14 @@ version = Version:{" "}
 source = Source code
 reset = Reset
 
+# Panels
+clicker = Clicker
+script = Script
+
 # Settings menu
 hotkey = Hotkey
 change_hotkey = Change Hotkey
-change_hotkey_desc = Change the hotkey to start and stop the clicker
+change_hotkey_desc = Change the hotkey to start and stop actions
 press_key = Press a key
 reset_hotkey = Reset Hotkey
 reset_hotkey_desc = Reset the hotkey to the default value
@@ -20,6 +24,7 @@ hours = Hours
 minutes = Minutes
 seconds = Seconds
 milliseconds = Milliseconds
+milliseconds_warning = 0ms is not recommended
 click_interval_desc = The interval between each click
 variation_desc = The variation in the interval between each click
 repeat_variation = Variation (ms):
@@ -61,5 +66,21 @@ pick_position_desc = Click anywhere on the screen to set the position
 position_desc = The position to click
 
 # Actions
+actions = Actions
 start = Start
 stop = Stop
+
+# Scripting
+log = Log
+misc = Misc
+none = None
+font_size = Font Size
+theme = Theme
+run = Run
+
+# File
+new = New
+open = Open
+save = Save
+reload = Reload
+reload_tooltip = Reload the script from the file on disk

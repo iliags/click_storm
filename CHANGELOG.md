@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.2.2
+
+* Basic script editor with log output
+  * VSCode is still recommended for larger scripts
+* Script execution
+* Script integration modules moved into scripting crate
+* Added warning about using 0ms in Clicker (don't do it, things misbehave)
+
 ## 0.2.1
 
 * Fix Mac build

@@ -1,6 +1,6 @@
 [package]
 name = "click_storm"
-version = "0.2.1"
+version = "0.2.2"
 authors = ["James Lennon"]
 edition = "2021"
 include = ["LICENSE-APACHE", "LICENSE-MIT", "**/*.rs", "Cargo.toml"]
@@ -17,7 +17,7 @@ embed-resource = { version = "2.4" }
 name = "click_storm"
 path = "src/main.rs"
 
-# Code generation, currently generates the definition files for the scripting engine LSP
+# Currently used to generate the definition files for the scripting engine LSP
 [[bin]]
 name = "cs_codegen"
 path = "crates/cs_codegen/src/main.rs"
@@ -78,6 +78,11 @@ eframe = { version = "0.28", default-features = false, features = [
     "glow",          # Use the glow rendering backend. Alternative: "wgpu".
     "persistence",   # Enable restoring app state when restarting the app.
 ] }
+egui_code_editor = "0.2"
+egui_dock = { version = "0.13", features = ["serde"] }
+
+# File dialog
+rfd = "0.14"
 
 # Localization
 fluent = "0.16"
@@ -98,5 +103,5 @@ lto = true
 opt-level = 2
 
 [features]
-#default = ["scripting"]
-scripting = ["dep:rhai", "cs_hal/scripting", "cs_scripting/scripting"]
+default = ["scripting"]
+scripting = ["dep:rhai", "cs_scripting/scripting"]

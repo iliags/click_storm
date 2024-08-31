@@ -2,9 +2,12 @@ use cs_hal::{
     display::screen_size::ScreenSize,
     input::{button_direction::ButtonDirection, keycode::AppKeycode, mouse_button::MouseButton},
 };
+use device_query::DeviceQuery;
 use enigo::{Button, Enigo, Keyboard, Mouse, Settings};
 use rand::Rng;
 use std::sync::{Arc, Mutex};
+
+use crate::hal::mouse::MousePosition;
 
 #[derive(Debug, Clone)]
 pub struct ClickStormInterface {
@@ -34,11 +37,15 @@ impl ClickStormInterface {
     /// Click at the specified coordinates with the specified mouse button.
     pub(super) fn click_at(&mut self, x: i32, y: i32, mouse_button: MouseButton) {
         let mut enigo = self.enigo.lock().unwrap();
+
+        let x = x.max(0);
+        let y = y.max(0);
+
         let _ = enigo.move_mouse(x, y, enigo::Coordinate::Abs);
         let _ = enigo.button(mouse_button.into(), enigo::Direction::Click);
     }
 
-    // Click at a random point within the specified specified area, X/Y starts at the top left corner.
+    /// Click at a random point within the specified specified area, X/Y starts at the top left corner.
     pub(super) fn click_within(
         &mut self,
         x: i32,
@@ -48,6 +55,9 @@ impl ClickStormInterface {
         mouse_button: MouseButton,
     ) {
         let mut enigo = self.enigo.lock().unwrap();
+
+        let x = x.max(0);
+        let y = y.max(0);
 
         let rand_coords = (
             self.rng.gen_range(x..=x + width),
@@ -61,6 +71,20 @@ impl ClickStormInterface {
     /// Move the mouse to the specified coordinates.
     pub(super) fn move_mouse_to(&mut self, x: i32, y: i32) {
         let mut enigo = self.enigo.lock().unwrap();
+
+        let x = x.max(0);
+        let y = y.max(0);
+
+        let _ = enigo.move_mouse(x, y, enigo::Coordinate::Abs);
+    }
+
+    /// Move the mouse to the specified coordinates.
+    pub(super) fn move_mouse_to_screen_size(&mut self, screen_size: ScreenSize) {
+        let mut enigo = self.enigo.lock().unwrap();
+
+        let x = screen_size.x().max(0);
+        let y = screen_size.y().max(0);
+
         let _ = enigo.move_mouse(x, y, enigo::Coordinate::Abs);
     }
 
@@ -70,10 +94,27 @@ impl ClickStormInterface {
         let _ = enigo.move_mouse(x, y, enigo::Coordinate::Rel);
     }
 
+    /// Scrolls the mouse wheel by 15 degree increments (positive for up, negative for down).
+    pub(super) fn scroll(&mut self, x: i32) {
+        let mut enigo = self.enigo.lock().unwrap();
+        let _ = enigo.scroll(x, enigo::Axis::Vertical);
+    }
+
+    /// Gets the current mouse position.
+    pub(super) fn get_mouse_position(&mut self) -> MousePosition {
+        let device = device_query::DeviceState::new();
+        device.get_mouse().coords.into()
+    }
+
     /// Drags from the current mouse position to the specified coordinates.
     pub(super) fn drag_to(&mut self, x: i32, y: i32, mouse_button: MouseButton) {
         let mut enigo = self.enigo.lock().unwrap();
+
+        let x = x.max(0);
+        let y = y.max(0);
+
         let button: Button = mouse_button.clone().into();
+
         let _ = enigo.button(button, enigo::Direction::Press);
         let _ = enigo.move_mouse(x, y, enigo::Coordinate::Abs);
         let _ = enigo.button(button, enigo::Direction::Release);
@@ -90,9 +131,36 @@ impl ClickStormInterface {
     ) {
         let mut enigo = self.enigo.lock().unwrap();
         let button: Button = mouse_button.clone().into();
+
+        let x1 = x1.max(0);
+        let y1 = y1.max(0);
+        let x2 = x2.max(0);
+        let y2 = y2.max(0);
+
         let _ = enigo.move_mouse(x1, y1, enigo::Coordinate::Abs);
         let _ = enigo.button(button, enigo::Direction::Press);
         let _ = enigo.move_mouse(x2, y2, enigo::Coordinate::Abs);
+        let _ = enigo.button(button, enigo::Direction::Release);
+    }
+
+    /// Drags from the specified coordinates to the specified coordinates.
+    pub(super) fn drag_from_to_rel(
+        &mut self,
+        x1: i32,
+        y1: i32,
+        x2: i32,
+        y2: i32,
+        mouse_button: MouseButton,
+    ) {
+        let mut enigo = self.enigo.lock().unwrap();
+        let button: Button = mouse_button.clone().into();
+
+        let x1 = x1.max(0);
+        let y1 = y1.max(0);
+
+        let _ = enigo.move_mouse(x1, y1, enigo::Coordinate::Abs);
+        let _ = enigo.button(button, enigo::Direction::Press);
+        let _ = enigo.move_mouse(x2, y2, enigo::Coordinate::Rel);
         let _ = enigo.button(button, enigo::Direction::Release);
     }
 
@@ -134,6 +202,12 @@ impl ClickStormInterface {
     /// Get a random boolean value (50/50).
     pub(super) fn rand_bool(&mut self) -> bool {
         self.rng.gen_bool(0.5)
+    }
+
+    /// Get a random boolean value (50/50).
+    pub(super) fn rand_bool_prob(&mut self, probability: f32) -> bool {
+        let probability = probability.clamp(0.0, 1.0);
+        self.rng.gen_bool(probability as f64)
     }
 
     /**************************************************************************

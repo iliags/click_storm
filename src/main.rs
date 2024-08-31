@@ -11,7 +11,7 @@ fn main() -> eframe::Result {
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             // Set the window size
-            .with_inner_size([WIDTH, HEIGHT])
+            .with_inner_size([750.0, HEIGHT])
             .with_min_inner_size([WIDTH, HEIGHT])
             // Allow resizing the window
             .with_resizable(true)

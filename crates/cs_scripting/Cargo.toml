@@ -8,6 +8,7 @@ cs_hal = { workspace = true }
 enigo = { workspace = true }
 device_query = { workspace = true }
 rand = { workspace = true }
+serde = { workspace = true }
 rhai = { workspace = true, optional = true, features = [
     "only_i32",
     "f32_float",

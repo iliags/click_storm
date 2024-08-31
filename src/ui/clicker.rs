@@ -6,7 +6,7 @@ use std::{
     thread::{self, JoinHandle},
 };
 
-use cs_hal::input::{mouse_button::MouseButton, mouse_click::MouseClickType};
+use cs_hal::input::{keycode::AppKeycode, mouse_button::MouseButton, mouse_click::MouseClickType};
 use device_query::{DeviceQuery, DeviceState, MouseState};
 use egui::Margin;
 use enigo::{Enigo, Mouse, Settings};
@@ -33,6 +33,9 @@ pub struct ClickerPanel {
     repeat_count: usize,
 
     #[serde(skip)]
+    hotkey_code: AppKeycode,
+
+    #[serde(skip)]
     language: LocaleText,
 
     #[serde(skip)]
@@ -53,7 +56,6 @@ pub struct ClickerPanel {
 
 impl Default for ClickerPanel {
     fn default() -> Self {
-        // TODO: Handle error
         let enigo = Enigo::new(&Settings::default()).unwrap_or_else(|_| {
             panic!("Failed to create Enigo instance. Please make sure you are running the application on a system that supports the Enigo library.")
         });
@@ -67,6 +69,7 @@ impl Default for ClickerPanel {
             language: LocaleText::default(),
             cursor_position_fixed: (0, 0),
             repeat_count: 0,
+            hotkey_code: AppKeycode::F6,
             device_state: DeviceState::new(),
             display_size,
             picking_position: false,
@@ -78,15 +81,7 @@ impl Default for ClickerPanel {
 
 impl UIPanel for ClickerPanel {
     fn show(&mut self, ctx: &egui::Context, ui: &mut egui::Ui) {
-        if self.is_running.load(Ordering::SeqCst) {
-            // Darken the UI
-            egui::CentralPanel::default().show(ctx, |ui| {
-                ui.style_mut().visuals.widgets.noninteractive.bg_fill =
-                    egui::Color32::from_black_alpha(128);
-            });
-
-            // TODO: Add an animation or something
-        } else {
+        ui.add_enabled_ui(!self.is_running.load(Ordering::SeqCst), |ui| {
             self.ui_interval(ui);
 
             ui.horizontal(|ui| {
@@ -95,7 +90,14 @@ impl UIPanel for ClickerPanel {
             });
 
             self.ui_cursor_position(ui);
-        }
+        });
+
+        egui::TopBottomPanel::bottom("actions")
+            .show_separator_line(true)
+            .max_height(50.0)
+            .show(ctx, |ui| {
+                self.ui_actions(ui);
+            });
     }
 
     fn start(&mut self) {
@@ -153,10 +155,8 @@ impl UIPanel for ClickerPanel {
 
     fn toggle(&mut self) {
         if self.is_running.load(Ordering::SeqCst) {
-            //println!("Stop");
             self.stop();
         } else {
-            //println!("Start");
             self.start();
         }
     }
@@ -165,14 +165,19 @@ impl UIPanel for ClickerPanel {
         self.is_running.load(Ordering::SeqCst)
     }
 
-    fn name(&self) -> &str {
-        // TODO: Get the localized string
-        "Clicker"
+    fn name(&self) -> String {
+        self.get_locale_string("clicker").to_owned()
     }
 
     fn as_any(&mut self) -> &mut dyn std::any::Any {
         self
     }
+
+    fn set_hotkey(&mut self, hotkey: AppKeycode) {
+        self.hotkey_code = hotkey;
+    }
+
+    fn show_settings(&mut self, _ctx: &egui::Context, _ui: &mut egui::Ui) {}
 }
 
 impl ClickerPanel {
@@ -228,9 +233,10 @@ impl ClickerPanel {
                             cols[7].centered_and_justified(|ui| {
                                 ui.add(
                                     egui::DragValue::new(self.settings.interval_milliseconds_mut())
-                                        .range(0..=1000)
+                                        .range(1..=1000)
                                         .speed(1),
-                                );
+                                )
+                                .on_hover_text(self.get_locale_string("milliseconds_warning"));
                             });
                         });
                     });
@@ -484,6 +490,42 @@ impl ClickerPanel {
         cursor_position_frame
             .response
             .on_hover_text(self.get_locale_string("position_desc"));
+    }
+
+    fn ui_actions(&mut self, ui: &mut egui::Ui) {
+        ui.centered_and_justified(|ui| {
+            ui.columns(2, |cols| {
+                let keycode: device_query::Keycode = self.hotkey_code.into();
+                let key_code_text = format!(" ({})", keycode).to_owned();
+                cols[0].centered_and_justified(|ui| {
+                    let enabled = !self.is_running() && self.can_start();
+
+                    let mut start_text = self.get_locale_string("start");
+                    start_text.push_str(&key_code_text);
+
+                    let start_button = ui.add_enabled(
+                        enabled,
+                        egui::Button::new(start_text).min_size(egui::vec2(10.0, 30.0)),
+                    );
+
+                    if start_button.clicked() {
+                        self.start();
+                    }
+                });
+                cols[1].centered_and_justified(|ui| {
+                    ui.add_enabled_ui(self.is_running(), |ui| {
+                        let mut stop_text = self.get_locale_string("stop");
+                        stop_text.push_str(&key_code_text);
+
+                        if ui.button(stop_text).clicked() {
+                            self.stop();
+                        }
+                    });
+
+                    ui.end_row();
+                });
+            });
+        });
     }
 
     #[inline]
