@@ -307,8 +307,6 @@ impl UIPanel for ScriptPanel {
     }
 
     fn handle_input(&mut self) {
-        // TODO: Save keybinding
-
         let current_keys = self.device_state.get_keys();
 
         let save_shortcut = current_keys.contains(&AppKeycode::LControl.into())
@@ -318,7 +316,7 @@ impl UIPanel for ScriptPanel {
             self.save_gate.set_waiting();
             println!("Saving script");
             self.save_file();
-        } else if self.save_gate.is_waiting_for_reset() && !save_shortcut {
+        } else if !save_shortcut && self.save_gate.is_waiting_for_reset() {
             self.save_gate.reset();
         }
 
