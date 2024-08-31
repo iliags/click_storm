@@ -201,48 +201,58 @@ impl UIPanel for ScriptPanel {
         egui::ScrollArea::vertical()
             .id_source("scripting")
             .show(ui, |ui| {
+                /*
                 egui::CollapsingHeader::new(self.get_locale_string("script"))
                     .default_open(true)
                     .show(ui, |ui| {
-                        ui.group(|ui| {
-                            egui::ScrollArea::vertical()
-                                .id_source("text_editor")
-                                .max_height(256.0)
-                                .show(ui, |ui| {
-                                    CodeEditor::default()
-                                        .id_source("code editor")
-                                        .with_rows(12)
-                                        .with_fontsize(self.font_size)
-                                        .with_theme(DEFAULT_THEMES[self.theme])
-                                        .with_syntax(Syntax::rust())
-                                        .with_numlines(true)
-                                        .show(ui, self.script.get_mut());
-                                });
+                     */
+                ui.group(|ui| {
+                    egui::ScrollArea::vertical()
+                        .id_source("text_editor")
+                        .max_height(256.0)
+                        .show(ui, |ui| {
+                            CodeEditor::default()
+                                .id_source("code editor")
+                                .with_rows(12)
+                                .with_fontsize(self.font_size)
+                                .with_theme(DEFAULT_THEMES[self.theme])
+                                .with_syntax(Syntax::rust())
+                                .with_numlines(true)
+                                .show(ui, self.script.get_mut());
                         });
-                    });
+                });
+                //});
 
+                /*
+                egui::TopBottomPanel::bottom("output_log_panel")
+                    .min_height(105.0)
+                    .show(ctx, |ui| {
+                     */
+                /*
                 egui::CollapsingHeader::new(self.get_locale_string("log"))
                     .default_open(true)
                     .show(ui, |ui| {
-                        ui.group(|ui| {
-                            egui::ScrollArea::vertical()
-                                .id_source("output_log")
-                                .show(ui, |ui| {
-                                    let output_log = self.output_log.lock().unwrap();
-                                    let mut text_buffer = output_log.get_log_copy();
+                     */
+                ui.group(|ui| {
+                    egui::ScrollArea::vertical()
+                        .id_source("output_log")
+                        .show(ui, |ui| {
+                            let output_log = self.output_log.lock().unwrap();
+                            let mut text_buffer = output_log.get_log_copy();
 
-                                    ui.add(
-                                        egui::TextEdit::multiline(&mut text_buffer)
-                                            .font(egui::TextStyle::Monospace)
-                                            .code_editor()
-                                            .desired_rows(6)
-                                            .lock_focus(true)
-                                            .desired_width(f32::INFINITY)
-                                            .cursor_at_end(true),
-                                    );
-                                });
+                            ui.add(
+                                egui::TextEdit::multiline(&mut text_buffer)
+                                    .font(egui::TextStyle::Monospace)
+                                    .code_editor()
+                                    .desired_rows(6)
+                                    .lock_focus(true)
+                                    .desired_width(f32::INFINITY)
+                                    .cursor_at_end(true),
+                            );
                         });
-                    });
+                });
+                //});
+                //});
             });
     }
 

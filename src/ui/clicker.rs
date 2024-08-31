@@ -80,7 +80,7 @@ impl Default for ClickerPanel {
 }
 
 impl UIPanel for ClickerPanel {
-    fn show(&mut self, _ctx: &egui::Context, ui: &mut egui::Ui) {
+    fn show(&mut self, ctx: &egui::Context, ui: &mut egui::Ui) {
         ui.add_enabled_ui(!self.is_running.load(Ordering::SeqCst), |ui| {
             self.ui_interval(ui);
 
@@ -92,9 +92,12 @@ impl UIPanel for ClickerPanel {
             self.ui_cursor_position(ui);
         });
 
-        ui.separator();
-
-        self.ui_actions(ui);
+        egui::TopBottomPanel::bottom("actions")
+            .show_separator_line(true)
+            .max_height(50.0)
+            .show(ctx, |ui| {
+                self.ui_actions(ui);
+            });
     }
 
     fn start(&mut self) {
@@ -493,6 +496,7 @@ impl ClickerPanel {
             ui.columns(2, |cols| {
                 // TODO: Change between run script and start click storm
                 // Note: Not localized text
+
                 let keycode: device_query::Keycode = self.hotkey_code.into();
                 let key_code_text = format!(" ({})", keycode).to_owned();
                 cols[0].centered_and_justified(|ui| {
@@ -501,7 +505,10 @@ impl ClickerPanel {
                     let mut start_text = self.get_locale_string("start");
                     start_text.push_str(&key_code_text);
 
-                    let start_button = ui.add_enabled(enabled, egui::Button::new(start_text));
+                    let start_button = ui.add_enabled(
+                        enabled,
+                        egui::Button::new(start_text).min_size(egui::vec2(1.0, 1.0)),
+                    );
 
                     if start_button.clicked() {
                         self.start();
