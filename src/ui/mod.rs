@@ -13,6 +13,9 @@ pub(crate) trait UIPanel {
     /// Show the panel
     fn show(&mut self, ctx: &egui::Context, ui: &mut egui::Ui);
 
+    /// Show settings
+    fn show_settings(&mut self, ctx: &egui::Context, ui: &mut egui::Ui);
+
     /// Start the relevant action
     fn start(&mut self);
 

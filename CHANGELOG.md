@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 * Basic script editor with log output
   * VSCode is still recommended for larger scripts
 
-Modified ftl keys (needs retranslating):
+Modified fluent keys (needs retranslating):
 
 * change_hotkey_desc
 * actions
@@ -26,6 +26,9 @@ Modified ftl keys (needs retranslating):
 * scroll (up, down, left, right)
 * clicker
 * script
+* font_size
+* theme
+* run
 
 ## 0.2.1
 

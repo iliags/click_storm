@@ -124,6 +124,10 @@ impl eframe::App for ClickStormApp {
                         ui.close_menu();
                     }
 
+                    for panel in self.panels.iter_mut() {
+                        panel.show_settings(ctx, ui);
+                    }
+
                     ui.separator();
 
                     // Language selection

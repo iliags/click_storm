@@ -176,6 +176,8 @@ impl UIPanel for ClickerPanel {
     fn set_hotkey(&mut self, hotkey: AppKeycode) {
         self.hotkey_code = hotkey;
     }
+
+    fn show_settings(&mut self, _ctx: &egui::Context, _ui: &mut egui::Ui) {}
 }
 
 impl ClickerPanel {

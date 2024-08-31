@@ -14,7 +14,7 @@ fn drag_to(_: ClickStormInterface, _: int, _: int, _: MouseButton) -> ;
 
 fn get_screen_size(_: ClickStormInterface) -> ScreenSize;
 
-fn move_mouse(_: ClickStormInterface, _: int, _: int) -> ;
+fn move_mouse_to(_: ClickStormInterface, _: int, _: int) -> ;
 
 fn new_click_storm() -> ClickStormInterface;
 

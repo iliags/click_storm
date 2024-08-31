@@ -1,9 +1,11 @@
 use std::path::PathBuf;
 
+use serde::{Deserialize, Serialize};
+
 /// Simple script structure
 ///
 /// The script_buffer is used as the primary workspace, the script is used to store the last saved
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Script {
     script: String,
     script_buffer: String,
@@ -25,7 +27,6 @@ impl Script {
         match path {
             Some(path) => {
                 let script = std::fs::read_to_string(&path).unwrap();
-                //let mut script = Script::new();
                 self.set_script(script);
                 self.set_script_path(Some(path));
             }

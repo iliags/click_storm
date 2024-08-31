@@ -73,6 +73,9 @@ stop = Stop
 log = Log
 misc = Misc
 none = None
+font_size = Font Size
+theme = Theme
+run = Run
 
 # File
 new = New

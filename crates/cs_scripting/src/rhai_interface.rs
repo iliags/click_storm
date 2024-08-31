@@ -114,7 +114,7 @@ impl RhaiInterface {
         self.engine
             .register_fn("click_at", ClickStormInterface::click_at)
             .register_fn("click_within", ClickStormInterface::click_within)
-            .register_fn("move_mouse", ClickStormInterface::move_mouse_to)
+            .register_fn("move_mouse_to", ClickStormInterface::move_mouse_to)
             .register_fn("add_position", ClickStormInterface::add_position)
             .register_fn("drag_to", ClickStormInterface::drag_to)
             .register_fn("drag_from_to", ClickStormInterface::drag_from_to)

@@ -5,7 +5,7 @@ use cs_scripting::{output_log::OutputLog, rhai_interface::RhaiInterface, script:
 use device_query::DeviceQuery;
 use egui::{Margin, TextBuffer};
 
-use egui_code_editor::{CodeEditor, ColorTheme, Syntax};
+use egui_code_editor::{CodeEditor, ColorTheme, Syntax, DEFAULT_THEMES};
 use rfd::FileDialog;
 
 use std::{
@@ -30,6 +30,11 @@ pub const SCRIPT_PANEL_KEY: &str = "script_panel";
 #[serde(default)]
 #[derive(Debug)]
 pub struct ScriptPanel {
+    font_size: f32,
+    theme: usize,
+
+    script: Script,
+
     #[serde(skip)]
     hotkey_code: AppKeycode,
 
@@ -38,9 +43,6 @@ pub struct ScriptPanel {
 
     #[serde(skip)]
     is_running: Arc<AtomicBool>,
-
-    #[serde(skip)]
-    script: Script,
 
     #[serde(skip)]
     thread: Option<JoinHandle<()>>,
@@ -69,6 +71,8 @@ impl Default for ScriptPanel {
         rhai_interface.initialize();
 
         Self {
+            font_size: 13.0,
+            theme: 7,
             hotkey_code: AppKeycode::F6.into(),
             language: LocaleText::default(),
             is_running: Arc::new(AtomicBool::new(false)),
@@ -118,6 +122,8 @@ impl UIPanel for ScriptPanel {
                                 // TODO: Check if there are changes, show a dialog if so
 
                                 self.script = Script::default();
+                                const NEW_SCRIPT: &str = "let cs = new_click_storm();\n\n";
+                                self.script.set_script(NEW_SCRIPT.to_string());
                             }
                         });
 
@@ -155,7 +161,7 @@ impl UIPanel for ScriptPanel {
                         cols[0].vertical_centered(|ui| {
                             let enabled = !self.is_running() && self.can_start();
 
-                            let mut start_text = self.get_locale_string("start");
+                            let mut start_text = self.get_locale_string("run");
                             start_text.push_str(&key_code_text);
 
                             let start_button =
@@ -202,8 +208,8 @@ impl UIPanel for ScriptPanel {
                                     CodeEditor::default()
                                         .id_source("code editor")
                                         .with_rows(12)
-                                        .with_fontsize(13.0)
-                                        .with_theme(ColorTheme::SONOKAI)
+                                        .with_fontsize(self.font_size)
+                                        .with_theme(DEFAULT_THEMES[self.theme])
                                         .with_syntax(Syntax::rust())
                                         .with_numlines(true)
                                         .show(ui, self.script.get_mut());
@@ -361,11 +367,54 @@ impl UIPanel for ScriptPanel {
     fn set_hotkey(&mut self, hotkey: AppKeycode) {
         self.hotkey_code = hotkey;
     }
+
+    fn show_settings(&mut self, _ctx: &egui::Context, ui: &mut egui::Ui) {
+        ui.separator();
+        ui.menu_button(self.get_locale_string("script"), |ui| {
+            ui.horizontal(|ui| {
+                let font_size_text = self.get_locale_string("font_size");
+                ui.label(font_size_text);
+
+                ui.separator();
+
+                if ui.button("⟳").clicked() {
+                    self.font_size = 13.0;
+                }
+            });
+            ui.add(egui::Slider::new(&mut self.font_size, 8.0..=24.0));
+
+            ui.separator();
+
+            ui.horizontal(|ui| {
+                ui.label(self.get_locale_string("theme"));
+
+                ui.separator();
+
+                if ui.button("⟳").clicked() {
+                    self.theme = 7;
+                }
+            });
+
+            ui.horizontal(|ui| {
+                egui::Grid::new("themes").num_columns(2).show(ui, |ui| {
+                    for (i, theme) in DEFAULT_THEMES.iter().enumerate() {
+                        ui.radio_value(&mut self.theme, i, theme.name);
+
+                        if i % 3 == 1 {
+                            ui.end_row();
+                        }
+                    }
+                });
+            });
+        });
+    }
 }
 
 impl ScriptPanel {
-    pub fn load(&mut self, _value: ScriptPanel) {
-        // TODO
+    pub fn load(&mut self, value: ScriptPanel) {
+        self.font_size = value.font_size;
+        self.theme = value.theme;
+        self.script = value.script;
     }
 
     #[inline]
