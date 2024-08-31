@@ -10,7 +10,6 @@ use device_query::DeviceQuery;
 use egui::{output, Margin, TextBuffer};
 
 use egui_code_editor::{CodeEditor, ColorTheme, Syntax, DEFAULT_THEMES};
-use egui_tiles::TileId;
 use rfd::FileDialog;
 
 use std::{
@@ -42,8 +41,7 @@ pub struct ScriptPanel {
 
     script: Script,
 
-    panes: egui_tiles::Tree<Pane>,
-
+    //panes: egui_tiles::Tree<Pane>,
     #[serde(skip)]
     behavior: TreeBehavior,
 
@@ -86,7 +84,7 @@ impl Default for ScriptPanel {
         let mut new_self = Self {
             font_size: 13.0,
             theme: 7,
-            panes: egui_tiles::Tree::new("None", TileId::from_u64(0), egui_tiles::Tiles::default()),
+            //panes: egui_tiles::Tree::new("None", TileId::from_u64(0), egui_tiles::Tiles::default()),
 
             // Serde skips
             behavior: TreeBehavior {},
@@ -105,6 +103,7 @@ impl Default for ScriptPanel {
             debug_key: false,
         };
 
+        /*
         let mut tiles = egui_tiles::Tiles::default();
 
         let mut tabs = vec![];
@@ -127,6 +126,7 @@ impl Default for ScriptPanel {
         let tree = egui_tiles::Tree::new("my_tree", root, tiles);
 
         new_self.panes = tree;
+         */
 
         new_self
     }
@@ -138,8 +138,6 @@ impl UIPanel for ScriptPanel {
             self.finished.store(false, Ordering::SeqCst);
             self.stop();
         }
-
-        self.panes.ui(&mut self.behavior, ui);
 
         //self.panes.ui(&mut self.behavior, ui);
 
@@ -340,24 +338,6 @@ impl UIPanel for ScriptPanel {
 
             finished.store(true, Ordering::SeqCst);
         }));
-
-        let output_log = self.output_log.lock().unwrap();
-        let text = output_log.get_log_copy();
-
-        if !text.is_empty() {
-            for (_id, tile) in self.panes.tiles.iter_mut() {
-                match tile {
-                    egui_tiles::Tile::Pane(pane) => match pane {
-                        Pane::OutputLog(output_pane) => {
-                            output_pane.output_log = self.output_log.clone();
-                            //println!("Output log: {}", text);
-                        }
-                        _ => {}
-                    },
-                    _ => {}
-                }
-            }
-        }
     }
 
     fn stop(&mut self) {
@@ -506,7 +486,7 @@ impl ScriptPanel {
         self.font_size = value.font_size;
         self.theme = value.theme;
         self.script = value.script;
-        self.panes = value.panes;
+        //self.panes = value.panes;
     }
 
     #[inline]

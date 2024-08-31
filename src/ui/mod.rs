@@ -65,6 +65,7 @@ pub(crate) trait UIPanel {
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 pub struct TreeBehavior {}
 
+/*
 impl egui_tiles::Behavior<Pane> for TreeBehavior {
     fn pane_ui(
         &mut self,
@@ -103,3 +104,4 @@ impl egui_tiles::Behavior<Pane> for TreeBehavior {
         }
     }
 }
+ */
