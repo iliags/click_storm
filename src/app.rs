@@ -4,7 +4,7 @@ use strum::IntoEnumIterator;
 
 use crate::do_once::DoOnceGate;
 use crate::localization::language::Language;
-use crate::localization::locale_text::LocaleText;
+use crate::settings::user_settings::UserSettings;
 use crate::ui::clicker::{self, ClickerPanel};
 use crate::ui::UIPanel;
 
@@ -22,9 +22,7 @@ use crate::ui::script::{self, ScriptPanel};
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
 pub struct ClickStormApp {
-    hotkey_code: AppKeycode,
-
-    language: LocaleText,
+    user_settings: UserSettings,
 
     active_panel: usize,
 
@@ -50,8 +48,7 @@ impl Default for ClickStormApp {
         ];
 
         Self {
-            hotkey_code: AppKeycode::F6,
-            language: LocaleText::default(),
+            user_settings: UserSettings::default(),
             active_panel: 0,
             panels,
             device_state: DeviceState::new(),
@@ -120,7 +117,7 @@ impl eframe::App for ClickStormApp {
                         .on_hover_text_at_pointer(self.get_locale_string("reset_hotkey_desc"))
                         .clicked()
                     {
-                        self.hotkey_code = AppKeycode::F6;
+                        self.user_settings.reset_hotkey();
                         ui.close_menu();
                     }
 
@@ -134,17 +131,17 @@ impl eframe::App for ClickStormApp {
                     ui.label(self.get_locale_string("language"));
 
                     egui::ComboBox::from_label("")
-                        .selected_text(self.language.get_language().as_str())
+                        .selected_text(self.user_settings.language().get_language().as_str())
                         .show_ui(ui, |ui| {
-                            let mut lang = self.language.get_language();
+                            let mut lang = self.user_settings.language().get_language();
                             for language in Language::iter() {
                                 let language_string = language.as_str();
                                 ui.selectable_value(&mut lang, language.clone(), language_string);
                             }
-                            self.language.set_language(lang);
+                            self.user_settings.language_mut().set_language(lang);
 
                             for panel in self.panels.iter_mut() {
-                                panel.set_language(self.language.clone());
+                                panel.set_language(self.user_settings.language().clone());
                             }
                         });
 
@@ -274,11 +271,11 @@ impl ClickStormApp {
             if !keys.is_empty() {
                 self.wait_for_key.set_waiting();
 
-                self.hotkey_code = AppKeycode::from(keys[0]);
-                println!("Hotkey set to: {:?}", self.hotkey_code);
+                self.user_settings.set_hotkey(AppKeycode::from(keys[0]));
+                println!("Hotkey set to: {:?}", self.user_settings.hotkey());
 
                 for panel in self.panels.iter_mut() {
-                    panel.set_hotkey(self.hotkey_code);
+                    panel.set_hotkey(self.user_settings.hotkey());
                 }
             }
         } else if self.wait_for_key.is_waiting_for_reset() {
@@ -291,7 +288,7 @@ impl ClickStormApp {
             let hot_key_pressed = self
                 .device_state
                 .get_keys()
-                .contains(&self.hotkey_code.into());
+                .contains(&self.user_settings.hotkey().into());
 
             if hot_key_pressed && !self.key_pressed {
                 self.key_pressed = true;
@@ -304,6 +301,6 @@ impl ClickStormApp {
 
     #[inline]
     fn get_locale_string(&self, key: &str) -> String {
-        self.language.get_locale_string(key)
+        self.user_settings.language().get_locale_string(key)
     }
 }
