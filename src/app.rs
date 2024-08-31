@@ -171,6 +171,8 @@ impl eframe::App for ClickStormApp {
                             ui.close_menu();
                         }
 
+                        // TODO: Put a check for updates button here
+
                         #[cfg(debug_assertions)]
                         {
                             ui.separator();
