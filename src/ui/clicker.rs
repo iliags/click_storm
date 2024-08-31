@@ -56,7 +56,6 @@ pub struct ClickerPanel {
 
 impl Default for ClickerPanel {
     fn default() -> Self {
-        // TODO: Handle error
         let enigo = Enigo::new(&Settings::default()).unwrap_or_else(|_| {
             panic!("Failed to create Enigo instance. Please make sure you are running the application on a system that supports the Enigo library.")
         });
@@ -153,10 +152,8 @@ impl UIPanel for ClickerPanel {
 
     fn toggle(&mut self) {
         if self.is_running.load(Ordering::SeqCst) {
-            //println!("Stop");
             self.stop();
         } else {
-            //println!("Start");
             self.start();
         }
     }
