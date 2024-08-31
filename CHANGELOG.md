@@ -8,29 +8,6 @@ All notable changes to this project will be documented in this file.
   * VSCode is still recommended for larger scripts
 * Script execution
 
-Modified fluent keys (needs retranslating):
-
-* change_hotkey_desc
-* actions
-* start
-* stop
-* log
-* misc
-* none
-* new
-* open
-* save
-* reload
-* back
-* forward
-* scroll (up, down, left, right)
-* clicker
-* script
-* font_size
-* theme
-* run
-* milliseconds_warning
-
 ## 0.2.1
 
 * Fix Mac build

@@ -12,7 +12,7 @@ script = Script
 # Settings menu
 hotkey = Hotkey
 change_hotkey = Change Hotkey
-change_hotkey_desc = Change the hotkey to start and stop
+change_hotkey_desc = Change the hotkey to start and stop actions
 press_key = Press a key
 reset_hotkey = Reset Hotkey
 reset_hotkey_desc = Reset the hotkey to the default value
