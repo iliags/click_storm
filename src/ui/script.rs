@@ -21,10 +21,8 @@ use super::UIPanel;
 use crate::{do_once::DoOnceGate, localization::locale_text::LocaleText};
 
 pub const SCRIPT_PANEL_KEY: &str = "script_panel";
-
-// TODO: Code editor settings
-// - Color theme
-// - Font size
+const NEW_SCRIPT: &str = "let cs = new_click_storm();\n\n";
+const RESET_EMOJI: &str = "⟳";
 
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)]
@@ -104,8 +102,8 @@ impl UIPanel for ScriptPanel {
         ui.group(|ui| {
             ui.columns(3, |cols| {
                 cols[0].group(|ui| {
-                    // Use the filename as the title
                     ui.vertical_centered(|ui| {
+                        // Use the filename as the title
                         let file_name = match self.script.get_filename() {
                             Some(file_name) => file_name,
                             None => self.get_locale_string("none"),
@@ -126,7 +124,6 @@ impl UIPanel for ScriptPanel {
                                 // TODO: Check if there are changes, show a dialog if so
 
                                 self.script = Script::default();
-                                const NEW_SCRIPT: &str = "let cs = new_click_storm();\n\n";
                                 self.script.set_script(NEW_SCRIPT.to_string());
                             }
                         });
@@ -141,7 +138,11 @@ impl UIPanel for ScriptPanel {
                         ui.separator();
 
                         ui.add_enabled_ui(self.script.has_path(), |ui| {
-                            if ui.button(self.get_locale_string("reload")).clicked() {
+                            if ui
+                                .button(self.get_locale_string("reload"))
+                                .on_hover_text(self.get_locale_string("reload_tooltip"))
+                                .clicked()
+                            {
                                 self.script.reload_from_disk();
                             }
                         });
@@ -208,7 +209,6 @@ impl UIPanel for ScriptPanel {
                                 .id_source("text_editor")
                                 .max_height(256.0)
                                 .show(ui, |ui| {
-                                    //let mut text_buffer = self.script.clone().to_string();
                                     CodeEditor::default()
                                         .id_source("code editor")
                                         .with_rows(12)
@@ -233,7 +233,7 @@ impl UIPanel for ScriptPanel {
 
                                     ui.add(
                                         egui::TextEdit::multiline(&mut text_buffer)
-                                            .font(egui::TextStyle::Monospace) // for cursor height
+                                            .font(egui::TextStyle::Monospace)
                                             .code_editor()
                                             .desired_rows(6)
                                             .lock_focus(true)
@@ -392,7 +392,7 @@ impl UIPanel for ScriptPanel {
 
                 ui.separator();
 
-                if ui.button("⟳").clicked() {
+                if ui.button(RESET_EMOJI).clicked() {
                     self.font_size = 13.0;
                 }
             });
@@ -405,7 +405,7 @@ impl UIPanel for ScriptPanel {
 
                 ui.separator();
 
-                if ui.button("⟳").clicked() {
+                if ui.button(RESET_EMOJI).clicked() {
                     self.theme = 7;
                 }
             });

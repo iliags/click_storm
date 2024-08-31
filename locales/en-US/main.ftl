@@ -82,3 +82,4 @@ new = New
 open = Open
 save = Save
 reload = Reload
+reload_tooltip = Reload the script from the file on disk
