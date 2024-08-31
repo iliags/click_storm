@@ -4,9 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## 0.2.2 WIP
 
-* Script execution
 * Basic script editor with log output
   * VSCode is still recommended for larger scripts
+* Script execution
 
 Modified fluent keys (needs retranslating):
 
