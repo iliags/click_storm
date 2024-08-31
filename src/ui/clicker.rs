@@ -70,7 +70,7 @@ impl Default for ClickerPanel {
             language: LocaleText::default(),
             cursor_position_fixed: (0, 0),
             repeat_count: 0,
-            hotkey_code: AppKeycode::F6.into(),
+            hotkey_code: AppKeycode::F6,
             device_state: DeviceState::new(),
             display_size,
             picking_position: false,

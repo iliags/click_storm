@@ -76,7 +76,7 @@ impl Default for ScriptPanel {
         Self {
             font_size: 13.0,
             theme: 7,
-            hotkey_code: AppKeycode::F6.into(),
+            hotkey_code: AppKeycode::F6,
             save_gate: DoOnceGate::default(),
             language: LocaleText::default(),
             is_running: Arc::new(AtomicBool::new(false)),
