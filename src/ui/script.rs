@@ -99,6 +99,8 @@ impl UIPanel for ScriptPanel {
             self.stop();
         }
 
+        /*
+
         ui.group(|ui| {
             ui.columns(3, |cols| {
                 cols[0].group(|ui| {
@@ -254,6 +256,7 @@ impl UIPanel for ScriptPanel {
                 //});
                 //});
             });
+             */
     }
 
     fn start(&mut self) {
