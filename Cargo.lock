@@ -791,7 +791,7 @@ dependencies = [
 
 [[package]]
 name = "click_storm"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "cs_hal",
  "cs_scripting",
