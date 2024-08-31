@@ -357,7 +357,7 @@ impl UIPanel for ScriptPanel {
         let save_shortcut = current_keys.contains(&AppKeycode::LControl.into())
             && current_keys.contains(&AppKeycode::S.into());
 
-        if save_shortcut && self.save_gate.is_inactive() {
+        if save_shortcut && !self.save_gate.is_waiting_for_reset() {
             self.save_gate.set_waiting();
             println!("Saving script");
             self.save_file();

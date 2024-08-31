@@ -39,11 +39,6 @@ impl DoOnceGate {
     pub fn is_waiting_for_reset(&self) -> bool {
         self.state == DoOnceState::WaitingForReset
     }
-
-    /// Check if the state is inactive
-    pub fn is_inactive(&self) -> bool {
-        self.state == DoOnceState::Inactive
-    }
 }
 
 #[cfg(test)]

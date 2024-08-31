@@ -1,6 +1,7 @@
 //! The scripting implementation
 
 /// Hardware abstraction layer
+#[cfg(feature = "scripting")]
 mod hal;
 
 #[cfg(feature = "scripting")]
