@@ -29,8 +29,6 @@ pub const SCRIPT_PANEL_KEY: &str = "script_panel";
 const NEW_SCRIPT: &str = "let cs = new_click_storm();\n\n";
 const RESET_EMOJI: &str = "⟳";
 
-// Note: It seems like the tiles are intended to be separate structs. The main struct needs to generate the tiles then pass the relevant data to the tiles.
-
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)]
 #[derive(Debug)]
@@ -62,14 +60,6 @@ pub struct ScriptPanel {
     // TODO: Change to RwLock since it is only written to in the worker thread
     #[serde(skip)]
     output_log: Arc<Mutex<OutputLog>>,
-
-    // TODO: Debug only
-    #[serde(skip)]
-    rhai_interface: RhaiInterface,
-
-    // TODO: Debug only
-    #[serde(skip)]
-    debug_key: bool,
 }
 
 impl Default for ScriptPanel {
@@ -87,10 +77,6 @@ impl Default for ScriptPanel {
             finished: Arc::new(AtomicBool::new(false)),
             device_state: device_query::DeviceState::new(),
             output_log: Arc::new(Mutex::new(OutputLog::new())),
-
-            // TODO: Debug only
-            rhai_interface: RhaiInterface::new(),
-            debug_key: false,
         };
 
         let mut dock_state = DockState::new(vec!["ScriptEditor".to_owned()]);
@@ -180,30 +166,6 @@ impl UIPanel for ScriptPanel {
         DockArea::new(&mut self.tree)
             .style(Style::from_egui(ctx.style().as_ref()))
             .show(ctx, &mut self.panels);
-
-        /*
-
-        ui.group(|ui| {
-            ui.columns(3, |cols| {
-                cols[0].group(|ui| {
-                    ui.vertical_centered(|ui| {
-                        // Use the filename as the title
-                        let file_name = match self.script.get_filename() {
-                            Some(file_name) => file_name,
-                            None => self.get_locale_string("none"),
-                        };
-
-                        let file_name = if self.script.has_changes() {
-                            format!("{}*", file_name)
-                        } else {
-                            file_name
-                        };
-
-                        ui.label(file_name);
-                    });
-
-
-             */
     }
 
     fn start(&mut self) {
@@ -279,43 +241,6 @@ impl UIPanel for ScriptPanel {
             self.save_file();
         } else if !save_shortcut && self.save_gate.is_waiting_for_reset() {
             self.save_gate.reset();
-        }
-
-        #[cfg(debug_assertions)]
-        {
-            use cs_hal::input::keycode::AppKeycode;
-            use device_query::DeviceQuery;
-
-            let hotkey_pressed = self
-                .device_state
-                .get_keys()
-                .contains(&AppKeycode::F7.into());
-
-            if !self.debug_key && hotkey_pressed {
-                self.debug_key = true;
-                //self.rhai_interface.test_script();
-                self.panels
-                    .script
-                    .set_script(cs_scripting::rhai_interface::TEST_SCRIPT.to_string());
-                self.start();
-            } else if self.debug_key && !hotkey_pressed {
-                self.debug_key = false;
-            }
-
-            let hotkey_pressed2 = self
-                .device_state
-                .get_keys()
-                .contains(&AppKeycode::F8.into());
-
-            if !self.debug_key && hotkey_pressed2 {
-                self.debug_key = true;
-
-                self.panels
-                    .script
-                    .set_script(cs_scripting::rhai_interface::TEST_SCRIPT.to_string());
-            } else if self.debug_key && !hotkey_pressed2 {
-                self.debug_key = false;
-            }
         }
     }
 
@@ -446,14 +371,6 @@ impl ScriptPanel {
 
         self.panels.script.load(files);
     }
-
-    fn output_log(&mut self, ui: &mut egui::Ui) {
-        ui.label("My output log");
-    }
-
-    fn script_editor(&mut self, ui: &mut egui::Ui) {
-        ui.label("My script editor");
-    }
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
@@ -478,8 +395,11 @@ struct Panels {
 
 impl Default for Panels {
     fn default() -> Self {
+        let mut script = Script::default();
+        script.set_script(NEW_SCRIPT.to_string());
+
         Self {
-            script: Script::default(),
+            script,
             font_size: 13.0,
             theme: 7,
             output_log: Arc::new(Mutex::new(OutputLog::new())),
@@ -572,7 +492,7 @@ impl Panels {
     fn script_editor(&mut self, ui: &mut egui::Ui) {
         CodeEditor::default()
             .id_source("code editor")
-            .with_rows(18)
+            .with_rows(20)
             .with_fontsize(self.font_size)
             .with_theme(DEFAULT_THEMES[self.theme])
             .with_syntax(Syntax::rust())
