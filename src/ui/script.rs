@@ -57,7 +57,7 @@ pub struct ScriptPanel {
     #[serde(skip)]
     device_state: device_query::DeviceState,
 
-    // TODO: Change to RwLock since it is only written to in the worker thread
+    // Note: Maybe change to RwLock since it is only written to in the worker thread
     #[serde(skip)]
     output_log: Arc<Mutex<OutputLog>>,
 }
