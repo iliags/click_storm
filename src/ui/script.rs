@@ -93,7 +93,7 @@ impl Default for ScriptPanel {
 }
 
 impl UIPanel for ScriptPanel {
-    fn show(&mut self, _ctx: &egui::Context, ui: &mut egui::Ui) {
+    fn show(&mut self, _ctx: &egui::Context, _ui: &mut egui::Ui) {
         if self.finished.load(Ordering::SeqCst) {
             self.finished.store(false, Ordering::SeqCst);
             self.stop();
