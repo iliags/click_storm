@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 * Basic script editor with log output
   * VSCode is still recommended for larger scripts
 * Script execution
+* Script integration modules moved into scripting crate
 
 ## 0.2.1
 
