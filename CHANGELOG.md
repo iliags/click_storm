@@ -29,6 +29,7 @@ Modified fluent keys (needs retranslating):
 * font_size
 * theme
 * run
+* milliseconds_warning
 
 ## 0.2.1
 

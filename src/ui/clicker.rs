@@ -233,9 +233,10 @@ impl ClickerPanel {
                             cols[7].centered_and_justified(|ui| {
                                 ui.add(
                                     egui::DragValue::new(self.settings.interval_milliseconds_mut())
-                                        .range(0..=1000)
+                                        .range(1..=1000)
                                         .speed(1),
-                                );
+                                )
+                                .on_hover_text(self.get_locale_string("milliseconds_warning"));
                             });
                         });
                     });

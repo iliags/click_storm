@@ -24,6 +24,7 @@ hours = Hours
 minutes = Minutes
 seconds = Seconds
 milliseconds = Milliseconds
+milliseconds_warning = 0ms is not recommended
 click_interval_desc = The interval between each click
 variation_desc = The variation in the interval between each click
 repeat_variation = Variation (ms):
