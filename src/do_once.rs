@@ -32,12 +32,17 @@ impl DoOnceGate {
 
     /// Check if the state is active
     pub fn is_active(&self) -> bool {
-        self.state == DoOnceState::Active
+        self.state == DoOnceState::Active && !self.is_waiting_for_reset()
     }
 
     /// Check if the state is waiting for reset
     pub fn is_waiting_for_reset(&self) -> bool {
         self.state == DoOnceState::WaitingForReset
+    }
+
+    /// Check if the state is inactive
+    pub fn is_inactive(&self) -> bool {
+        self.state == DoOnceState::Inactive
     }
 }
 

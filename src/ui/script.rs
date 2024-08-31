@@ -14,11 +14,11 @@ use std::{
         atomic::{AtomicBool, Ordering},
         Arc, Mutex,
     },
-    thread::{self, JoinHandle},
+    thread::{self, current, JoinHandle},
 };
 
 use super::UIPanel;
-use crate::localization::locale_text::LocaleText;
+use crate::{do_once::DoOnceGate, localization::locale_text::LocaleText};
 
 pub const SCRIPT_PANEL_KEY: &str = "script_panel";
 
@@ -37,6 +37,9 @@ pub struct ScriptPanel {
 
     #[serde(skip)]
     hotkey_code: AppKeycode,
+
+    #[serde(skip)]
+    save_gate: DoOnceGate,
 
     #[serde(skip)]
     language: LocaleText,
@@ -74,6 +77,7 @@ impl Default for ScriptPanel {
             font_size: 13.0,
             theme: 7,
             hotkey_code: AppKeycode::F6.into(),
+            save_gate: DoOnceGate::default(),
             language: LocaleText::default(),
             is_running: Arc::new(AtomicBool::new(false)),
             script: Script::default(),
@@ -304,6 +308,19 @@ impl UIPanel for ScriptPanel {
 
     fn handle_input(&mut self) {
         // TODO: Save keybinding
+
+        let current_keys = self.device_state.get_keys();
+
+        let save_shortcut = current_keys.contains(&AppKeycode::LControl.into())
+            && current_keys.contains(&AppKeycode::S.into());
+
+        if save_shortcut && self.save_gate.is_inactive() {
+            self.save_gate.set_waiting();
+            println!("Saving script");
+            self.save_file();
+        } else if self.save_gate.is_waiting_for_reset() && !save_shortcut {
+            self.save_gate.reset();
+        }
 
         #[cfg(debug_assertions)]
         {
