@@ -1,7 +1,7 @@
 // A script to test features, may not always work as expected
 
 // Create a new click storm object
-let cs = click_storm();
+let cs = new_click_storm();
 
 const SLEEP_TIME = 0.25;
 const USE_SLEEP = false;

@@ -37,13 +37,13 @@ pub mod ScreenSizeModule {
 
     /// Get the width of the screen
     #[rhai_fn(get = "width", pure)]
-    pub fn get_width(object: &mut ScreenSize) -> i32 {
+    pub fn width(object: &mut ScreenSize) -> i32 {
         object.x
     }
 
     /// Get the height of the screen
     #[rhai_fn(get = "height", pure)]
-    pub fn get_height(object: &mut ScreenSize) -> i32 {
+    pub fn height(object: &mut ScreenSize) -> i32 {
         object.y
     }
 

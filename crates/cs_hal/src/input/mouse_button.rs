@@ -120,6 +120,10 @@ pub mod MouseButtonModule {
     pub const Left: MouseButton = MouseButton::Left;
     pub const Right: MouseButton = MouseButton::Right;
     pub const Middle: MouseButton = MouseButton::Middle;
+    pub const ScrollUp: MouseButton = MouseButton::ScrollUp;
+    pub const ScrollDown: MouseButton = MouseButton::ScrollDown;
+    pub const ScrollLeft: MouseButton = MouseButton::ScrollLeft;
+    pub const ScrollRight: MouseButton = MouseButton::ScrollRight;
 
     /// Return the current variant of `MouseButton`.
     #[rhai_fn(global, get = "enum_type", pure)]

@@ -108,7 +108,7 @@ impl RhaiInterface {
 
         // Register the functions
         self.engine
-            .register_fn("click_storm", ClickStormInterface::new);
+            .register_fn("new_click_storm", ClickStormInterface::new);
 
         // Click and drag related
         self.engine
@@ -117,7 +117,8 @@ impl RhaiInterface {
             .register_fn("move_mouse", ClickStormInterface::move_mouse_to)
             .register_fn("add_position", ClickStormInterface::add_position)
             .register_fn("drag_to", ClickStormInterface::drag_to)
-            .register_fn("drag_from_to", ClickStormInterface::drag_from_to);
+            .register_fn("drag_from_to", ClickStormInterface::drag_from_to)
+            .register_fn("drag_from_to_rel", ClickStormInterface::drag_from_to_rel);
 
         // Keyboard related
         self.engine
@@ -128,9 +129,11 @@ impl RhaiInterface {
             .register_fn("get_screen_size", ClickStormInterface::get_screen_size);
 
         // Random number related
+        // TODO: Move these to a separate module
         self.engine
             .register_fn("rand_range", ClickStormInterface::rand_range)
             .register_fn("rand_range_excl", ClickStormInterface::rand_range_excl)
-            .register_fn("rand_bool", ClickStormInterface::rand_bool);
+            .register_fn("rand_bool", ClickStormInterface::rand_bool)
+            .register_fn("rand_bool", ClickStormInterface::rand_bool_prob);
     }
 }

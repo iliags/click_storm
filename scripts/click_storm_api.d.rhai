@@ -4,11 +4,11 @@ fn add_position(_: ClickStormInterface, _: int, _: int) -> ;
 
 fn click_at(_: ClickStormInterface, _: int, _: int, _: MouseButton) -> ;
 
-fn click_storm() -> ClickStormInterface;
-
 fn click_within(_: ClickStormInterface, _: int, _: int, _: int, _: int, _: MouseButton) -> ;
 
 fn drag_from_to(_: ClickStormInterface, _: int, _: int, _: int, _: int, _: MouseButton) -> ;
+
+fn drag_from_to_rel(_: ClickStormInterface, _: int, _: int, _: int, _: int, _: MouseButton) -> ;
 
 fn drag_to(_: ClickStormInterface, _: int, _: int, _: MouseButton) -> ;
 
@@ -16,7 +16,11 @@ fn get_screen_size(_: ClickStormInterface) -> ScreenSize;
 
 fn move_mouse(_: ClickStormInterface, _: int, _: int) -> ;
 
+fn new_click_storm() -> ClickStormInterface;
+
 fn rand_bool(_: ClickStormInterface) -> bool;
+
+fn rand_bool(_: ClickStormInterface, _: float) -> bool;
 
 fn rand_range(_: ClickStormInterface, _: int, _: int) -> int;
 
@@ -299,6 +303,14 @@ const Left: MouseButton;
 const Middle: MouseButton;
 
 const Right: MouseButton;
+
+const ScrollDown: MouseButton;
+
+const ScrollLeft: MouseButton;
+
+const ScrollRight: MouseButton;
+
+const ScrollUp: MouseButton;
 
 op !=(MouseButton, MouseButton) -> bool;
 
