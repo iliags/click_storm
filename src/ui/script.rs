@@ -57,6 +57,9 @@ pub struct ScriptPanel {
     #[serde(skip)]
     output_log: Arc<Mutex<OutputLog>>,
 
+    #[serde(skip)]
+    panes: egui_tiles::Tree<Pane>,
+
     // TODO: Debug only
     #[serde(skip)]
     rhai_interface: RhaiInterface,
@@ -71,6 +74,8 @@ impl Default for ScriptPanel {
         let mut rhai_interface = RhaiInterface::new();
         rhai_interface.initialize();
 
+        let tree = create_tree();
+
         Self {
             font_size: 13.0,
             theme: 7,
@@ -83,6 +88,7 @@ impl Default for ScriptPanel {
             finished: Arc::new(AtomicBool::new(false)),
             device_state: device_query::DeviceState::new(),
             output_log: Arc::new(Mutex::new(OutputLog::new())),
+            panes: tree,
 
             // TODO: Debug only
             rhai_interface,
@@ -93,11 +99,15 @@ impl Default for ScriptPanel {
 }
 
 impl UIPanel for ScriptPanel {
-    fn show(&mut self, _ctx: &egui::Context, _ui: &mut egui::Ui) {
+    fn show(&mut self, _ctx: &egui::Context, ui: &mut egui::Ui) {
         if self.finished.load(Ordering::SeqCst) {
             self.finished.store(false, Ordering::SeqCst);
             self.stop();
         }
+
+        let mut behavior = TreeBehavior {};
+
+        self.panes.ui(&mut behavior, ui);
 
         /*
 
@@ -481,4 +491,70 @@ impl ScriptPanel {
 
         self.script.load(files);
     }
+}
+
+#[derive(Debug)]
+struct Pane {
+    nr: usize,
+}
+
+struct TreeBehavior {}
+
+struct LogPanel {
+    output_log: Arc<Mutex<OutputLog>>,
+}
+
+impl egui_tiles::Behavior<Pane> for TreeBehavior {
+    fn pane_ui(
+        &mut self,
+        ui: &mut egui::Ui,
+        _tile_id: egui_tiles::TileId,
+        pane: &mut Pane,
+    ) -> egui_tiles::UiResponse {
+        // Give each pane a unique color:
+        let color = egui::epaint::Hsva::new(0.103 * pane.nr as f32, 0.5, 0.5, 1.0);
+        ui.painter().rect_filled(ui.max_rect(), 0.0, color);
+
+        ui.label(format!("The contents of pane {}.", pane.nr));
+
+        // You can make your pane draggable like so:
+        if ui
+            .add(egui::Button::new("Drag me!").sense(egui::Sense::drag()))
+            .drag_started()
+        {
+            egui_tiles::UiResponse::DragStarted
+        } else {
+            egui_tiles::UiResponse::None
+        }
+    }
+
+    fn tab_title_for_pane(&mut self, pane: &Pane) -> egui::WidgetText {
+        format!("Pane {}", pane.nr).into()
+    }
+}
+
+fn create_tree() -> egui_tiles::Tree<Pane> {
+    let mut next_view_nr = 0;
+    let mut gen_pane = || {
+        let pane = Pane { nr: next_view_nr };
+        next_view_nr += 1;
+        pane
+    };
+
+    let mut tiles = egui_tiles::Tiles::default();
+
+    let mut tabs = vec![];
+    tabs.push({
+        let children = (0..7).map(|_| tiles.insert_pane(gen_pane())).collect();
+        tiles.insert_horizontal_tile(children)
+    });
+    tabs.push({
+        let cells = (0..11).map(|_| tiles.insert_pane(gen_pane())).collect();
+        tiles.insert_grid_tile(cells)
+    });
+    tabs.push(tiles.insert_pane(gen_pane()));
+
+    let root = tiles.insert_tab_tile(tabs);
+
+    egui_tiles::Tree::new("my_tree", root, tiles)
 }
