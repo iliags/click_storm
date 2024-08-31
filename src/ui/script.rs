@@ -24,6 +24,8 @@ pub const SCRIPT_PANEL_KEY: &str = "script_panel";
 const NEW_SCRIPT: &str = "let cs = new_click_storm();\n\n";
 const RESET_EMOJI: &str = "⟳";
 
+// Note: It seems like the tiles are intended to be separate structs. The main struct needs to generate the tiles then pass the relevant data to the tiles.
+
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)]
 #[derive(Debug)]
@@ -74,7 +76,31 @@ impl Default for ScriptPanel {
         let mut rhai_interface = RhaiInterface::new();
         rhai_interface.initialize();
 
-        let tree = create_tree();
+        // Example gen
+        let mut next_view_nr = 0;
+        let mut gen_pane = || {
+            let pane = Pane { nr: next_view_nr };
+            next_view_nr += 1;
+            pane
+        };
+
+        let mut tiles = egui_tiles::Tiles::default();
+
+        let log_panel = LogPanel {
+            output_log: Arc::new(Mutex::new(OutputLog::new())),
+        };
+
+        let mut tabs = vec![];
+        tabs.push({
+            //let children = (0..2).map(|_| tiles.insert_pane(gen_pane())).collect();
+            let children = vec![tiles.insert_pane(gen_pane()), tiles.insert_pane(gen_pane())];
+            tiles.insert_vertical_tile(children)
+        });
+
+        let root = tiles.insert_tab_tile(tabs);
+
+        let tree = egui_tiles::Tree::new("my_tree", root, tiles);
+        // Example gen end
 
         Self {
             font_size: 13.0,
@@ -504,6 +530,52 @@ struct LogPanel {
     output_log: Arc<Mutex<OutputLog>>,
 }
 
+impl egui_tiles::Behavior<Pane> for LogPanel {
+    fn pane_ui(
+        &mut self,
+        ui: &mut egui::Ui,
+        _tile_id: egui_tiles::TileId,
+        pane: &mut Pane,
+    ) -> egui_tiles::UiResponse {
+        // Give each pane a unique color:
+        let color = egui::epaint::Hsva::new(0.103 * pane.nr as f32, 0.3, 0.1, 1.0);
+        ui.painter().rect_filled(ui.max_rect(), 0.0, color);
+
+        ui.label(format!("The contents of pane {}.", pane.nr));
+
+        egui::ScrollArea::vertical()
+            .id_source("output_log")
+            .show(ui, |ui| {
+                let output_log = self.output_log.lock().unwrap();
+                let mut text_buffer = output_log.get_log_copy();
+
+                ui.add(
+                    egui::TextEdit::multiline(&mut text_buffer)
+                        .font(egui::TextStyle::Monospace)
+                        .code_editor()
+                        .desired_rows(6)
+                        .lock_focus(true)
+                        .desired_width(f32::INFINITY)
+                        .cursor_at_end(true),
+                );
+            });
+
+        // You can make your pane draggable like so:
+        if ui
+            .add(egui::Button::new("Drag me!").sense(egui::Sense::drag()))
+            .drag_started()
+        {
+            egui_tiles::UiResponse::DragStarted
+        } else {
+            egui_tiles::UiResponse::None
+        }
+    }
+
+    fn tab_title_for_pane(&mut self, pane: &Pane) -> egui::WidgetText {
+        format!("Pane {}", pane.nr).into()
+    }
+}
+
 impl egui_tiles::Behavior<Pane> for TreeBehavior {
     fn pane_ui(
         &mut self,
@@ -512,7 +584,7 @@ impl egui_tiles::Behavior<Pane> for TreeBehavior {
         pane: &mut Pane,
     ) -> egui_tiles::UiResponse {
         // Give each pane a unique color:
-        let color = egui::epaint::Hsva::new(0.103 * pane.nr as f32, 0.5, 0.5, 1.0);
+        let color = egui::epaint::Hsva::new(0.103 * pane.nr as f32, 0.3, 0.1, 1.0);
         ui.painter().rect_filled(ui.max_rect(), 0.0, color);
 
         ui.label(format!("The contents of pane {}.", pane.nr));
@@ -545,14 +617,9 @@ fn create_tree() -> egui_tiles::Tree<Pane> {
 
     let mut tabs = vec![];
     tabs.push({
-        let children = (0..7).map(|_| tiles.insert_pane(gen_pane())).collect();
-        tiles.insert_horizontal_tile(children)
+        let children = (0..2).map(|_| tiles.insert_pane(gen_pane())).collect();
+        tiles.insert_vertical_tile(children)
     });
-    tabs.push({
-        let cells = (0..11).map(|_| tiles.insert_pane(gen_pane())).collect();
-        tiles.insert_grid_tile(cells)
-    });
-    tabs.push(tiles.insert_pane(gen_pane()));
 
     let root = tiles.insert_tab_tile(tabs);
 
