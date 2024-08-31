@@ -95,11 +95,15 @@ impl Default for ScriptPanel {
 
         let mut dock_state = DockState::new(vec!["ScriptEditor".to_owned()]);
 
-        let [_, _] = dock_state.main_surface_mut().split_below(
+        let [_, b] = dock_state.main_surface_mut().split_below(
             NodeIndex::root(),
-            0.7,
+            0.65,
             vec!["OutputLog".to_owned()],
         );
+
+        let [_, _] = dock_state
+            .main_surface_mut()
+            .split_right(b, 0.5, vec!["Misc".to_owned()]);
 
         new_self.tree = dock_state;
 
@@ -113,6 +117,65 @@ impl UIPanel for ScriptPanel {
             self.finished.store(false, Ordering::SeqCst);
             self.stop();
         }
+
+        egui::TopBottomPanel::top("top_panel_script").show(ctx, |ui| {
+            egui::menu::bar(ui, |ui| {
+                ui.horizontal(|ui| {
+                    if ui.button(self.get_locale_string("new")).clicked() {
+                        // TODO: Check if there are changes, show a dialog if so
+
+                        self.panels.script = Script::default();
+                        self.panels.script.set_script(NEW_SCRIPT.to_string());
+                    }
+
+                    if ui.button(self.get_locale_string("open")).clicked() {
+                        // TODO: Check for changes
+                        self.load_file();
+                    }
+
+                    ui.add_enabled_ui(self.panels.script.has_path(), |ui| {
+                        if ui
+                            .button(self.get_locale_string("reload"))
+                            .on_hover_text(self.get_locale_string("reload_tooltip"))
+                            .clicked()
+                        {
+                            self.panels.script.reload_from_disk();
+                        }
+                    });
+
+                    if ui.button(self.get_locale_string("save")).clicked() {
+                        self.save_file();
+                    }
+
+                    ui.separator();
+
+                    let keycode: device_query::Keycode = self.hotkey_code.into();
+                    let key_code_text = format!(" ({})", keycode).to_owned();
+
+                    ui.add_enabled_ui(!self.is_running(), |ui| {
+                        let start_text = format!("▶{}", key_code_text);
+                        if ui
+                            .button(start_text)
+                            .on_hover_text_at_pointer(self.get_locale_string("run"))
+                            .clicked()
+                        {
+                            self.start();
+                        }
+                    });
+
+                    ui.add_enabled_ui(self.is_running(), |ui| {
+                        let stop_text = format!("⏹{}", key_code_text);
+                        if ui
+                            .button(stop_text)
+                            .on_hover_text_at_pointer(self.get_locale_string("stop"))
+                            .clicked()
+                        {
+                            self.stop();
+                        }
+                    });
+                });
+            });
+        });
 
         DockArea::new(&mut self.tree)
             .style(Style::from_egui(ctx.style().as_ref()))
@@ -139,142 +202,7 @@ impl UIPanel for ScriptPanel {
                         ui.label(file_name);
                     });
 
-                    ui.horizontal(|ui| {
-                        ui.add_enabled_ui(!self.script.is_default(), |ui| {
-                            if ui.button(self.get_locale_string("new")).clicked() {
-                                // TODO: Check if there are changes, show a dialog if so
 
-                                self.script = Script::default();
-                                self.script.set_script(NEW_SCRIPT.to_string());
-                            }
-                        });
-
-                        ui.separator();
-
-                        if ui.button(self.get_locale_string("open")).clicked() {
-                            // TODO: Check for changes
-                            self.load_file();
-                        }
-
-                        ui.separator();
-
-                        ui.add_enabled_ui(self.script.has_path(), |ui| {
-                            if ui
-                                .button(self.get_locale_string("reload"))
-                                .on_hover_text(self.get_locale_string("reload_tooltip"))
-                                .clicked()
-                            {
-                                self.script.reload_from_disk();
-                            }
-                        });
-
-                        ui.separator();
-
-                        if ui.button(self.get_locale_string("save")).clicked() {
-                            self.save_file();
-                        }
-                    });
-                });
-                cols[1].group(|ui| {
-                    ui.vertical_centered(|ui| {
-                        ui.label(self.get_locale_string("actions"));
-                    });
-
-                    ui.columns(2, |cols| {
-                        // Note: Not localized text
-                        let keycode: device_query::Keycode = self.hotkey_code.into();
-                        let key_code_text = format!(" ({})", keycode).to_owned();
-                        cols[0].vertical_centered(|ui| {
-                            let enabled = !self.is_running() && self.can_start();
-
-                            let mut start_text = self.get_locale_string("run");
-                            start_text.push_str(&key_code_text);
-
-                            let start_button =
-                                ui.add_enabled(enabled, egui::Button::new(start_text));
-
-                            if start_button.clicked() {
-                                self.start();
-                            }
-                        });
-                        cols[1].vertical_centered(|ui| {
-                            let mut stop_text = self.get_locale_string("stop");
-                            stop_text.push_str(&key_code_text);
-
-                            if ui.button(stop_text).clicked() {
-                                self.stop();
-                            }
-                            ui.end_row();
-                        });
-                    });
-                });
-                cols[2].group(|ui| {
-                    ui.vertical_centered(|ui| {
-                        ui.label(self.get_locale_string("misc"));
-                    });
-                    let cursor_pos = self.device_state.get_mouse().coords;
-                    let cursor_pos = format!("🖱: ({}, {})", cursor_pos.0, cursor_pos.1);
-                    ui.label(egui::RichText::new(cursor_pos).size(16.0));
-                });
-            });
-        });
-
-        egui::ScrollArea::vertical()
-            .id_source("scripting")
-            .show(ui, |ui| {
-                /*
-                egui::CollapsingHeader::new(self.get_locale_string("script"))
-                    .default_open(true)
-                    .show(ui, |ui| {
-                     */
-                ui.group(|ui| {
-                    egui::ScrollArea::vertical()
-                        .id_source("text_editor")
-                        .max_height(256.0)
-                        .show(ui, |ui| {
-                            CodeEditor::default()
-                                .id_source("code editor")
-                                .with_rows(12)
-                                .with_fontsize(self.font_size)
-                                .with_theme(DEFAULT_THEMES[self.theme])
-                                .with_syntax(Syntax::rust())
-                                .with_numlines(true)
-                                .show(ui, self.script.get_mut());
-                        });
-                });
-                //});
-
-                /*
-                egui::TopBottomPanel::bottom("output_log_panel")
-                    .min_height(105.0)
-                    .show(ctx, |ui| {
-                     */
-                /*
-                egui::CollapsingHeader::new(self.get_locale_string("log"))
-                    .default_open(true)
-                    .show(ui, |ui| {
-                     */
-                ui.group(|ui| {
-                    egui::ScrollArea::vertical()
-                        .id_source("output_log")
-                        .show(ui, |ui| {
-                            let output_log = self.output_log.lock().unwrap();
-                            let mut text_buffer = output_log.get_log_copy();
-
-                            ui.add(
-                                egui::TextEdit::multiline(&mut text_buffer)
-                                    .font(egui::TextStyle::Monospace)
-                                    .code_editor()
-                                    .desired_rows(6)
-                                    .lock_focus(true)
-                                    .desired_width(f32::INFINITY)
-                                    .cursor_at_end(true),
-                            );
-                        });
-                });
-                //});
-                //});
-            });
              */
     }
 
@@ -391,7 +319,21 @@ impl UIPanel for ScriptPanel {
         }
     }
 
-    fn reset(&mut self) {}
+    fn reset(&mut self) {
+        let mut dock_state = DockState::new(vec!["ScriptEditor".to_owned()]);
+
+        let [_, b] = dock_state.main_surface_mut().split_below(
+            NodeIndex::root(),
+            0.65,
+            vec!["OutputLog".to_owned()],
+        );
+
+        let [_, _] = dock_state
+            .main_surface_mut()
+            .split_right(b, 0.5, vec!["Misc".to_owned()]);
+
+        self.tree = dock_state;
+    }
 
     fn exit(&mut self) {
         println!("Script shutting down");
@@ -399,7 +341,8 @@ impl UIPanel for ScriptPanel {
     }
 
     fn set_language(&mut self, language: LocaleText) {
-        self.language = language;
+        self.language = language.clone();
+        self.panels.language = language;
     }
 
     fn name(&self) -> String {
@@ -514,6 +457,7 @@ impl ScriptPanel {
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[serde(default)]
 struct Panels {
     script: Script,
     font_size: f32,
@@ -521,6 +465,29 @@ struct Panels {
 
     #[serde(skip)]
     output_log: Arc<Mutex<OutputLog>>,
+
+    #[serde(skip)]
+    device_state: device_query::DeviceState,
+
+    #[serde(skip)]
+    language: LocaleText,
+
+    #[serde(skip)]
+    hotkey_code: AppKeycode,
+}
+
+impl Default for Panels {
+    fn default() -> Self {
+        Self {
+            script: Script::default(),
+            font_size: 13.0,
+            theme: 7,
+            output_log: Arc::new(Mutex::new(OutputLog::new())),
+            device_state: device_query::DeviceState::new(),
+            language: LocaleText::default(),
+            hotkey_code: AppKeycode::F6,
+        }
+    }
 }
 
 impl TabViewer for Panels {
@@ -528,9 +495,26 @@ impl TabViewer for Panels {
 
     fn title(&mut self, tab: &mut Self::Tab) -> egui::WidgetText {
         match tab.as_str() {
-            "OutputLog" => "Output Log".into(),
-            "ScriptEditor" => "Script Editor".into(),
-            _ => "Unknown".into(),
+            "OutputLog" => self.get_locale_string("log").into(),
+            "ScriptEditor" => {
+                let file_name = match self.script.get_filename() {
+                    Some(file_name) => file_name,
+                    None => self.get_locale_string("none"),
+                };
+
+                let file_name = if self.script.has_changes() {
+                    format!("{}*", file_name)
+                } else {
+                    file_name
+                };
+
+                //self.get_locale_string("script").into()
+                let tab_name = format!("{} - {}", self.get_locale_string("script"), file_name);
+
+                tab_name.into()
+            }
+            "Misc" => self.get_locale_string("misc").into(),
+            _ => "???".into(),
         }
     }
 
@@ -542,30 +526,29 @@ impl TabViewer for Panels {
             "ScriptEditor" => {
                 self.script_editor(ui);
             }
+            "Misc" => {
+                self.settings(ui);
+            }
             _ => {}
         }
     }
-}
 
-impl Default for Panels {
-    fn default() -> Self {
-        Self {
-            script: Script::default(),
-            font_size: 13.0,
-            theme: 7,
-            output_log: Arc::new(Mutex::new(OutputLog::new())),
-        }
+    fn closeable(&mut self, _tab: &mut Self::Tab) -> bool {
+        false
     }
 }
 
 impl Panels {
     pub fn new(output_log: Arc<Mutex<OutputLog>>) -> Self {
         Self {
-            script: Script::default(),
-            font_size: 13.0,
-            theme: 7,
             output_log,
+            ..Default::default()
         }
+    }
+
+    #[inline]
+    fn get_locale_string(&self, key: &str) -> String {
+        self.language.get_locale_string(key)
     }
 
     fn output_log(&mut self, ui: &mut egui::Ui) {
@@ -579,7 +562,7 @@ impl Panels {
                     egui::TextEdit::multiline(&mut text_buffer)
                         .font(egui::TextStyle::Monospace)
                         .code_editor()
-                        .desired_rows(6)
+                        .desired_rows(8)
                         .lock_focus(true)
                         .desired_width(f32::INFINITY)
                         .cursor_at_end(true),
@@ -595,5 +578,11 @@ impl Panels {
             .with_syntax(Syntax::rust())
             .with_numlines(true)
             .show(ui, self.script.get_mut());
+    }
+
+    fn settings(&mut self, ui: &mut egui::Ui) {
+        let cursor_pos = self.device_state.get_mouse().coords;
+        let cursor_pos = format!("🖱: ({}, {})", cursor_pos.0, cursor_pos.1);
+        ui.label(egui::RichText::new(cursor_pos).size(16.0));
     }
 }
