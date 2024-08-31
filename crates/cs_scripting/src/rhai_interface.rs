@@ -8,8 +8,11 @@ use rhai::{exported_module, Engine};
 
 use crate::{
     hal::{
-        button_direction::ButtonDirectionModule, keycode::AppKeycodeModule,
-        mouse_button::MouseButtonModule, screen_size::ScreenSizeModule,
+        button_direction::ButtonDirectionModule,
+        keycode::AppKeycodeModule,
+        mouse::{MouseModule, MousePosition},
+        mouse_button::MouseButtonModule,
+        screen_size::ScreenSizeModule,
     },
     output_log::OutputLog,
 };
@@ -95,6 +98,11 @@ impl RhaiInterface {
             .register_type_with_name::<MouseButton>("MouseButton")
             .register_static_module("MouseButton", exported_module!(MouseButtonModule).into());
 
+        // Register the mouse position type
+        self.engine
+            .register_type_with_name::<MousePosition>("MouseButton")
+            .register_static_module("MouseButton", exported_module!(MouseModule).into());
+
         // Register screen size
         self.engine
             .register_type_with_name::<ScreenSize>("ScreenSize")
@@ -122,7 +130,16 @@ impl RhaiInterface {
             .register_fn("click_at", ClickStormInterface::click_at)
             .register_fn("click_within", ClickStormInterface::click_within)
             .register_fn("move_mouse_to", ClickStormInterface::move_mouse_to)
+            .register_fn(
+                "move_mouse_to",
+                ClickStormInterface::move_mouse_to_screen_size,
+            )
             .register_fn("add_position", ClickStormInterface::add_position)
+            .register_fn("scroll", ClickStormInterface::scroll)
+            .register_fn(
+                "get_mouse_position",
+                ClickStormInterface::get_mouse_position,
+            )
             .register_fn("drag_to", ClickStormInterface::drag_to)
             .register_fn("drag_from_to", ClickStormInterface::drag_from_to)
             .register_fn("drag_from_to_rel", ClickStormInterface::drag_from_to_rel);

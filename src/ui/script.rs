@@ -417,6 +417,7 @@ impl TabViewer for Panels {
         match tab.as_str() {
             "OutputLog" => self.get_locale_string("log").into(),
             "ScriptEditor" => {
+                /* TODO: This causes the code editor to lose focus
                 let file_name = match self.script.get_filename() {
                     Some(file_name) => file_name,
                     None => self.get_locale_string("none"),
@@ -432,6 +433,9 @@ impl TabViewer for Panels {
                 let tab_name = format!("{} - {}", self.get_locale_string("script"), file_name);
 
                 tab_name.into()
+                 */
+
+                self.get_locale_string("script").into()
             }
             "Misc" => self.get_locale_string("misc").into(),
             _ => "???".into(),
@@ -491,7 +495,7 @@ impl Panels {
     }
     fn script_editor(&mut self, ui: &mut egui::Ui) {
         CodeEditor::default()
-            .id_source("code editor")
+            .id_source("code_editor")
             .with_rows(20)
             .with_fontsize(self.font_size)
             .with_theme(DEFAULT_THEMES[self.theme])

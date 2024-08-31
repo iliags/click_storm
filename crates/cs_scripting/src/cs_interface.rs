@@ -2,9 +2,12 @@ use cs_hal::{
     display::screen_size::ScreenSize,
     input::{button_direction::ButtonDirection, keycode::AppKeycode, mouse_button::MouseButton},
 };
+use device_query::DeviceQuery;
 use enigo::{Button, Enigo, Keyboard, Mouse, Settings};
 use rand::Rng;
 use std::sync::{Arc, Mutex};
+
+use crate::hal::mouse::MousePosition;
 
 #[derive(Debug, Clone)]
 pub struct ClickStormInterface {
@@ -75,10 +78,32 @@ impl ClickStormInterface {
         let _ = enigo.move_mouse(x, y, enigo::Coordinate::Abs);
     }
 
+    /// Move the mouse to the specified coordinates.
+    pub(super) fn move_mouse_to_screen_size(&mut self, screen_size: ScreenSize) {
+        let mut enigo = self.enigo.lock().unwrap();
+
+        let x = screen_size.x().max(0);
+        let y = screen_size.y().max(0);
+
+        let _ = enigo.move_mouse(x, y, enigo::Coordinate::Abs);
+    }
+
     /// Adds the coordinates to the current mouse position.
     pub(super) fn add_position(&mut self, x: i32, y: i32) {
         let mut enigo = self.enigo.lock().unwrap();
         let _ = enigo.move_mouse(x, y, enigo::Coordinate::Rel);
+    }
+
+    /// Scrolls the mouse wheel by 15 degree increments (positive for up, negative for down).
+    pub(super) fn scroll(&mut self, x: i32) {
+        let mut enigo = self.enigo.lock().unwrap();
+        let _ = enigo.scroll(x, enigo::Axis::Vertical);
+    }
+
+    /// Gets the current mouse position.
+    pub(super) fn get_mouse_position(&mut self) -> MousePosition {
+        let device = device_query::DeviceState::new();
+        device.get_mouse().coords.into()
     }
 
     /// Drags from the current mouse position to the specified coordinates.
