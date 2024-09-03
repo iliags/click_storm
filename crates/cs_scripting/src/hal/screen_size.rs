@@ -5,8 +5,6 @@ use rhai::plugin::*;
 #[allow(non_snake_case, dead_code)]
 pub mod ScreenSizeModule {
 
-    use super::*;
-
     #[rhai_fn(global, pure)]
     pub fn to_debug(object: &mut ScreenSize) -> String {
         format!("({}, {})", object.x(), object.y())
@@ -26,6 +24,16 @@ pub mod ScreenSizeModule {
     /// Get the height of the screen
     #[rhai_fn(get = "height", pure)]
     pub fn height(object: &mut ScreenSize) -> i32 {
+        object.y()
+    }
+
+    #[rhai_fn(get = "x", pure)]
+    pub fn x(object: &mut ScreenSize) -> i32 {
+        object.x()
+    }
+
+    #[rhai_fn(get = "y", pure)]
+    pub fn y(object: &mut ScreenSize) -> i32 {
         object.y()
     }
 
