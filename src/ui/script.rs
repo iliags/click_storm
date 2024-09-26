@@ -477,7 +477,7 @@ impl Panels {
 
     fn output_log(&mut self, ui: &mut egui::Ui) {
         egui::ScrollArea::vertical()
-            .id_source("output_log")
+            .id_salt("output_log")
             .show(ui, |ui| {
                 let output_log = self.output_log.lock().unwrap();
                 let mut text_buffer = output_log.get_log_copy();

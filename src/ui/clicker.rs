@@ -253,7 +253,7 @@ impl ClickerPanel {
                                     egui::DragValue::new(self.settings.repeat_variation_mut())
                                         .range(0..=1000)
                                         .speed(1)
-                                        .clamp_to_range(true),
+                                        .clamp_existing_to_range(true),
                                 )
                                 .on_hover_text_at_pointer(self.get_locale_string("variation_desc"));
                             });
@@ -384,7 +384,7 @@ impl ClickerPanel {
                                 egui::DragValue::new(&mut current_count)
                                     .range(1..=1000)
                                     .speed(1)
-                                    .clamp_to_range(false),
+                                    .clamp_existing_to_range(false),
                             );
 
                             if current_count != self.repeat_count {
