@@ -41,7 +41,7 @@ enigo = "0.2"
 device_query = "2.1"
 
 # Serialization 
-serde = { version = "1", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
 
 # Enum helpers
 strum = "0.26"
