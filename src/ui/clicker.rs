@@ -60,6 +60,7 @@ impl Default for ClickerPanel {
             panic!("Failed to create Enigo instance. Please make sure you are running the application on a system that supports the Enigo library.")
         });
 
+        // TODO: Move setting the display size to first meaningful paint
         let display_size = enigo
             .main_display()
             .unwrap_or_else(|_| panic!("Failed to get display size."));

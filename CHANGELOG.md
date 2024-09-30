@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.2.3
+
+* Update egui to 0.29
+* Fix [#12](https://github.com/iliags/click_storm/issues/12)
+
 ## 0.2.2
 
 * Basic script editor with log output
