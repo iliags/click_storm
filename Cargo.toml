@@ -79,7 +79,11 @@ eframe = { version = "0.29", default-features = false, features = [
     "persistence",   # Enable restoring app state when restarting the app.
 ] }
 egui_code_editor = "0.2"
-egui_dock = { version = "0.13", features = ["serde"] }
+#egui_dock = { version = "0.13", features = ["serde"] }
+# TODO: Update to the latest version of egui_dock when it is available
+egui_dock = { git = "https://github.com/Adanos020/egui_dock", branch = "egui-0.29", features = [
+    "serde",
+] }
 
 # File dialog
 rfd = "0.15"
@@ -92,7 +96,6 @@ unic-langid = "0.9"
 # Logging
 log = "0.4"
 env_logger = "0.11"
-
 
 [profile.release]
 opt-level = 2
