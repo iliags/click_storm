@@ -52,6 +52,9 @@ pub struct ClickerPanel {
 
     #[serde(skip)]
     thread: Option<JoinHandle<()>>,
+
+    #[serde(skip)]
+    enigo: Option<Enigo>,
 }
 
 impl Default for ClickerPanel {
@@ -60,11 +63,6 @@ impl Default for ClickerPanel {
             panic!("Failed to create Enigo instance. Please make sure you are running the application on a system that supports the Enigo library.")
         });
 
-        // TODO: Move setting the display size to first meaningful paint
-        let display_size = enigo
-            .main_display()
-            .unwrap_or_else(|_| panic!("Failed to get display size."));
-
         Self {
             settings: AppSettings::default(),
             language: LocaleText::default(),
@@ -72,16 +70,22 @@ impl Default for ClickerPanel {
             repeat_count: 0,
             hotkey_code: AppKeycode::F6,
             device_state: DeviceState::new(),
-            display_size,
+            display_size: (0, 0),
             picking_position: false,
             is_running: Arc::new(AtomicBool::new(false)),
             thread: None,
+            enigo: Some(enigo),
         }
     }
 }
 
 impl UIPanel for ClickerPanel {
     fn show(&mut self, ctx: &egui::Context, ui: &mut egui::Ui) {
+        // TODO: Move to app tick method when egui implements [#5113](https://github.com/emilk/egui/issues/5113)
+        if self.display_size == (0, 0) {
+            self.init();
+        }
+
         ui.add_enabled_ui(!self.is_running.load(Ordering::SeqCst), |ui| {
             self.ui_interval(ui);
 
@@ -186,6 +190,15 @@ impl ClickerPanel {
         self.settings = value.settings;
         self.cursor_position_fixed = value.cursor_position_fixed;
         self.repeat_count = value.repeat_count;
+    }
+
+    fn init(&mut self) {
+        self.display_size = self
+            .enigo
+            .as_ref()
+            .unwrap()
+            .main_display()
+            .unwrap_or_else(|_| panic!("Failed to get display size."));
     }
 
     fn ui_interval(&mut self, ui: &mut egui::Ui) {
