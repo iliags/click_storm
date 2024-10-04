@@ -323,6 +323,10 @@ fn get height(object: ScreenSize) -> int;
 /// Get the width of the screen
 fn get width(object: ScreenSize) -> int;
 
+fn get x(object: ScreenSize) -> int;
+
+fn get y(object: ScreenSize) -> int;
+
 fn to_debug(object: ScreenSize) -> String;
 
 fn to_string(object: ScreenSize) -> String;

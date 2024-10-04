@@ -4,9 +4,8 @@ Misc notes for development.
 
 ## Next Release TODO
 
-- Toggle between script mode and clicker mode UI
-- Script execution
-  - Output terminal
+- Include the example script in the program
+- Implement an unsaved script check
 
 ## Rhai
 

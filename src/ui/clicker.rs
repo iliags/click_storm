@@ -52,6 +52,9 @@ pub struct ClickerPanel {
 
     #[serde(skip)]
     thread: Option<JoinHandle<()>>,
+
+    #[serde(skip)]
+    enigo: Option<Enigo>,
 }
 
 impl Default for ClickerPanel {
@@ -60,10 +63,6 @@ impl Default for ClickerPanel {
             panic!("Failed to create Enigo instance. Please make sure you are running the application on a system that supports the Enigo library.")
         });
 
-        let display_size = enigo
-            .main_display()
-            .unwrap_or_else(|_| panic!("Failed to get display size."));
-
         Self {
             settings: AppSettings::default(),
             language: LocaleText::default(),
@@ -71,16 +70,22 @@ impl Default for ClickerPanel {
             repeat_count: 0,
             hotkey_code: AppKeycode::F6,
             device_state: DeviceState::new(),
-            display_size,
+            display_size: (0, 0),
             picking_position: false,
             is_running: Arc::new(AtomicBool::new(false)),
             thread: None,
+            enigo: Some(enigo),
         }
     }
 }
 
 impl UIPanel for ClickerPanel {
     fn show(&mut self, ctx: &egui::Context, ui: &mut egui::Ui) {
+        // TODO: Move to app tick method when egui implements [#5113](https://github.com/emilk/egui/issues/5113)
+        if self.display_size == (0, 0) {
+            self.init();
+        }
+
         ui.add_enabled_ui(!self.is_running.load(Ordering::SeqCst), |ui| {
             self.ui_interval(ui);
 
@@ -187,6 +192,15 @@ impl ClickerPanel {
         self.repeat_count = value.repeat_count;
     }
 
+    fn init(&mut self) {
+        self.display_size = self
+            .enigo
+            .as_ref()
+            .unwrap()
+            .main_display()
+            .unwrap_or_else(|_| panic!("Failed to get display size."));
+    }
+
     fn ui_interval(&mut self, ui: &mut egui::Ui) {
         let interval_frame = egui::Frame::default()
             .stroke(ui.visuals().widgets.noninteractive.bg_stroke)
@@ -253,7 +267,7 @@ impl ClickerPanel {
                                     egui::DragValue::new(self.settings.repeat_variation_mut())
                                         .range(0..=1000)
                                         .speed(1)
-                                        .clamp_to_range(true),
+                                        .clamp_existing_to_range(true),
                                 )
                                 .on_hover_text_at_pointer(self.get_locale_string("variation_desc"));
                             });
@@ -384,7 +398,7 @@ impl ClickerPanel {
                                 egui::DragValue::new(&mut current_count)
                                     .range(1..=1000)
                                     .speed(1)
-                                    .clamp_to_range(false),
+                                    .clamp_existing_to_range(false),
                             );
 
                             if current_count != self.repeat_count {

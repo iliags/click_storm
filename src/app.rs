@@ -180,7 +180,7 @@ impl eframe::App for ClickStormApp {
 
                     ui.separator();
 
-                    egui::widgets::global_dark_light_mode_buttons(ui);
+                    egui::widgets::global_theme_preference_switch(ui);
                 });
 
                 ui.separator();

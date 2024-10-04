@@ -1,6 +1,6 @@
 [package]
 name = "click_storm"
-version = "0.2.2"
+version = "0.2.3"
 authors = ["James Lennon"]
 edition = "2021"
 include = ["LICENSE-APACHE", "LICENSE-MIT", "**/*.rs", "Cargo.toml"]
@@ -41,7 +41,7 @@ enigo = "0.2"
 device_query = "2.1"
 
 # Serialization 
-serde = { version = "1", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
 
 # Enum helpers
 strum = "0.26"
@@ -71,28 +71,27 @@ rhai = { workspace = true, optional = true, features = [
     "metadata",
 ] }
 
-egui = "0.28"
-eframe = { version = "0.28", default-features = false, features = [
+egui = "0.29"
+eframe = { version = "0.29", default-features = false, features = [
     "accesskit",     # Make egui compatible with screen readers. NOTE: adds a lot of dependencies.
     "default_fonts", # Embed the default egui fonts.
     "glow",          # Use the glow rendering backend. Alternative: "wgpu".
     "persistence",   # Enable restoring app state when restarting the app.
 ] }
 egui_code_editor = "0.2"
-egui_dock = { version = "0.13", features = ["serde"] }
+egui_dock = { version = "0.14", features = ["serde"] }
 
 # File dialog
-rfd = "0.14"
+rfd = "0.15"
 
 # Localization
 fluent = "0.16"
-fluent-templates = "0.10"
+fluent-templates = "0.11"
 unic-langid = "0.9"
 
 # Logging
 log = "0.4"
 env_logger = "0.11"
-
 
 [profile.release]
 opt-level = 2

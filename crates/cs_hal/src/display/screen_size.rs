@@ -23,3 +23,16 @@ impl ScreenSize {
         self.y
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_screen_size() {
+        let size = ScreenSize { x: 10, y: 20 };
+        assert_eq!(size.x(), 10);
+        assert_eq!(size.y(), 20);
+        assert_eq!(size.center(), ScreenSize { x: 5, y: 10 });
+    }
+}
