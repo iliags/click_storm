@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.2.4 (WIP)
+
 ## 0.2.3
 
 * Update egui to 0.29
