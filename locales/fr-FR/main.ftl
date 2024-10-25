@@ -17,6 +17,8 @@ press_key = Appuyez sur une touche
 reset_hotkey = Réinitialiser le raccourci
 reset_hotkey_desc = Réinitialiser le raccourci clavier à la valeur par défaut
 language = Langue
+clamp_values = Limiter les valeurs
+clamp_values_desc = Alterner la limitation des valeurs pour certaines configurations
 
 # Duration
 click_interval = Intervalle de clic

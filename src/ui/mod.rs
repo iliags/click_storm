@@ -1,4 +1,5 @@
 use crate::localization::locale_text::LocaleText;
+use crate::settings::user_settings::UserSettings;
 use cs_hal::input::keycode::AppKeycode;
 
 /// Clicker panel
@@ -38,6 +39,8 @@ pub(crate) trait UIPanel {
 
     /// Set the language
     fn set_language(&mut self, language: LocaleText);
+
+    fn set_user_settings(&mut self, user_settings: UserSettings);
 
     /// Get the panel name
     #[allow(dead_code)]

@@ -17,6 +17,8 @@ press_key = Drücken Sie eine Taste
 reset_hotkey = Hotkey zurücksetzen
 reset_hotkey_desc = Setzen Sie den Hotkey auf den Standardwert zurück
 language = Sprache
+clamp_values = Werte klemmen
+clamp_values_desc = Schaltet das Klemmen von Werten für einige Einstellungen um
 
 # Duration
 click_interval = Klickintervall

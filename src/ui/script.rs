@@ -326,6 +326,10 @@ impl UIPanel for ScriptPanel {
             });
         });
     }
+
+    fn set_user_settings(&mut self, _user_settings: crate::settings::user_settings::UserSettings) {
+        // Not used for now
+    }
 }
 
 impl ScriptPanel {
