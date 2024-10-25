@@ -16,6 +16,7 @@ use crate::{
     localization::locale_text::LocaleText,
     settings::{
         app_settings::AppSettings, cursor_position::CursorPosition, repeat_type::RepeatType,
+        user_settings::UserSettings,
     },
     worker::{self},
 };
@@ -55,6 +56,9 @@ pub struct ClickerPanel {
 
     #[serde(skip)]
     enigo: Option<Enigo>,
+
+    #[serde(skip)]
+    user_settings: UserSettings,
 }
 
 impl Default for ClickerPanel {
@@ -75,6 +79,7 @@ impl Default for ClickerPanel {
             is_running: Arc::new(AtomicBool::new(false)),
             thread: None,
             enigo: Some(enigo),
+            user_settings: UserSettings::default(),
         }
     }
 }
@@ -156,6 +161,10 @@ impl UIPanel for ClickerPanel {
 
     fn set_language(&mut self, language: LocaleText) {
         self.language = language;
+    }
+
+    fn set_user_settings(&mut self, user_settings: UserSettings) {
+        self.user_settings = user_settings;
     }
 
     fn toggle(&mut self) {
@@ -467,14 +476,12 @@ impl ClickerPanel {
                         });
                         cols[3].centered_and_justified(|ui| {
                             let mut pos_x = self.cursor_position_fixed.0;
-                            ui.add(
-                                egui::DragValue::new(&mut pos_x)
-                                    .range(0..=self.display_size.0)
-                                    .prefix("x: ")
-                                    .speed(1),
-                            );
+                            ui.add(egui::DragValue::new(&mut pos_x).prefix("x: ").speed(1));
                             if pos_x != self.cursor_position_fixed.0 {
-                                self.cursor_position_fixed.0 = pos_x;
+                                if self.user_settings.clamp_values() {
+                                    pos_x = pos_x.clamp(0, self.display_size.0);
+                                }
+                                self.cursor_position_fixed.0 = pos_x.abs();
                                 let pos_y = self.cursor_position_fixed.1;
 
                                 let cursor_type = CursorPosition::FixedLocation(pos_x, pos_y);
@@ -483,14 +490,12 @@ impl ClickerPanel {
                         });
                         cols[4].centered_and_justified(|ui| {
                             let mut pos_y = self.cursor_position_fixed.1;
-                            ui.add(
-                                egui::DragValue::new(&mut pos_y)
-                                    .range(0..=self.display_size.1)
-                                    .prefix("y: ")
-                                    .speed(1),
-                            );
+                            ui.add(egui::DragValue::new(&mut pos_y).prefix("y: ").speed(1));
                             if pos_y != self.cursor_position_fixed.1 {
-                                self.cursor_position_fixed.1 = pos_y;
+                                if self.user_settings.clamp_values() {
+                                    pos_y = pos_y.clamp(0, self.display_size.1);
+                                }
+                                self.cursor_position_fixed.1 = pos_y.abs();
                                 let pos_x = self.cursor_position_fixed.0;
 
                                 let cursor_type = CursorPosition::FixedLocation(pos_x, pos_y);

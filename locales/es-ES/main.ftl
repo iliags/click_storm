@@ -17,6 +17,8 @@ press_key = Presiona una tecla
 reset_hotkey = Restablecer la tecla de acceso rápido
 reset_hotkey_desc = Restablece la tecla de acceso rápido al valor predeterminado
 language = Idioma
+clamp_values = Acotar valores
+clamp_values_desc = Alterna el acotamiento de valores para algunas configuraciones
 
 # Duration
 click_interval = Intervalo de clic

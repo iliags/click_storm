@@ -75,6 +75,8 @@ impl eframe::App for ClickStormApp {
                 let script_panel = panel.as_any().downcast_ref::<ScriptPanel>().unwrap();
                 eframe::set_value(storage, script::SCRIPT_PANEL_KEY, script_panel);
             }
+
+            panel.set_user_settings(self.user_settings.clone())
         }
     }
 
@@ -144,6 +146,20 @@ impl eframe::App for ClickStormApp {
                                 panel.set_language(self.user_settings.language().clone());
                             }
                         });
+
+                    ui.separator();
+
+                    let mut toggle_setting = self.user_settings.clamp_values();
+                    ui.toggle_value(&mut toggle_setting, self.get_locale_string("clamp_values"))
+                        .on_hover_text(self.get_locale_string("clamp_values_desc"));
+
+                    if toggle_setting != self.user_settings.clamp_values() {
+                        self.user_settings.set_clamp_values(toggle_setting);
+
+                        for panel in self.panels.iter_mut() {
+                            panel.set_user_settings(self.user_settings.clone());
+                        }
+                    }
 
                     ui.separator();
 
@@ -255,6 +271,8 @@ impl ClickStormApp {
                         .unwrap()
                         .load(script_panel);
                 }
+
+                panel.set_user_settings(value.user_settings.clone())
             }
 
             return value;
