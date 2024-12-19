@@ -37,7 +37,7 @@ cs_hal = { path = "crates/cs_hal" }
 cs_scripting = { path = "crates/cs_scripting" }
 
 # Hardware control
-enigo = "0.2"
+enigo = "0.3"
 device_query = "2.1"
 
 # Serialization 
@@ -48,7 +48,7 @@ strum = "0.26"
 strum_macros = "0.26"
 
 # Scripting
-rhai = { version = "1.19" }
+rhai = { version = "1.20" }
 
 # Misc
 rand = "0.8"
@@ -71,15 +71,17 @@ rhai = { workspace = true, optional = true, features = [
     "metadata",
 ] }
 
-egui = "0.29"
-eframe = { version = "0.29", default-features = false, features = [
+egui = "0.30"
+eframe = { version = "0.30", default-features = false, features = [
     "accesskit",     # Make egui compatible with screen readers. NOTE: adds a lot of dependencies.
     "default_fonts", # Embed the default egui fonts.
     "glow",          # Use the glow rendering backend. Alternative: "wgpu".
     "persistence",   # Enable restoring app state when restarting the app.
+    "wayland",
 ] }
 egui_code_editor = "0.2"
-egui_dock = { version = "0.14", features = ["serde"] }
+#egui_dock = { version = "0.14", features = ["serde"] }
+egui_dock = { path = "./crates/egui_dock", features = ["serde"] }
 
 # File dialog
 rfd = "0.15"
@@ -102,5 +104,6 @@ lto = true
 opt-level = 2
 
 [features]
+#default = []
 default = ["scripting"]
 scripting = ["dep:rhai", "cs_scripting/scripting"]
