@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.2.6 (WIP)
+
+## 0.2.5
+
+* Update dependencies
+  * Update egui to 0.30
+  * Source version of `egui_dock` added to support egui update
+
 ## 0.2.4
 
 * Update dependencies
