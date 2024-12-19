@@ -703,7 +703,7 @@ dependencies = [
 
 [[package]]
 name = "click_storm"
-version = "0.2.4"
+version = "0.2.5"
 dependencies = [
  "cs_hal",
  "cs_scripting",
