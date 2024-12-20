@@ -11,7 +11,7 @@ use crate::{
     DockArea, Node, Style, SurfaceIndex, TabViewer,
 };
 
-impl<'tree, Tab> DockArea<'tree, Tab> {
+impl<Tab> DockArea<'_, Tab> {
     pub(super) fn show_window_surface(
         &mut self,
         ui: &Ui,

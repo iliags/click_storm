@@ -18,7 +18,7 @@ use crate::{
 
 use crate::popup::popup_under_widget;
 
-impl<'tree, Tab> DockArea<'tree, Tab> {
+impl<Tab> DockArea<'_, Tab> {
     pub(super) fn show_leaf(
         &mut self,
         ui: &mut Ui,
