@@ -80,15 +80,14 @@ eframe = { version = "0.30", default-features = false, features = [
     "wayland",
 ] }
 egui_code_editor = "0.2"
-#egui_dock = { version = "0.14", features = ["serde"] }
-egui_dock = { path = "./crates/egui_dock", features = ["serde"] }
+egui_dock = { version = "0.15", features = ["serde"] }
 
 # File dialog
 rfd = "0.15"
 
 # Localization
 fluent = "0.16"
-fluent-templates = "0.11"
+fluent-templates = "0.12"
 unic-langid = "0.9"
 
 # Logging
