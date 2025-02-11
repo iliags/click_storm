@@ -38,20 +38,20 @@ cs_scripting = { path = "crates/cs_scripting" }
 
 # Hardware control
 enigo = "0.3"
-device_query = "2.1"
+device_query = "3"
 
 # Serialization 
 serde = { version = "1.0", features = ["derive"] }
 
 # Enum helpers
-strum = "0.26"
-strum_macros = "0.26"
+strum = "0.27"
+strum_macros = "0.27"
 
 # Scripting
-rhai = { version = "1.20" }
+rhai = { version = "1" }
 
 # Misc
-rand = "0.8"
+rand = "0.9"
 
 [dependencies]
 cs_hal = { workspace = true }
@@ -71,8 +71,8 @@ rhai = { workspace = true, optional = true, features = [
     "metadata",
 ] }
 
-egui = "0.30"
-eframe = { version = "0.30", default-features = false, features = [
+egui = "0.31"
+eframe = { version = "0.31", default-features = false, features = [
     "accesskit",     # Make egui compatible with screen readers. NOTE: adds a lot of dependencies.
     "default_fonts", # Embed the default egui fonts.
     "glow",          # Use the glow rendering backend. Alternative: "wgpu".
@@ -80,14 +80,14 @@ eframe = { version = "0.30", default-features = false, features = [
     "wayland",
 ] }
 egui_code_editor = "0.2"
-egui_dock = { version = "0.15", features = ["serde"] }
+egui_dock = { version = "0.16", features = ["serde"] }
 
 # File dialog
 rfd = "0.15"
 
 # Localization
 fluent = "0.16"
-fluent-templates = "0.12"
+fluent-templates = "0.13"
 unic-langid = "0.9"
 
 # Logging

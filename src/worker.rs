@@ -31,7 +31,7 @@ pub fn worker_thread(settings: AppSettings, is_running: Arc<AtomicBool>) {
     let sleep_duration = settings.click_interval();
 
     // Random number generator
-    let mut rand = rand::thread_rng();
+    let mut rand = rand::rng();
 
     // Get the mouse button to click with
     let mouse_button = settings.mouse_button().into();
@@ -116,7 +116,7 @@ pub fn worker_thread(settings: AppSettings, is_running: Arc<AtomicBool>) {
 
         // Sleep for the specified interval
         if *settings.repeat_variation() > 0 {
-            let variation = rand.gen_range(0..*settings.repeat_variation() as u64);
+            let variation = rand.random_range(0..*settings.repeat_variation() as u64);
             let sleep_duration = sleep_duration + std::time::Duration::from_millis(variation);
 
             thread::sleep(sleep_duration);

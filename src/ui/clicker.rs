@@ -213,8 +213,8 @@ impl ClickerPanel {
     fn ui_interval(&mut self, ui: &mut egui::Ui) {
         let interval_frame = egui::Frame::default()
             .stroke(ui.visuals().widgets.noninteractive.bg_stroke)
-            .rounding(ui.visuals().widgets.noninteractive.rounding)
-            .inner_margin(Margin::same(4.0))
+            .corner_radius(ui.visuals().widgets.noninteractive.corner_radius)
+            .inner_margin(Margin::same(4))
             .show(ui, |ui| {
                 ui.heading(self.get_locale_string("click_interval"));
                 ui.vertical(|ui| {
@@ -294,8 +294,8 @@ impl ClickerPanel {
     fn ui_click_options(&mut self, ui: &mut egui::Ui) {
         let _ = egui::Frame::default()
             .stroke(ui.visuals().widgets.noninteractive.bg_stroke)
-            .rounding(ui.visuals().widgets.noninteractive.rounding)
-            .inner_margin(Margin::same(4.0))
+            .corner_radius(ui.visuals().widgets.noninteractive.corner_radius)
+            .inner_margin(Margin::same(4))
             .show(ui, |ui| {
                 ui.vertical(|ui| {
                     ui.heading(self.get_locale_string("click_options"));
@@ -363,8 +363,8 @@ impl ClickerPanel {
     fn ui_click_repeat(&mut self, ui: &mut egui::Ui) {
         let _ = egui::Frame::default()
             .stroke(ui.visuals().widgets.noninteractive.bg_stroke)
-            .rounding(ui.visuals().widgets.noninteractive.rounding)
-            .inner_margin(Margin::same(4.0))
+            .corner_radius(ui.visuals().widgets.noninteractive.corner_radius)
+            .inner_margin(Margin::same(4))
             .show(ui, |ui| {
                 ui.vertical(|ui| {
                     ui.heading(self.get_locale_string("repeat_options"));
@@ -424,8 +424,8 @@ impl ClickerPanel {
     fn ui_cursor_position(&mut self, ui: &mut egui::Ui) {
         let cursor_position_frame = egui::Frame::default()
             .stroke(ui.visuals().widgets.noninteractive.bg_stroke)
-            .rounding(ui.visuals().widgets.noninteractive.rounding)
-            .inner_margin(Margin::same(4.0))
+            .corner_radius(ui.visuals().widgets.noninteractive.corner_radius)
+            .inner_margin(Margin::same(4))
             .show(ui, |ui| {
                 ui.heading(self.get_locale_string("cursor_position"));
 

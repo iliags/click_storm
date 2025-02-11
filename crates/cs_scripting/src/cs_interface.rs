@@ -24,7 +24,7 @@ impl ClickStormInterface {
 
         Self {
             enigo: Arc::new(Mutex::new(enigo)),
-            rng: rand::thread_rng(),
+            rng: rand::rng(),
             screen_size: None,
         }
     }
@@ -60,8 +60,8 @@ impl ClickStormInterface {
         let y = y.max(0);
 
         let rand_coords = (
-            self.rng.gen_range(x..=x + width),
-            self.rng.gen_range(y..=y + height),
+            self.rng.random_range(x..=x + width),
+            self.rng.random_range(y..=y + height),
         );
 
         let _ = enigo.move_mouse(rand_coords.0, rand_coords.1, enigo::Coordinate::Abs);
@@ -191,23 +191,23 @@ impl ClickStormInterface {
 
     /// Get a random number within the specified range (min inclusive, max inclusive).
     pub(super) fn rand_range(&mut self, min: i32, max: i32) -> i32 {
-        self.rng.gen_range(min..=max)
+        self.rng.random_range(min..=max)
     }
 
     /// Get a random number within the specified range (min inclusive, max exclusive).
     pub(super) fn rand_range_excl(&mut self, min: i32, max: i32) -> i32 {
-        self.rng.gen_range(min..max)
+        self.rng.random_range(min..max)
     }
 
     /// Get a random boolean value (50/50).
     pub(super) fn rand_bool(&mut self) -> bool {
-        self.rng.gen_bool(0.5)
+        self.rng.random_bool(0.5)
     }
 
     /// Get a random boolean value (50/50).
     pub(super) fn rand_bool_prob(&mut self, probability: f32) -> bool {
         let probability = probability.clamp(0.0, 1.0);
-        self.rng.gen_bool(probability as f64)
+        self.rng.random_bool(probability as f64)
     }
 
     /**************************************************************************
