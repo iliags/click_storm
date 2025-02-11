@@ -4,7 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## 0.2.6
 
-- Update dependencies
+- Update dependencies.
+- Added aarch64 Mac to CI workflow.
 
 ## 0.2.5
 
