@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 /// Simple output log
 #[derive(Default, Debug, Clone)]
 pub struct OutputLog {

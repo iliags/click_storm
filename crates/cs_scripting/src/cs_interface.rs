@@ -173,19 +173,18 @@ impl ClickStormInterface {
 
     /// Get the screen size.
     pub(super) fn get_screen_size(&mut self) -> ScreenSize {
-        match &self.screen_size {
-            Some(size) => size.clone(),
-            None => {
-                let enigo = self.enigo.lock().unwrap();
-                let screen_size = enigo
-                    .main_display()
-                    .unwrap_or_else(|_| panic!("Failed to get screen size."));
+        if let Some(size) = &self.screen_size {
+            size.clone()
+        } else {
+            let enigo = self.enigo.lock().unwrap();
+            let screen_size = enigo
+                .main_display()
+                .unwrap_or_else(|_| panic!("Failed to get screen size."));
 
-                let size: ScreenSize = screen_size.into();
-                self.screen_size = Some(size.clone());
+            let size: ScreenSize = screen_size.into();
+            self.screen_size = Some(size.clone());
 
-                size.clone()
-            }
+            size.clone()
         }
     }
 
@@ -207,7 +206,7 @@ impl ClickStormInterface {
     /// Get a random boolean value (50/50).
     pub(super) fn rand_bool_prob(&mut self, probability: f32) -> bool {
         let probability = probability.clamp(0.0, 1.0);
-        self.rng.random_bool(probability as f64)
+        self.rng.random_bool(f64::from(probability))
     }
 
     /**************************************************************************

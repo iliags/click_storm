@@ -53,7 +53,7 @@ impl RhaiInterface {
         self.engine.run(r#"print("hello, world!")"#).unwrap();
 
         let result = self.engine.eval::<i32>("40 + 2").unwrap();
-        println!("Result: {}", result);
+        eprintln!("Result: {result}");
     }
 
     /// Run the test script
@@ -76,7 +76,7 @@ impl RhaiInterface {
         match self.engine.run(script) {
             Ok(_) => Ok(()),
             Err(err) => {
-                eprintln!("Error: {}", err);
+                eprintln!("Error: {err}");
                 Err(err.to_string())
             }
         }

@@ -1,4 +1,7 @@
-use rhai::plugin::*;
+use rhai::plugin::{
+    export_module, Dynamic, FnNamespace, FuncRegistration, Module, NativeCallContext, PluginFunc,
+    RhaiResult, TypeId,
+};
 
 #[derive(Debug, Clone)]
 pub struct MousePosition {
