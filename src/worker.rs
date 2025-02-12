@@ -17,18 +17,13 @@ use crate::settings::{
 
 pub fn worker_thread(settings: AppSettings, is_running: Arc<AtomicBool>) {
     // TODO: This is a total mess, clean it up
-
     // Start the click storm
-    //println!("Starting click storm");
 
     // Create instances needed for hardware input
     let mut enigo = Enigo::new(&Settings::default()).unwrap_or_else(|_| {
            panic!("Failed to create Enigo instance. Please make sure you are running the application on a system that supports the Enigo library.")
        });
     let device = DeviceState::new();
-
-    // Get the time interval to sleep between clicks
-    let sleep_duration = settings.click_interval();
 
     // Random number generator
     let mut rand = rand::rng();
@@ -39,9 +34,9 @@ pub fn worker_thread(settings: AppSettings, is_running: Arc<AtomicBool>) {
     // Used to keep track of the number of clicks (if repeat type is count)
     let mut current_count = 0;
 
+    // Status flags which won't change while running
     let move_mouse = *settings.cursor_position_type() != CursorPosition::CurrentLocation;
     let single_click = *settings.click_type() == MouseClickType::Single;
-
     let turbo_mode = *settings.repeat_type() == RepeatType::Turbo;
 
     // Function to click the mouse
@@ -115,17 +110,14 @@ pub fn worker_thread(settings: AppSettings, is_running: Arc<AtomicBool>) {
         }
 
         // Sleep for the specified interval
-        if *settings.repeat_variation() > 0 {
+        let sleep_duration = if *settings.repeat_variation() > 0 {
             let variation = rand.random_range(0..*settings.repeat_variation() as u64);
-            let sleep_duration = sleep_duration + std::time::Duration::from_millis(variation);
-
-            thread::sleep(sleep_duration);
+            settings.click_interval() + std::time::Duration::from_millis(variation)
         } else if turbo_mode {
-            let sleep_duration =
-                std::time::Duration::from_millis(settings.click_interval_milliseconds());
-            thread::sleep(sleep_duration);
+            std::time::Duration::from_millis(settings.click_interval_milliseconds())
         } else {
-            thread::sleep(sleep_duration);
-        }
+            settings.click_interval()
+        };
+        thread::sleep(sleep_duration);
     }
 }
