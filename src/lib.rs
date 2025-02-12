@@ -1,19 +1,20 @@
 //! ClickStorm application library.
+//!
 
-/// Application module
-mod app;
+/// Worker thread module
+pub mod worker;
 
 /// Application settings
 pub mod settings;
+
+/// Application module
+mod app;
 
 /// Localization module
 mod localization;
 
 /// Do once module
 mod do_once;
-
-/// Worker thread module
-pub mod worker;
 
 /// User interface module
 mod ui;
