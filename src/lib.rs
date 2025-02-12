@@ -4,7 +4,7 @@
 mod app;
 
 /// Application settings
-mod settings;
+pub mod settings;
 
 /// Localization module
 mod localization;
@@ -13,7 +13,7 @@ mod localization;
 mod do_once;
 
 /// Worker thread module
-mod worker;
+pub mod worker;
 
 /// User interface module
 mod ui;
