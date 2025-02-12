@@ -20,8 +20,6 @@ pub fn criterion_benchmark(c: &mut Criterion) {
     c.bench_function("worker", |b| {
         b.iter(|| worker_thread(black_box(settings.clone()), black_box(is_running.clone())))
     });
-
-    //c.bench_function("fib 20", |b| b.iter(|| fibonacci(black_box(20))));
 }
 
 criterion_group!(benches, criterion_benchmark);
