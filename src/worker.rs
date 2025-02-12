@@ -39,6 +39,14 @@ pub fn worker_thread(settings: AppSettings, is_running: Arc<AtomicBool>) {
     let single_click = *settings.click_type() == MouseClickType::Single;
     let turbo_mode = *settings.repeat_type() == RepeatType::Turbo;
 
+    let sleep_duration = if turbo_mode {
+        std::time::Duration::from_millis(settings.click_interval_milliseconds())
+    } else {
+        settings.click_interval()
+    };
+
+    let repeat_variation = *settings.repeat_variation() as u64;
+
     // Function to click the mouse
     let click_mouse = |enigo: &mut Enigo,
                        mouse_button: Button,
@@ -110,14 +118,12 @@ pub fn worker_thread(settings: AppSettings, is_running: Arc<AtomicBool>) {
         }
 
         // Sleep for the specified interval
-        let sleep_duration = if *settings.repeat_variation() > 0 {
-            let variation = rand.random_range(0..*settings.repeat_variation() as u64);
-            settings.click_interval() + std::time::Duration::from_millis(variation)
-        } else if turbo_mode {
-            std::time::Duration::from_millis(settings.click_interval_milliseconds())
+        let duration = if repeat_variation > 0 {
+            sleep_duration
+                + std::time::Duration::from_millis(rand.random_range(0..repeat_variation))
         } else {
-            settings.click_interval()
+            sleep_duration
         };
-        thread::sleep(sleep_duration);
+        thread::sleep(duration);
     }
 }
