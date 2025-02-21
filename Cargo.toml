@@ -1,6 +1,6 @@
 [package]
 name = "click_storm"
-version = "0.2.5"
+version = "0.2.6"
 authors = ["James Lennon"]
 edition = "2021"
 include = ["LICENSE-APACHE", "LICENSE-MIT", "**/*.rs", "Cargo.toml"]
@@ -32,26 +32,29 @@ unsafe_op_in_unsafe_fn = "warn"
 missing_docs = "warn"
 unsafe_code = "deny"
 
+[workspace.lints.clippy]
+#pedantic = "warn"
+
 [workspace.dependencies]
 cs_hal = { path = "crates/cs_hal" }
 cs_scripting = { path = "crates/cs_scripting" }
 
 # Hardware control
 enigo = "0.3"
-device_query = "2.1"
+device_query = "3"
 
 # Serialization 
 serde = { version = "1.0", features = ["derive"] }
 
 # Enum helpers
-strum = "0.26"
-strum_macros = "0.26"
+strum = "0.27"
+strum_macros = "0.27"
 
 # Scripting
-rhai = { version = "1.20" }
+rhai = { version = "1" }
 
 # Misc
-rand = "0.8"
+rand = "0.9"
 
 [dependencies]
 cs_hal = { workspace = true }
@@ -71,8 +74,8 @@ rhai = { workspace = true, optional = true, features = [
     "metadata",
 ] }
 
-egui = "0.30"
-eframe = { version = "0.30", default-features = false, features = [
+egui = "0.31"
+eframe = { version = "0.31", default-features = false, features = [
     "accesskit",     # Make egui compatible with screen readers. NOTE: adds a lot of dependencies.
     "default_fonts", # Embed the default egui fonts.
     "glow",          # Use the glow rendering backend. Alternative: "wgpu".
@@ -80,24 +83,32 @@ eframe = { version = "0.30", default-features = false, features = [
     "wayland",
 ] }
 egui_code_editor = "0.2"
-#egui_dock = { version = "0.14", features = ["serde"] }
-egui_dock = { path = "./crates/egui_dock", features = ["serde"] }
+egui_dock = { version = "0.16", features = ["serde"] }
 
 # File dialog
 rfd = "0.15"
 
 # Localization
 fluent = "0.16"
-fluent-templates = "0.11"
+fluent-templates = "0.13"
 unic-langid = "0.9"
 
 # Logging
 log = "0.4"
 env_logger = "0.11"
 
+[dev-dependencies]
+criterion = "0.5"
+
+[[bench]]
+name = "worker_benchmark"
+harness = false
+
+
 [profile.release]
 opt-level = 2
 lto = true
+strip = true
 
 # Optimize all dependencies even in debug builds
 [profile.dev.package."*"]

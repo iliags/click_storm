@@ -1,17 +1,4 @@
-use std::{
-    sync::{
-        atomic::{AtomicBool, Ordering},
-        Arc,
-    },
-    thread::{self, JoinHandle},
-};
-
-use cs_hal::input::{keycode::AppKeycode, mouse_button::MouseButton, mouse_click::MouseClickType};
-use device_query::{DeviceQuery, DeviceState, MouseState};
-use egui::Margin;
-use enigo::{Enigo, Mouse, Settings};
-use strum::IntoEnumIterator;
-
+use super::UIPanel;
 use crate::{
     localization::locale_text::LocaleText,
     settings::{
@@ -20,8 +7,18 @@ use crate::{
     },
     worker::{self},
 };
-
-use super::UIPanel;
+use cs_hal::input::{keycode::AppKeycode, mouse_button::MouseButton, mouse_click::MouseClickType};
+use device_query::{DeviceQuery, DeviceState, MouseState};
+use egui::Margin;
+use enigo::{Enigo, Mouse, Settings};
+use std::{
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc,
+    },
+    thread::{self, JoinHandle},
+};
+use strum::IntoEnumIterator;
 
 pub const CLICKER_PANEL_KEY: &str = "clicker_panel";
 
@@ -139,11 +136,9 @@ impl UIPanel for ClickerPanel {
 
             for press in mouse.button_pressed.iter() {
                 if *press {
-                    let coords = mouse.coords;
-                    self.cursor_position_fixed.0 = coords.0;
-                    self.cursor_position_fixed.1 = coords.1;
+                    self.cursor_position_fixed = mouse.coords;
                     self.picking_position = false;
-                    println!("Picked position: {:?}", coords);
+                    eprintln!("Picked position: {:?}", mouse.coords);
                 }
             }
         }
@@ -213,8 +208,8 @@ impl ClickerPanel {
     fn ui_interval(&mut self, ui: &mut egui::Ui) {
         let interval_frame = egui::Frame::default()
             .stroke(ui.visuals().widgets.noninteractive.bg_stroke)
-            .rounding(ui.visuals().widgets.noninteractive.rounding)
-            .inner_margin(Margin::same(4.0))
+            .corner_radius(ui.visuals().widgets.noninteractive.corner_radius)
+            .inner_margin(Margin::same(4))
             .show(ui, |ui| {
                 ui.heading(self.get_locale_string("click_interval"));
                 ui.vertical(|ui| {
@@ -294,8 +289,8 @@ impl ClickerPanel {
     fn ui_click_options(&mut self, ui: &mut egui::Ui) {
         let _ = egui::Frame::default()
             .stroke(ui.visuals().widgets.noninteractive.bg_stroke)
-            .rounding(ui.visuals().widgets.noninteractive.rounding)
-            .inner_margin(Margin::same(4.0))
+            .corner_radius(ui.visuals().widgets.noninteractive.corner_radius)
+            .inner_margin(Margin::same(4))
             .show(ui, |ui| {
                 ui.vertical(|ui| {
                     ui.heading(self.get_locale_string("click_options"));
@@ -363,8 +358,8 @@ impl ClickerPanel {
     fn ui_click_repeat(&mut self, ui: &mut egui::Ui) {
         let _ = egui::Frame::default()
             .stroke(ui.visuals().widgets.noninteractive.bg_stroke)
-            .rounding(ui.visuals().widgets.noninteractive.rounding)
-            .inner_margin(Margin::same(4.0))
+            .corner_radius(ui.visuals().widgets.noninteractive.corner_radius)
+            .inner_margin(Margin::same(4))
             .show(ui, |ui| {
                 ui.vertical(|ui| {
                     ui.heading(self.get_locale_string("repeat_options"));
@@ -424,8 +419,8 @@ impl ClickerPanel {
     fn ui_cursor_position(&mut self, ui: &mut egui::Ui) {
         let cursor_position_frame = egui::Frame::default()
             .stroke(ui.visuals().widgets.noninteractive.bg_stroke)
-            .rounding(ui.visuals().widgets.noninteractive.rounding)
-            .inner_margin(Margin::same(4.0))
+            .corner_radius(ui.visuals().widgets.noninteractive.corner_radius)
+            .inner_margin(Margin::same(4))
             .show(ui, |ui| {
                 ui.heading(self.get_locale_string("cursor_position"));
 

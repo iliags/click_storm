@@ -36,6 +36,7 @@ impl Default for RhaiInterface {
 
 impl RhaiInterface {
     /// Create a new engine instance
+    #[must_use]
     pub fn new() -> Self {
         let mut new_self = Self {
             engine: Engine::new(),
@@ -53,7 +54,7 @@ impl RhaiInterface {
         self.engine.run(r#"print("hello, world!")"#).unwrap();
 
         let result = self.engine.eval::<i32>("40 + 2").unwrap();
-        println!("Result: {}", result);
+        eprintln!("Result: {result}");
     }
 
     /// Run the test script
@@ -76,7 +77,7 @@ impl RhaiInterface {
         match self.engine.run(script) {
             Ok(_) => Ok(()),
             Err(err) => {
-                eprintln!("Error: {}", err);
+                eprintln!("Error: {err}");
                 Err(err.to_string())
             }
         }
@@ -84,7 +85,7 @@ impl RhaiInterface {
 
     /// Get the engine instance (only for codegen)
     pub fn get_engine(&self) -> &Engine {
-        println!("This should only be used for codegen");
+        eprintln!("This should only be used for codegen");
         &self.engine
     }
 

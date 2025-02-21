@@ -1,5 +1,8 @@
 use cs_hal::input::keycode::AppKeycode;
-use rhai::plugin::*;
+use rhai::plugin::{
+    export_module, mem, Dynamic, FnNamespace, FuncRegistration, Module, NativeCallContext,
+    PluginFunc, RhaiResult, TypeId,
+};
 
 #[export_module]
 #[allow(non_snake_case, non_upper_case_globals, dead_code)]

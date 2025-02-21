@@ -43,7 +43,6 @@ pub(crate) trait UIPanel {
     fn set_user_settings(&mut self, user_settings: UserSettings);
 
     /// Get the panel name
-    #[allow(dead_code)]
     fn name(&self) -> String;
 
     fn as_any(&mut self) -> &mut dyn std::any::Any;

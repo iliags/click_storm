@@ -1,3 +1,8 @@
+// Pass by value is necessary due to how the scripting engine is constructed
+#![allow(clippy::needless_pass_by_value)]
+// All script functions need to be &mut self regardless of if it's used
+#![allow(clippy::unused_self)]
+
 use cs_hal::{
     display::screen_size::ScreenSize,
     input::{button_direction::ButtonDirection, keycode::AppKeycode, mouse_button::MouseButton},
@@ -24,7 +29,7 @@ impl ClickStormInterface {
 
         Self {
             enigo: Arc::new(Mutex::new(enigo)),
-            rng: rand::thread_rng(),
+            rng: rand::rng(),
             screen_size: None,
         }
     }
@@ -60,8 +65,8 @@ impl ClickStormInterface {
         let y = y.max(0);
 
         let rand_coords = (
-            self.rng.gen_range(x..=x + width),
-            self.rng.gen_range(y..=y + height),
+            self.rng.random_range(x..=x + width),
+            self.rng.random_range(y..=y + height),
         );
 
         let _ = enigo.move_mouse(rand_coords.0, rand_coords.1, enigo::Coordinate::Abs);
@@ -173,41 +178,40 @@ impl ClickStormInterface {
 
     /// Get the screen size.
     pub(super) fn get_screen_size(&mut self) -> ScreenSize {
-        match &self.screen_size {
-            Some(size) => size.clone(),
-            None => {
-                let enigo = self.enigo.lock().unwrap();
-                let screen_size = enigo
-                    .main_display()
-                    .unwrap_or_else(|_| panic!("Failed to get screen size."));
+        if let Some(size) = &self.screen_size {
+            size.clone()
+        } else {
+            let enigo = self.enigo.lock().unwrap();
+            let screen_size = enigo
+                .main_display()
+                .unwrap_or_else(|_| panic!("Failed to get screen size."));
 
-                let size: ScreenSize = screen_size.into();
-                self.screen_size = Some(size.clone());
+            let size: ScreenSize = screen_size.into();
+            self.screen_size = Some(size.clone());
 
-                size.clone()
-            }
+            size.clone()
         }
     }
 
     /// Get a random number within the specified range (min inclusive, max inclusive).
     pub(super) fn rand_range(&mut self, min: i32, max: i32) -> i32 {
-        self.rng.gen_range(min..=max)
+        self.rng.random_range(min..=max)
     }
 
     /// Get a random number within the specified range (min inclusive, max exclusive).
     pub(super) fn rand_range_excl(&mut self, min: i32, max: i32) -> i32 {
-        self.rng.gen_range(min..max)
+        self.rng.random_range(min..max)
     }
 
     /// Get a random boolean value (50/50).
     pub(super) fn rand_bool(&mut self) -> bool {
-        self.rng.gen_bool(0.5)
+        self.rng.random_bool(0.5)
     }
 
     /// Get a random boolean value (50/50).
     pub(super) fn rand_bool_prob(&mut self, probability: f32) -> bool {
         let probability = probability.clamp(0.0, 1.0);
-        self.rng.gen_bool(probability as f64)
+        self.rng.random_bool(f64::from(probability))
     }
 
     /**************************************************************************

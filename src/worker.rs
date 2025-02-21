@@ -16,10 +16,7 @@ use crate::settings::{
 };
 
 pub fn worker_thread(settings: AppSettings, is_running: Arc<AtomicBool>) {
-    // TODO: This is a total mess, clean it up
-
     // Start the click storm
-    println!("Starting click storm");
 
     // Create instances needed for hardware input
     let mut enigo = Enigo::new(&Settings::default()).unwrap_or_else(|_| {
@@ -27,11 +24,8 @@ pub fn worker_thread(settings: AppSettings, is_running: Arc<AtomicBool>) {
        });
     let device = DeviceState::new();
 
-    // Get the time interval to sleep between clicks
-    let sleep_duration = settings.click_interval();
-
     // Random number generator
-    let mut rand = rand::thread_rng();
+    let mut rand = rand::rng();
 
     // Get the mouse button to click with
     let mouse_button = settings.mouse_button().into();
@@ -39,10 +33,18 @@ pub fn worker_thread(settings: AppSettings, is_running: Arc<AtomicBool>) {
     // Used to keep track of the number of clicks (if repeat type is count)
     let mut current_count = 0;
 
+    // Status flags which won't change while running
     let move_mouse = *settings.cursor_position_type() != CursorPosition::CurrentLocation;
     let single_click = *settings.click_type() == MouseClickType::Single;
-
     let turbo_mode = *settings.repeat_type() == RepeatType::Turbo;
+
+    let sleep_duration = if turbo_mode {
+        std::time::Duration::from_millis(settings.click_interval_milliseconds())
+    } else {
+        settings.click_interval()
+    };
+
+    let repeat_variation = *settings.repeat_variation() as u64;
 
     // Function to click the mouse
     let click_mouse = |enigo: &mut Enigo,
@@ -115,17 +117,12 @@ pub fn worker_thread(settings: AppSettings, is_running: Arc<AtomicBool>) {
         }
 
         // Sleep for the specified interval
-        if *settings.repeat_variation() > 0 {
-            let variation = rand.gen_range(0..*settings.repeat_variation() as u64);
-            let sleep_duration = sleep_duration + std::time::Duration::from_millis(variation);
-
-            thread::sleep(sleep_duration);
-        } else if turbo_mode {
-            let sleep_duration =
-                std::time::Duration::from_millis(settings.click_interval_milliseconds());
-            thread::sleep(sleep_duration);
+        let duration = if repeat_variation > 0 {
+            sleep_duration
+                + std::time::Duration::from_millis(rand.random_range(0..repeat_variation))
         } else {
-            thread::sleep(sleep_duration);
-        }
+            sleep_duration
+        };
+        thread::sleep(duration);
     }
 }

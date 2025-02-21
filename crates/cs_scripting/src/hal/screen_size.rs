@@ -1,5 +1,8 @@
 use cs_hal::display::screen_size::ScreenSize;
-use rhai::plugin::*;
+use rhai::plugin::{
+    export_module, Dynamic, FnNamespace, FuncRegistration, Module, NativeCallContext, PluginFunc,
+    RhaiResult, TypeId,
+};
 
 #[export_module]
 #[allow(non_snake_case, dead_code)]

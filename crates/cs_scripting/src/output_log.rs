@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 /// Simple output log
 #[derive(Default, Debug, Clone)]
 pub struct OutputLog {
@@ -8,6 +6,7 @@ pub struct OutputLog {
 
 impl OutputLog {
     /// Create a new output log
+    #[must_use]
     pub fn new() -> Self {
         Self { log: String::new() }
     }
@@ -24,11 +23,13 @@ impl OutputLog {
     }
 
     /// Get the log
+    #[must_use]
     pub fn get_log(&self) -> &str {
         &self.log
     }
 
     /// Get a copy of the log
+    #[must_use]
     pub fn get_log_copy(&self) -> String {
         self.log.clone()
     }
