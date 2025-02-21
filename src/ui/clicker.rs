@@ -1,17 +1,4 @@
-use std::{
-    sync::{
-        atomic::{AtomicBool, Ordering},
-        Arc,
-    },
-    thread::{self, JoinHandle},
-};
-
-use cs_hal::input::{keycode::AppKeycode, mouse_button::MouseButton, mouse_click::MouseClickType};
-use device_query::{DeviceQuery, DeviceState, MouseState};
-use egui::Margin;
-use enigo::{Enigo, Mouse, Settings};
-use strum::IntoEnumIterator;
-
+use super::UIPanel;
 use crate::{
     localization::locale_text::LocaleText,
     settings::{
@@ -20,8 +7,18 @@ use crate::{
     },
     worker::{self},
 };
-
-use super::UIPanel;
+use cs_hal::input::{keycode::AppKeycode, mouse_button::MouseButton, mouse_click::MouseClickType};
+use device_query::{DeviceQuery, DeviceState, MouseState};
+use egui::Margin;
+use enigo::{Enigo, Mouse, Settings};
+use std::{
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        Arc,
+    },
+    thread::{self, JoinHandle},
+};
+use strum::IntoEnumIterator;
 
 pub const CLICKER_PANEL_KEY: &str = "clicker_panel";
 
@@ -139,11 +136,9 @@ impl UIPanel for ClickerPanel {
 
             for press in mouse.button_pressed.iter() {
                 if *press {
-                    let coords = mouse.coords;
-                    self.cursor_position_fixed.0 = coords.0;
-                    self.cursor_position_fixed.1 = coords.1;
+                    self.cursor_position_fixed = mouse.coords;
                     self.picking_position = false;
-                    println!("Picked position: {:?}", coords);
+                    eprintln!("Picked position: {:?}", mouse.coords);
                 }
             }
         }
