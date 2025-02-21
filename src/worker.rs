@@ -16,7 +16,6 @@ use crate::settings::{
 };
 
 pub fn worker_thread(settings: AppSettings, is_running: Arc<AtomicBool>) {
-    // TODO: This is a total mess, clean it up
     // Start the click storm
 
     // Create instances needed for hardware input
