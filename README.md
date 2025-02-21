@@ -7,7 +7,7 @@
 Click Storm is an open-source auto-clicker and input automation tool written in Rust. [Download the latest version](https://github.com/iliags/click_storm/releases/latest) or [visit the wiki](https://github.com/iliags/click_storm/wiki) for documentation.
 
 <p align="center">
- <img width="80%" src="./screenshots/v0.2.6.png", alt-text="screenshot">
+ <img width="70%" src="./screenshots/v0.2.6.png", alt-text="screenshot">
 </p>
 
 > [!NOTE]
