@@ -1,29 +1,18 @@
-#![allow(dead_code, unused_imports)]
-
+use super::UIPanel;
+use crate::{do_once::DoOnceGate, localization::locale_text::LocaleText};
 use cs_hal::input::keycode::AppKeycode;
-use cs_scripting::{
-    output_log::OutputLog,
-    rhai_interface::RhaiInterface,
-    script::{self, Script},
-};
+use cs_scripting::{output_log::OutputLog, rhai_interface::RhaiInterface, script::Script};
 use device_query::DeviceQuery;
-use egui::{output, Margin, TextBuffer};
-
-use egui_code_editor::{CodeEditor, ColorTheme, Syntax, DEFAULT_THEMES};
+use egui_code_editor::{CodeEditor, Syntax, DEFAULT_THEMES};
 use egui_dock::{DockArea, DockState, NodeIndex, Style, TabViewer};
 use rfd::FileDialog;
-
 use std::{
-    hash::Hash,
     sync::{
         atomic::{AtomicBool, Ordering},
         Arc, Mutex,
     },
-    thread::{self, current, JoinHandle},
+    thread::{self, JoinHandle},
 };
-
-use super::UIPanel;
-use crate::{do_once::DoOnceGate, localization::locale_text::LocaleText};
 
 pub const SCRIPT_PANEL_KEY: &str = "script_panel";
 const NEW_SCRIPT: &str = "let cs = new_click_storm();\n\n";
@@ -173,7 +162,7 @@ impl UIPanel for ScriptPanel {
             return;
         }
 
-        println!("Starting script");
+        eprintln!("Starting script");
         self.is_running.store(true, Ordering::SeqCst);
 
         let finished = self.finished.clone();
@@ -201,7 +190,7 @@ impl UIPanel for ScriptPanel {
             let mut output_log = output_log.lock().unwrap();
             output_log.log(&result_message);
 
-            println!("{}", result_message);
+            eprintln!("{}", result_message);
 
             finished.store(true, Ordering::SeqCst);
         }));
@@ -216,7 +205,7 @@ impl UIPanel for ScriptPanel {
     }
 
     fn toggle(&mut self) {
-        println!("Toggling script");
+        eprintln!("Toggling script");
 
         if self.is_running() {
             self.stop();
@@ -237,7 +226,7 @@ impl UIPanel for ScriptPanel {
 
         if save_shortcut && !self.save_gate.is_waiting_for_reset() {
             self.save_gate.set_waiting();
-            println!("Saving script");
+            eprintln!("Saving script");
             self.save_file();
         } else if !save_shortcut && self.save_gate.is_waiting_for_reset() {
             self.save_gate.reset();
@@ -261,7 +250,7 @@ impl UIPanel for ScriptPanel {
     }
 
     fn exit(&mut self) {
-        println!("Script shutting down");
+        eprintln!("Script shutting down");
         self.stop();
     }
 
@@ -351,16 +340,11 @@ impl ScriptPanel {
                 .set_directory("/")
                 .save_file();
 
-            println!("{:?}", files);
+            eprintln!("{:?}", files);
 
-            match files {
-                Some(file) => {
-                    self.panels.script.set_script_path(Some(file));
-                    self.panels.script.save();
-                }
-                None => {
-                    println!("No file selected");
-                }
+            if let Some(file) = files {
+                self.panels.script.set_script_path(Some(file));
+                self.panels.script.save();
             }
         }
     }
@@ -371,7 +355,7 @@ impl ScriptPanel {
             .set_directory("/")
             .pick_file();
 
-        println!("{:?}", files);
+        eprintln!("{:?}", files);
 
         self.panels.script.load(files);
     }
@@ -467,6 +451,7 @@ impl TabViewer for Panels {
 }
 
 impl Panels {
+    #[allow(dead_code)]
     pub fn new(output_log: Arc<Mutex<OutputLog>>) -> Self {
         Self {
             output_log,
