@@ -1,3 +1,8 @@
+// Pass by value is necessary due to how the scripting engine is constructed
+#![allow(clippy::needless_pass_by_value)]
+// All script functions need to be &mut self regardless of if it's used
+#![allow(clippy::unused_self)]
+
 use cs_hal::{
     display::screen_size::ScreenSize,
     input::{button_direction::ButtonDirection, keycode::AppKeycode, mouse_button::MouseButton},

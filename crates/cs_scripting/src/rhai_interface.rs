@@ -36,6 +36,7 @@ impl Default for RhaiInterface {
 
 impl RhaiInterface {
     /// Create a new engine instance
+    #[must_use]
     pub fn new() -> Self {
         let mut new_self = Self {
             engine: Engine::new(),
@@ -84,7 +85,7 @@ impl RhaiInterface {
 
     /// Get the engine instance (only for codegen)
     pub fn get_engine(&self) -> &Engine {
-        println!("This should only be used for codegen");
+        eprintln!("This should only be used for codegen");
         &self.engine
     }
 

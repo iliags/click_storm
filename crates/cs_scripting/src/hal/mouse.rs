@@ -21,7 +21,10 @@ impl From<(i32, i32)> for MousePosition {
 #[export_module]
 #[allow(non_snake_case, dead_code)]
 pub mod MouseModule {
-    use super::*;
+    use super::{
+        Dynamic, FnNamespace, FuncRegistration, Module, MousePosition, NativeCallContext,
+        PluginFunc, RhaiResult, TypeId,
+    };
 
     #[rhai_fn(global, name = "to_string", name = "to_debug", pure)]
     pub fn to_string(value: &mut MousePosition) -> String {

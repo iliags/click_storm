@@ -111,7 +111,7 @@ impl UIPanel for ScriptPanel {
                         // TODO: Check if there are changes, show a dialog if so
 
                         self.panels.script = Script::default();
-                        self.panels.script.set_script(NEW_SCRIPT.to_string());
+                        self.panels.script.set_script(NEW_SCRIPT);
                     }
 
                     if ui.button(self.get_locale_string("open")).clicked() {
@@ -400,7 +400,7 @@ struct Panels {
 impl Default for Panels {
     fn default() -> Self {
         let mut script = Script::default();
-        script.set_script(NEW_SCRIPT.to_string());
+        script.set_script(NEW_SCRIPT);
 
         Self {
             script,
