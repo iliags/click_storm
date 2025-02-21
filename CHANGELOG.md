@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 - Update dependencies.
 - Added aarch64 Mac to CI workflow.
+- Optimized worker thread.
 
 ## 0.2.5
 
