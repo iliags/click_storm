@@ -1,7 +1,5 @@
 # Click Storm
 
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/iliags/click_storm/badge)](https://scorecard.dev/viewer/?uri=github.com/iliags/click_storm/)
-
 <p align="center">
  <img width="20%" src="./assets/icon-256.png", alt-text="logo">
 </p>
