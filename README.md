@@ -1,5 +1,7 @@
 # Click Storm
 
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/iliags/click_storm/badge)](https://scorecard.dev/viewer/?uri=github.com/iliags/click_storm/)
+
 <p align="center">
  <img width="20%" src="./assets/icon-256.png", alt-text="logo">
 </p>
@@ -11,7 +13,7 @@ Click Storm is an open-source auto-clicker and input automation tool written in 
 </p>
 
 > [!NOTE]
-> Windows Security has marked the executable as having `Trojan:Script/Wacatac.B!ml` in the past, which is a false positive.
+> Windows Security has marked the executable as having `Trojan:Script/Wacatac.B!ml` in the past, which is a false positive. See the Antivirus section for more information.
 
 ## Clicker vs Scripting
 
@@ -31,7 +33,7 @@ Some devices may prevent hardware access due to permissions, see this [permissio
 
 ### Translations
 
-The fluent `ftl` files are in the `locales` folder under their respective language codes. They were translated from english using AI so they are probably wrong, feel free to submit a PR with corrections.
+The fluent `ftl` files are in the `locales` folder under their respective language codes.
 
 ### Antivirus
 

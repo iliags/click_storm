@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.2.7
+
+- Update Rust edition to 2024
+- Update dependencies
+- Added OpenSSF Scorecard support
+
 ## 0.2.6
 
 - Update dependencies.
