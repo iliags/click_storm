@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.2.8
+
+- Revert 2024 edition until workflows are fixed.
+- Remove OpenSSF scorecard until workflow is fixed.
+
 ## 0.2.7
 
 - Update Rust edition to 2024
