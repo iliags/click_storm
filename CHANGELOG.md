@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.2.9
+
+- Update Rust edition to 2024
+- Update egui to 0.31
+
 ## 0.2.8
 
 - Revert 2024 edition until workflows are fixed.
