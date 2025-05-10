@@ -6,6 +6,7 @@ All notable changes to this project will be documented in this file.
 
 - Update Rust edition to 2024
 - Update egui to 0.31
+- Update dependencies
 
 ## 0.2.8
 
