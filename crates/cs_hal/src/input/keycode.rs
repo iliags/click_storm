@@ -119,6 +119,7 @@ pub enum AppKeycode {
     Comma,
     Dot,
     Slash,
+    RCommand,
 }
 
 impl AppKeycode {
@@ -235,6 +236,7 @@ impl AppKeycode {
             Self::Comma => "Comma",
             Self::Dot => "Dot",
             Self::Slash => "Slash",
+            Self::RCommand => "RCommand",
         }
     }
 }
@@ -353,6 +355,7 @@ impl From<device_query::Keycode> for AppKeycode {
             Keycode::Comma => AppKeycode::Comma,
             Keycode::Dot => AppKeycode::Dot,
             Keycode::Slash => AppKeycode::Slash,
+            Keycode::RCommand => AppKeycode::RCommand,
         }
     }
 }
@@ -471,6 +474,7 @@ impl From<AppKeycode> for device_query::Keycode {
             AppKeycode::Comma => Keycode::Comma,
             AppKeycode::Dot => Keycode::Dot,
             AppKeycode::Slash => Keycode::Slash,
+            AppKeycode::RCommand => Keycode::RCommand,
         }
     }
 }
@@ -542,7 +546,7 @@ impl From<AppKeycode> for enigo::Key {
             AppKeycode::LShift => Key::LShift,
             AppKeycode::RShift => Key::RShift,
             AppKeycode::LAlt | AppKeycode::RAlt => Key::Alt,
-            AppKeycode::Command => Key::Meta,
+            AppKeycode::Command | AppKeycode::RCommand => Key::Meta,
             AppKeycode::LOption | AppKeycode::ROption => Key::Option,
             AppKeycode::LMeta | AppKeycode::RMeta => Key::Meta,
             AppKeycode::Enter => Key::Return,

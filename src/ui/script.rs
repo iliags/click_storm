@@ -3,13 +3,13 @@ use crate::{do_once::DoOnceGate, localization::locale_text::LocaleText};
 use cs_hal::input::keycode::AppKeycode;
 use cs_scripting::{output_log::OutputLog, rhai_interface::RhaiInterface, script::Script};
 use device_query::DeviceQuery;
-use egui_code_editor::{CodeEditor, Syntax, DEFAULT_THEMES};
+use egui_code_editor::{CodeEditor, DEFAULT_THEMES, Syntax};
 use egui_dock::{DockArea, DockState, NodeIndex, Style, TabViewer};
 use rfd::FileDialog;
 use std::{
     sync::{
-        atomic::{AtomicBool, Ordering},
         Arc, Mutex,
+        atomic::{AtomicBool, Ordering},
     },
     thread::{self, JoinHandle},
 };
@@ -178,7 +178,7 @@ impl UIPanel for ScriptPanel {
             let mut rhai_interface = RhaiInterface::new();
 
             let mut result_message = String::new();
-            match rhai_interface.run_script(&script, output_log.clone()) {
+            match rhai_interface.run_script(&script, &output_log.clone()) {
                 Ok(_) => {
                     result_message.push_str("Script finished successfully");
                 }
