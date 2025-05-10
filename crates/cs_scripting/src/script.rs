@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 /// Simple script structure
 ///
-/// The script_buffer is used as the primary workspace, the script is used to store the last saved
+/// The `script_buffer` is used as the primary workspace, the script is used to store the last saved
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct Script {
     script: String,

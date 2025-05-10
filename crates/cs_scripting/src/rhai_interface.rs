@@ -48,26 +48,11 @@ impl RhaiInterface {
         new_self
     }
 
-    /// Test hello world
-    #[cfg(debug_assertions)]
-    pub fn test_hello(&mut self) {
-        self.engine.run(r#"print("hello, world!")"#).unwrap();
-
-        let result = self.engine.eval::<i32>("40 + 2").unwrap();
-        eprintln!("Result: {result}");
-    }
-
-    /// Run the test script
-    #[cfg(debug_assertions)]
-    pub fn test_script(&mut self) {
-        self.engine.run(TEST_SCRIPT).unwrap();
-    }
-
     /// Run a script
     pub fn run_script(
         &mut self,
         script: &str,
-        output_log: Arc<Mutex<OutputLog>>,
+        output_log: &Arc<Mutex<OutputLog>>,
     ) -> Result<(), String> {
         let output_log = output_log.clone();
         self.engine.on_print(move |msg| {
@@ -75,7 +60,7 @@ impl RhaiInterface {
         });
 
         match self.engine.run(script) {
-            Ok(_) => Ok(()),
+            Ok(()) => Ok(()),
             Err(err) => {
                 eprintln!("Error: {err}");
                 Err(err.to_string())
@@ -160,5 +145,29 @@ impl RhaiInterface {
             .register_fn("rand_range_excl", ClickStormInterface::rand_range_excl)
             .register_fn("rand_bool", ClickStormInterface::rand_bool)
             .register_fn("rand_bool", ClickStormInterface::rand_bool_prob);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    pub fn test_hello() {
+        let rhai_interface = RhaiInterface::new();
+
+        let script = r#"print("hello, world!")"#;
+
+        rhai_interface.engine.run(script).unwrap();
+
+        let script = "40 + 2";
+        let result = rhai_interface.engine.eval::<i32>(script).unwrap();
+        eprintln!("Result: {result}");
+    }
+
+    #[test]
+    pub fn test_script() {
+        let rhai_interface = RhaiInterface::new();
+        rhai_interface.engine.run(TEST_SCRIPT).unwrap();
     }
 }
