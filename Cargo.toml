@@ -40,7 +40,7 @@ cs_hal = { path = "crates/cs_hal" }
 cs_scripting = { path = "crates/cs_scripting" }
 
 # Hardware control
-enigo = "0.3"
+enigo = "0.5"
 device_query = "3"
 
 # Serialization 
@@ -89,7 +89,7 @@ egui_dock = { version = "0.16", features = ["serde"] }
 rfd = "0.15"
 
 # Localization
-fluent = "0.16"
+fluent = "0.17"
 fluent-templates = "0.13"
 unic-langid = "0.9"
 
@@ -98,7 +98,7 @@ log = "0.4"
 env_logger = "0.11"
 
 [dev-dependencies]
-criterion = "0.5"
+criterion = "0.6"
 
 [[bench]]
 name = "worker_benchmark"
