@@ -1,9 +1,10 @@
 use click_storm::settings::cursor_position::CursorPosition;
 use click_storm::settings::{app_settings::AppSettings, repeat_type::RepeatType};
 use click_storm::worker::worker_thread;
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{Criterion, criterion_group, criterion_main};
 use cs_hal::input::{mouse_button::MouseButton, mouse_click::MouseClickType};
-use std::sync::{atomic::AtomicBool, Arc};
+use std::hint::black_box;
+use std::sync::{Arc, atomic::AtomicBool};
 
 pub fn criterion_benchmark(c: &mut Criterion) {
     let is_running: Arc<AtomicBool> = Arc::new(AtomicBool::new(true));
