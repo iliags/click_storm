@@ -7,10 +7,7 @@ pub enum MouseButton {
     Right,
     Middle,
 
-    // TODO: Make these unsupported
-    #[cfg(any(target_os = "windows", all(unix, not(target_os = "macos"))))]
     Back,
-    #[cfg(any(target_os = "windows", all(unix, not(target_os = "macos"))))]
     Forward,
     ScrollUp,
     ScrollDown,
@@ -25,9 +22,7 @@ impl MouseButton {
             Self::Left => "left",
             Self::Right => "right",
             Self::Middle => "middle",
-            #[cfg(any(target_os = "windows", all(unix, not(target_os = "macos"))))]
             Self::Back => "back",
-            #[cfg(any(target_os = "windows", all(unix, not(target_os = "macos"))))]
             Self::Forward => "forward",
             Self::ScrollUp => "scroll_up",
             Self::ScrollDown => "scroll_down",
@@ -42,9 +37,7 @@ impl MouseButton {
             Self::Left => "Left",
             Self::Right => "Right",
             Self::Middle => "Middle",
-            #[cfg(any(target_os = "windows", all(unix, not(target_os = "macos"))))]
             Self::Back => "Back",
-            #[cfg(any(target_os = "windows", all(unix, not(target_os = "macos"))))]
             Self::Forward => "Forward",
             Self::ScrollUp => "ScrollUp",
             Self::ScrollDown => "ScrollDown",
@@ -60,9 +53,7 @@ impl From<enigo::Button> for MouseButton {
             enigo::Button::Left => Self::Left,
             enigo::Button::Right => Self::Right,
             enigo::Button::Middle => Self::Middle,
-            #[cfg(any(target_os = "windows", all(unix, not(target_os = "macos"))))]
             enigo::Button::Back => Self::Back,
-            #[cfg(any(target_os = "windows", all(unix, not(target_os = "macos"))))]
             enigo::Button::Forward => Self::Forward,
             enigo::Button::ScrollUp => Self::ScrollUp,
             enigo::Button::ScrollDown => Self::ScrollDown,
@@ -78,9 +69,7 @@ impl From<&MouseButton> for enigo::Button {
             MouseButton::Left => enigo::Button::Left,
             MouseButton::Right => enigo::Button::Right,
             MouseButton::Middle => enigo::Button::Middle,
-            #[cfg(any(target_os = "windows", all(unix, not(target_os = "macos"))))]
             MouseButton::Back => enigo::Button::Back,
-            #[cfg(any(target_os = "windows", all(unix, not(target_os = "macos"))))]
             MouseButton::Forward => enigo::Button::Forward,
             MouseButton::ScrollUp => enigo::Button::ScrollUp,
             MouseButton::ScrollDown => enigo::Button::ScrollDown,
@@ -96,9 +85,7 @@ impl From<MouseButton> for enigo::Button {
             MouseButton::Left => enigo::Button::Left,
             MouseButton::Right => enigo::Button::Right,
             MouseButton::Middle => enigo::Button::Middle,
-            #[cfg(any(target_os = "windows", all(unix, not(target_os = "macos"))))]
             MouseButton::Back => enigo::Button::Back,
-            #[cfg(any(target_os = "windows", all(unix, not(target_os = "macos"))))]
             MouseButton::Forward => enigo::Button::Forward,
             MouseButton::ScrollUp => enigo::Button::ScrollUp,
             MouseButton::ScrollDown => enigo::Button::ScrollDown,
