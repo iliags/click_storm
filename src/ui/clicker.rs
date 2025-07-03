@@ -510,7 +510,7 @@ impl ClickerPanel {
         ui.centered_and_justified(|ui| {
             ui.columns(2, |cols| {
                 let keycode: device_query::Keycode = self.hotkey_code.into();
-                let key_code_text = format!(" ({})", keycode).to_owned();
+                let key_code_text = format!(" ({keycode})").to_owned();
                 cols[0].centered_and_justified(|ui| {
                     let enabled = !self.is_running() && self.can_start();
 

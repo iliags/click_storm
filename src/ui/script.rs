@@ -125,10 +125,10 @@ impl UIPanel for ScriptPanel {
                     ui.separator();
 
                     let keycode: device_query::Keycode = self.hotkey_code.into();
-                    let key_code_text = format!(" ({})", keycode).to_owned();
+                    let key_code_text = format!(" ({keycode})").to_owned();
 
                     ui.add_enabled_ui(!self.is_running(), |ui| {
-                        let start_text = format!("▶{}", key_code_text);
+                        let start_text = format!("▶{key_code_text}");
                         if ui
                             .button(start_text)
                             .on_hover_text_at_pointer(self.get_locale_string("run"))
@@ -139,7 +139,7 @@ impl UIPanel for ScriptPanel {
                     });
 
                     ui.add_enabled_ui(self.is_running(), |ui| {
-                        let stop_text = format!("⏹{}", key_code_text);
+                        let stop_text = format!("⏹{key_code_text}");
                         if ui
                             .button(stop_text)
                             .on_hover_text_at_pointer(self.get_locale_string("stop"))
@@ -190,7 +190,7 @@ impl UIPanel for ScriptPanel {
             let mut output_log = output_log.lock().unwrap();
             output_log.log(&result_message);
 
-            eprintln!("{}", result_message);
+            eprintln!("{result_message}");
 
             finished.store(true, Ordering::SeqCst);
         }));
@@ -340,7 +340,7 @@ impl ScriptPanel {
                 .set_directory("/")
                 .save_file();
 
-            eprintln!("{:?}", files);
+            eprintln!("{files:?}");
 
             if let Some(file) = files {
                 self.panels.script.set_script_path(Some(file));
@@ -355,7 +355,7 @@ impl ScriptPanel {
             .set_directory("/")
             .pick_file();
 
-        eprintln!("{:?}", files);
+        eprintln!("{files:?}");
 
         self.panels.script.load(files);
     }
