@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.2.10
+
+- Update dependencies
+
 ## 0.2.9
 
 - Update Rust edition to 2024
