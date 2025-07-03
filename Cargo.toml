@@ -41,7 +41,7 @@ cs_scripting = { path = "crates/cs_scripting" }
 
 # Hardware control
 enigo = "0.5"
-device_query = "3"
+device_query = "4"
 
 # Serialization 
 serde = { version = "1.0", features = ["derive"] }
