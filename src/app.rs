@@ -1,9 +1,11 @@
 use cs_hal::input::keycode::AppKeycode;
 use device_query::{DeviceQuery, DeviceState};
-use strum::IntoEnumIterator;
+use egui::PopupCloseBehavior;
+use egui::containers::menu::{MenuButton, MenuConfig};
+//use strum::IntoEnumIterator;
 
 use crate::do_once::DoOnceGate;
-use crate::localization::language::Language;
+//use crate::localization::language::Language;
 use crate::settings::user_settings::UserSettings;
 use crate::ui::UIPanel;
 use crate::ui::clicker::{self, ClickerPanel};
@@ -12,7 +14,6 @@ use crate::ui::clicker::{self, ClickerPanel};
 use crate::ui::script::{self, ScriptPanel};
 
 // Wishlist:
-// - Record and playback mouse movements
 // - Check github for updates
 //  - Use GET /repos/:owner/:repo/releases/latest
 // - Write a lint or comp-time check to find unused/mismatched keys in the localization files
@@ -98,106 +99,118 @@ impl eframe::App for ClickStormApp {
         // Top panel
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             egui::MenuBar::new().ui(ui, |ui| {
-                ui.menu_button("⛭", |ui| {
-                    // Change hotkey button
-                    ui.label(self.get_locale_string("hotkey"));
-                    let button_text = if self.wait_for_key.is_active() {
-                        self.get_locale_string("press_key")
-                    } else {
-                        self.get_locale_string("change_hotkey")
-                    };
-                    if ui
-                        .button(button_text)
-                        .on_hover_text_at_pointer(self.get_locale_string("change_hotkey_desc"))
-                        .clicked()
-                    {
-                        self.wait_for_key.set_active();
-                    }
+                MenuButton::new("⛭")
+                    .config(
+                        MenuConfig::default()
+                            .close_behavior(PopupCloseBehavior::CloseOnClickOutside),
+                    )
+                    .ui(ui, |ui| {
+                        // Change hotkey button
+                        ui.label(self.get_locale_string("hotkey"));
+                        let button_text = if self.wait_for_key.is_active() {
+                            self.get_locale_string("press_key")
+                        } else {
+                            self.get_locale_string("change_hotkey")
+                        };
+                        if ui
+                            .button(button_text)
+                            .on_hover_text_at_pointer(self.get_locale_string("change_hotkey_desc"))
+                            .clicked()
+                        {
+                            self.wait_for_key.set_active();
+                        }
 
-                    if ui
-                        .button(self.get_locale_string("reset_hotkey"))
-                        .on_hover_text_at_pointer(self.get_locale_string("reset_hotkey_desc"))
-                        .clicked()
-                    {
-                        self.user_settings.reset_hotkey();
-                        ui.close();
-                    }
-
-                    for panel in self.panels.iter_mut() {
-                        panel.show_settings(ctx, ui);
-                    }
-
-                    ui.separator();
-
-                    // Language selection
-                    ui.label(self.get_locale_string("language"));
-
-                    egui::ComboBox::from_label("")
-                        .selected_text(self.user_settings.language().get_language().as_str())
-                        .show_ui(ui, |ui| {
-                            let mut lang = self.user_settings.language().get_language();
-                            for language in Language::iter() {
-                                let language_string = language.as_str();
-                                ui.selectable_value(&mut lang, language.clone(), language_string);
-                            }
-                            self.user_settings.language_mut().set_language(lang);
-
-                            for panel in self.panels.iter_mut() {
-                                panel.set_language(self.user_settings.language().clone());
-                            }
-                        });
-
-                    ui.separator();
-
-                    let mut toggle_setting = self.user_settings.clamp_values();
-                    ui.toggle_value(&mut toggle_setting, self.get_locale_string("clamp_values"))
-                        .on_hover_text(self.get_locale_string("clamp_values_desc"));
-
-                    if toggle_setting != self.user_settings.clamp_values() {
-                        self.user_settings.set_clamp_values(toggle_setting);
+                        if ui
+                            .button(self.get_locale_string("reset_hotkey"))
+                            .on_hover_text_at_pointer(self.get_locale_string("reset_hotkey_desc"))
+                            .clicked()
+                        {
+                            self.user_settings.reset_hotkey();
+                        }
 
                         for panel in self.panels.iter_mut() {
-                            panel.set_user_settings(self.user_settings.clone());
+                            panel.show_settings(ctx, ui);
                         }
-                    }
-
-                    ui.separator();
-
-                    // About button
-                    ui.menu_button(self.get_locale_string("about"), |ui| {
-                        let version_label = format!(
-                            "{}{}",
-                            self.get_locale_string("version"),
-                            env!("CARGO_PKG_VERSION")
-                        );
-                        ui.label(version_label);
 
                         ui.separator();
 
-                        if ui
-                            .hyperlink_to(
-                                self.get_locale_string("source"),
-                                "https://github.com/iliags/click_storm",
-                            )
-                            .clicked()
-                        {
-                            ui.close();
+                        // TODO: Closes the menu when clicking on the dropdown as of egui 0.32
+                        // Language selection
+                        // ui.label(self.get_locale_string("language"));
+
+                        // egui::ComboBox::from_label("")
+                        //     .selected_text(self.user_settings.language().get_language().as_str())
+                        //     .show_ui(ui, |ui| {
+                        //         let mut lang = self.user_settings.language().get_language();
+                        //         for language in Language::iter() {
+                        //             let language_string = language.as_str();
+                        //             ui.selectable_value(
+                        //                 &mut lang,
+                        //                 language.clone(),
+                        //                 language_string,
+                        //             );
+                        //         }
+                        //         self.user_settings.language_mut().set_language(lang);
+
+                        //         for panel in self.panels.iter_mut() {
+                        //             panel.set_language(self.user_settings.language().clone());
+                        //         }
+                        //     });
+
+                        // ui.separator();
+
+                        let mut toggle_setting = self.user_settings.clamp_values();
+                        ui.toggle_value(
+                            &mut toggle_setting,
+                            self.get_locale_string("clamp_values"),
+                        )
+                        .on_hover_text(self.get_locale_string("clamp_values_desc"));
+
+                        if toggle_setting != self.user_settings.clamp_values() {
+                            self.user_settings.set_clamp_values(toggle_setting);
+
+                            for panel in self.panels.iter_mut() {
+                                panel.set_user_settings(self.user_settings.clone());
+                            }
                         }
 
-                        // TODO: Put a check for updates button here
+                        ui.separator();
 
-                        #[cfg(debug_assertions)]
-                        {
+                        // About button
+                        ui.menu_button(self.get_locale_string("about"), |ui| {
+                            let version_label = format!(
+                                "{}{}",
+                                self.get_locale_string("version"),
+                                env!("CARGO_PKG_VERSION")
+                            );
+                            ui.label(version_label);
+
                             ui.separator();
 
-                            egui::warn_if_debug_build(ui);
-                        }
+                            if ui
+                                .hyperlink_to(
+                                    self.get_locale_string("source"),
+                                    "https://github.com/iliags/click_storm",
+                                )
+                                .clicked()
+                            {
+                                ui.close();
+                            }
+
+                            // TODO: Put a check for updates button here
+
+                            #[cfg(debug_assertions)]
+                            {
+                                ui.separator();
+
+                                egui::warn_if_debug_build(ui);
+                            }
+                        });
+
+                        ui.separator();
+
+                        egui::widgets::global_theme_preference_switch(ui);
                     });
-
-                    ui.separator();
-
-                    egui::widgets::global_theme_preference_switch(ui);
-                });
 
                 ui.separator();
 

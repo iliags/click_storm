@@ -38,6 +38,7 @@ pub(crate) trait UIPanel {
     fn exit(&mut self);
 
     /// Set the language
+    #[allow(dead_code)]
     fn set_language(&mut self, language: LocaleText);
 
     fn set_user_settings(&mut self, user_settings: UserSettings);
