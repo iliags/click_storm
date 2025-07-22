@@ -5,8 +5,8 @@ use strum::IntoEnumIterator;
 use crate::do_once::DoOnceGate;
 use crate::localization::language::Language;
 use crate::settings::user_settings::UserSettings;
-use crate::ui::clicker::{self, ClickerPanel};
 use crate::ui::UIPanel;
+use crate::ui::clicker::{self, ClickerPanel};
 
 #[cfg(feature = "scripting")]
 use crate::ui::script::{self, ScriptPanel};
@@ -97,7 +97,7 @@ impl eframe::App for ClickStormApp {
 
         // Top panel
         egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
-            egui::menu::bar(ui, |ui| {
+            egui::MenuBar::new().ui(ui, |ui| {
                 ui.menu_button("⛭", |ui| {
                     // Change hotkey button
                     ui.label(self.get_locale_string("hotkey"));
@@ -120,7 +120,7 @@ impl eframe::App for ClickStormApp {
                         .clicked()
                     {
                         self.user_settings.reset_hotkey();
-                        ui.close_menu();
+                        ui.close();
                     }
 
                     for panel in self.panels.iter_mut() {
@@ -181,7 +181,7 @@ impl eframe::App for ClickStormApp {
                             )
                             .clicked()
                         {
-                            ui.close_menu();
+                            ui.close();
                         }
 
                         // TODO: Put a check for updates button here
@@ -290,7 +290,7 @@ impl ClickStormApp {
                 self.wait_for_key.set_waiting();
 
                 self.user_settings.set_hotkey(AppKeycode::from(keys[0]));
-                println!("Hotkey set to: {:?}", self.user_settings.hotkey());
+                eprintln!("Hotkey set to: {:?}", self.user_settings.hotkey());
 
                 for panel in self.panels.iter_mut() {
                     panel.set_hotkey(self.user_settings.hotkey());

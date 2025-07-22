@@ -74,8 +74,8 @@ rhai = { workspace = true, optional = true, features = [
     "metadata",
 ] }
 
-egui = "0.31"
-eframe = { version = "0.31", default-features = false, features = [
+egui = "0.32"
+eframe = { version = "0.32", default-features = false, features = [
     "accesskit",     # Make egui compatible with screen readers. NOTE: adds a lot of dependencies.
     "default_fonts", # Embed the default egui fonts.
     "glow",          # Use the glow rendering backend. Alternative: "wgpu".
@@ -83,7 +83,7 @@ eframe = { version = "0.31", default-features = false, features = [
     "wayland",
 ] }
 egui_code_editor = "0.2"
-egui_dock = { version = "0.16", features = ["serde"] }
+egui_dock = { version = "0.17", features = ["serde"] }
 
 # File dialog
 rfd = "0.15"
