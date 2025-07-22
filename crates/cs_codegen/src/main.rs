@@ -1,6 +1,6 @@
 #[cfg(not(feature = "scripting"))]
 fn main() {
-    println!("Scripting disabled, nothing to do.");
+    eprintln!("Scripting disabled, nothing to do.");
 }
 
 // TODO: Add command line features

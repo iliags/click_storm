@@ -1,7 +1,7 @@
 use std::{
     sync::{
-        atomic::{AtomicBool, Ordering},
         Arc,
+        atomic::{AtomicBool, Ordering},
     },
     thread,
 };
@@ -66,8 +66,6 @@ pub fn worker_thread(settings: AppSettings, is_running: Arc<AtomicBool>) {
     };
 
     while is_running.load(Ordering::SeqCst) {
-        //println!("Working");
-
         // Coordinates are in absolute screen coordinates
         let mouse_position = match settings.cursor_position_type() {
             CursorPosition::CurrentLocation => {
@@ -81,7 +79,6 @@ pub fn worker_thread(settings: AppSettings, is_running: Arc<AtomicBool>) {
 
         match settings.repeat_type() {
             RepeatType::Repeat(count) => {
-                //println!("Count click");
                 if current_count >= *count {
                     is_running.store(false, Ordering::SeqCst);
                 } else {
@@ -97,7 +94,6 @@ pub fn worker_thread(settings: AppSettings, is_running: Arc<AtomicBool>) {
                 }
             }
             RepeatType::RepeatUntilStopped => {
-                //println!("Repeat click");
                 click_mouse(
                     &mut enigo,
                     mouse_button,
@@ -109,7 +105,6 @@ pub fn worker_thread(settings: AppSettings, is_running: Arc<AtomicBool>) {
             RepeatType::Turbo => {
                 // TODO: Check if this works with left handed mice
                 if device.get_mouse().button_pressed[1] {
-                    //println!("Turbo click");
                     let _ = enigo.button(mouse_button, enigo::Direction::Release);
                     let _ = enigo.button(mouse_button, enigo::Direction::Press);
                 }

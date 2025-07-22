@@ -32,7 +32,7 @@ impl Script {
                 self.set_script_path(Some(path));
             }
             None => {
-                println!("No path provided to load script from");
+                eprintln!("No path provided to load script from");
             }
         }
     }
