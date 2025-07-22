@@ -49,14 +49,22 @@ impl RhaiInterface {
     }
 
     /// Run a script
+    ///
+    /// # Errors
+    /// Will return a `String` constructed from `EvalAltResult` errors
     pub fn run_script(
         &mut self,
         script: &str,
         output_log: &Arc<Mutex<OutputLog>>,
     ) -> Result<(), String> {
         let output_log = output_log.clone();
-        self.engine.on_print(move |msg| {
-            output_log.lock().unwrap().log(msg);
+        self.engine.on_print(move |msg| match output_log.lock() {
+            Ok(mut out) => {
+                out.log(msg);
+            }
+            Err(e) => {
+                eprintln!("Error locking output log: {e}");
+            }
         });
 
         match self.engine.run(script) {
