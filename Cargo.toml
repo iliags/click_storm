@@ -40,7 +40,7 @@ cs_hal = { path = "crates/cs_hal" }
 cs_scripting = { path = "crates/cs_scripting" }
 
 # Hardware control
-enigo = "0.5"
+enigo = "0.6"
 device_query = "4"
 
 # Serialization 
@@ -74,8 +74,8 @@ rhai = { workspace = true, optional = true, features = [
     "metadata",
 ] }
 
-egui = "0.32"
-eframe = { version = "0.32", default-features = false, features = [
+egui = "0.33"
+eframe = { version = "0.33", default-features = false, features = [
     "accesskit",     # Make egui compatible with screen readers. NOTE: adds a lot of dependencies.
     "default_fonts", # Embed the default egui fonts.
     "glow",          # Use the glow rendering backend. Alternative: "wgpu".
@@ -83,7 +83,7 @@ eframe = { version = "0.32", default-features = false, features = [
     "wayland",
 ] }
 egui_code_editor = "0.2"
-egui_dock = { version = "0.17", features = ["serde"] }
+egui_dock = { version = "0.18", features = ["serde"] }
 
 # File dialog
 rfd = "0.15"
@@ -98,7 +98,7 @@ log = "0.4"
 env_logger = "0.11"
 
 [dev-dependencies]
-criterion = "0.6"
+criterion = "0.7"
 
 [[bench]]
 name = "worker_benchmark"
