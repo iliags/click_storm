@@ -86,7 +86,7 @@ egui_code_editor = "0.2"
 egui_dock = { version = "0.18", features = ["serde"] }
 
 # File dialog
-rfd = "0.15"
+rfd = "0.16"
 
 # Localization
 fluent = "0.17"
@@ -98,7 +98,7 @@ log = "0.4"
 env_logger = "0.11"
 
 [dev-dependencies]
-criterion = "0.7"
+criterion = "0.8"
 
 [[bench]]
 name = "worker_benchmark"
