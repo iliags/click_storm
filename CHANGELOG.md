@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.2.13
+
+- Update dependencies which may have had issues on some devices
+
 ## 0.2.12
 
 - Fix mouse button compilation error on Mac
