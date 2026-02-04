@@ -94,7 +94,7 @@ impl UIPanel for ScriptPanel {
         }
 
         egui::TopBottomPanel::top("top_panel_script").show(ctx, |ui| {
-            egui::menu::bar(ui, |ui| {
+            egui::MenuBar::new().ui(ui, |ui| {
                 ui.horizontal(|ui| {
                     if ui.button(self.get_locale_string("new")).clicked() {
                         // TODO: Check if there are changes, show a dialog if so
