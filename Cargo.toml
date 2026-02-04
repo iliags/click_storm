@@ -1,6 +1,6 @@
 [package]
 name = "click_storm"
-version = "0.2.13"
+version = "0.2.14"
 authors = ["James Lennon"]
 edition = "2024"
 include = ["LICENSE-APACHE", "LICENSE-MIT", "**/*.rs", "Cargo.toml"]
