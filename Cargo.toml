@@ -47,14 +47,14 @@ device_query = "4"
 serde = { version = "1.0", features = ["derive"] }
 
 # Enum helpers
-strum = "0.27"
-strum_macros = "0.27"
+strum = "0.28"
+strum_macros = "0.28"
 
 # Scripting
 rhai = { version = "1" }
 
 # Misc
-rand = "0.9"
+rand = "0.10"
 
 [dependencies]
 cs_hal = { workspace = true }
