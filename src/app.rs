@@ -10,9 +10,6 @@ use crate::settings::user_settings::UserSettings;
 use crate::ui::UIPanel;
 use crate::ui::clicker::{self, ClickerPanel};
 
-#[cfg(feature = "scripting")]
-use crate::ui::script::{self, ScriptPanel};
-
 #[cfg(feature = "node_graph")]
 use crate::ui::graph::GraphPanel;
 
@@ -47,8 +44,6 @@ impl Default for ClickStormApp {
     fn default() -> Self {
         let panels: Vec<Box<dyn UIPanel>> = vec![
             Box::new(ClickerPanel::default()),
-            #[cfg(feature = "scripting")]
-            Box::new(ScriptPanel::default()),
             #[cfg(feature = "node_graph")]
             Box::new(GraphPanel::default()),
         ];
@@ -74,12 +69,6 @@ impl eframe::App for ClickStormApp {
             if panel.as_any().downcast_ref::<ClickerPanel>().is_some() {
                 let clicker_panel = panel.as_any().downcast_ref::<ClickerPanel>().unwrap();
                 eframe::set_value(storage, clicker::CLICKER_PANEL_KEY, clicker_panel);
-            }
-
-            #[cfg(feature = "scripting")]
-            if panel.as_any().downcast_ref::<ScriptPanel>().is_some() {
-                let script_panel = panel.as_any().downcast_ref::<ScriptPanel>().unwrap();
-                eframe::set_value(storage, script::SCRIPT_PANEL_KEY, script_panel);
             }
 
             #[cfg(feature = "node_graph")]
@@ -238,7 +227,7 @@ impl eframe::App for ClickStormApp {
 
                 ui.separator();
 
-                #[cfg(any(feature = "scripting", feature = "node_graph"))]
+                #[cfg(feature = "node_graph")]
                 {
                     for (index, panel) in self.panels.iter().enumerate() {
                         let panel_name = panel.name();
@@ -284,18 +273,6 @@ impl ClickStormApp {
                         .downcast_mut::<ClickerPanel>()
                         .unwrap()
                         .load(clicker_panel);
-                }
-
-                // Note: I apparently can't use cfg on an else if
-                #[cfg(feature = "scripting")]
-                if panel.as_any().downcast_ref::<ScriptPanel>().is_some() {
-                    let script_panel: ScriptPanel =
-                        eframe::get_value(storage, script::SCRIPT_PANEL_KEY).unwrap_or_default();
-                    panel
-                        .as_any()
-                        .downcast_mut::<ScriptPanel>()
-                        .unwrap()
-                        .load(script_panel);
                 }
 
                 #[cfg(feature = "node_graph")]

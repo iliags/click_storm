@@ -6,6 +6,7 @@ pub enum ClickStormNode {
 }
 
 impl ClickStormNode {
+    #[allow(unused)]
     const fn name(&self) -> &str {
         match self {
             ClickStormNode::TestNode => "Test Node",
@@ -27,23 +28,23 @@ impl SnarlViewer<ClickStormNode> for ClickStormViewer {
     #[allow(refining_impl_trait)]
     fn show_input(
         &mut self,
-        pin: &egui_snarl::InPin,
-        ui: &mut egui::Ui,
-        snarl: &mut egui_snarl::Snarl<ClickStormNode>,
+        _pin: &egui_snarl::InPin,
+        _ui: &mut egui::Ui,
+        _snarl: &mut egui_snarl::Snarl<ClickStormNode>,
     ) -> PinInfo {
         PinInfo::default()
     }
 
-    fn outputs(&mut self, node: &ClickStormNode) -> usize {
+    fn outputs(&mut self, _node: &ClickStormNode) -> usize {
         0
     }
 
     #[allow(refining_impl_trait)]
     fn show_output(
         &mut self,
-        pin: &egui_snarl::OutPin,
-        ui: &mut egui::Ui,
-        snarl: &mut egui_snarl::Snarl<ClickStormNode>,
+        _pin: &egui_snarl::OutPin,
+        _ui: &mut egui::Ui,
+        _snarl: &mut egui_snarl::Snarl<ClickStormNode>,
     ) -> PinInfo {
         PinInfo::default()
     }

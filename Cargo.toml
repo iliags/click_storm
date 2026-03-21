@@ -17,12 +17,6 @@ embed-resource = { version = "3.0" }
 name = "click_storm"
 path = "src/main.rs"
 
-# Currently used to generate the definition files for the scripting engine LSP
-[[bin]]
-name = "cs_codegen"
-path = "crates/cs_codegen/src/main.rs"
-required-features = ["scripting"]
-
 [workspace]
 members = ["crates/*"]
 resolver = "2"
@@ -37,7 +31,6 @@ unsafe_code = "deny"
 
 [workspace.dependencies]
 cs_hal = { path = "crates/cs_hal" }
-cs_scripting = { path = "crates/cs_scripting" }
 
 # Hardware control
 enigo = "0.6"
@@ -50,15 +43,11 @@ serde = { version = "1.0", features = ["derive"] }
 strum = "0.28"
 strum_macros = "0.28"
 
-# Scripting
-rhai = { version = "1" }
-
 # Misc
 rand = "0.10"
 
 [dependencies]
 cs_hal = { workspace = true }
-cs_scripting = { workspace = true }
 
 enigo = { workspace = true }
 device_query = { workspace = true }
@@ -66,13 +55,6 @@ serde = { workspace = true }
 strum = { workspace = true }
 strum_macros = { workspace = true }
 rand = { workspace = true }
-rhai = { workspace = true, optional = true, features = [
-    "only_i32",
-    "f32_float",
-    "no_custom_syntax",
-    # TODO: Check if this is needed
-    "metadata",
-] }
 
 egui = "0.33"
 eframe = { version = "0.33", default-features = false, features = [
@@ -82,8 +64,6 @@ eframe = { version = "0.33", default-features = false, features = [
     "persistence",   # Enable restoring app state when restarting the app.
     "wayland",
 ] }
-egui_code_editor = "0.2"
-egui_dock = { version = "0.18", features = ["serde"] }
 
 # File dialog
 rfd = "0.17"
@@ -120,5 +100,4 @@ opt-level = 2
 [features]
 #default = []
 default = ["node_graph"]
-scripting = ["dep:rhai", "cs_scripting/scripting"]
 node_graph = []
