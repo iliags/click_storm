@@ -50,6 +50,17 @@ impl ClickStormInterface {
         let _ = enigo.button(mouse_button.into(), enigo::Direction::Click);
     }
 
+    /// Click at the specified coordinates with the specified mouse button.
+    pub(super) fn click_at_left(&mut self, x: i32, y: i32) {
+        let mut enigo = self.enigo.lock().unwrap();
+
+        let x = x.max(0);
+        let y = y.max(0);
+
+        let _ = enigo.move_mouse(x, y, enigo::Coordinate::Abs);
+        let _ = enigo.button(MouseButton::Left.into(), enigo::Direction::Click);
+    }
+
     /// Click at a random point within the specified specified area, X/Y starts at the top left corner.
     pub(super) fn click_within(
         &mut self,

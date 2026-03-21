@@ -122,6 +122,7 @@ impl RhaiInterface {
         // Click and drag related
         self.engine
             .register_fn("click_at", ClickStormInterface::click_at)
+            .register_fn("click_at_left", ClickStormInterface::click_at_left)
             .register_fn("click_within", ClickStormInterface::click_within)
             .register_fn("move_mouse_to", ClickStormInterface::move_mouse_to)
             .register_fn(
