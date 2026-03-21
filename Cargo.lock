@@ -749,6 +749,7 @@ dependencies = [
  "device_query",
  "eframe",
  "egui",
+ "egui-snarl",
  "egui_code_editor",
  "egui_dock",
  "embed-resource",
@@ -1176,6 +1177,27 @@ dependencies = [
  "serde",
  "smallvec",
  "unicode-segmentation",
+]
+
+[[package]]
+name = "egui-scale"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b7964ad2697e2b2df7157e5a0104c812c3773172c2a7b7dea95b57d9b5fd285f"
+dependencies = [
+ "egui",
+]
+
+[[package]]
+name = "egui-snarl"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c6358986338c35fe268c0647b410725babd5de772010e8e739e88cb11f5665da"
+dependencies = [
+ "egui",
+ "egui-scale",
+ "slab",
+ "smallvec",
 ]
 
 [[package]]

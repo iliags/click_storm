@@ -19,5 +19,7 @@ mod do_once;
 /// User interface module
 mod ui;
 
+pub mod graph;
+
 /// Application module re-export
 pub use app::ClickStormApp;

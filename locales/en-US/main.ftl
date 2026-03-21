@@ -8,6 +8,7 @@ reset = Reset
 # Panels
 clicker = Clicker
 script = Script
+graph = Node Graph
 
 # Settings menu
 hotkey = Hotkey
@@ -86,3 +87,5 @@ open = Open
 save = Save
 reload = Reload
 reload_tooltip = Reload the script from the file on disk
+
+# Node graph

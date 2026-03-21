@@ -13,6 +13,9 @@ use crate::ui::clicker::{self, ClickerPanel};
 #[cfg(feature = "scripting")]
 use crate::ui::script::{self, ScriptPanel};
 
+#[cfg(feature = "node_graph")]
+use crate::ui::graph::GraphPanel;
+
 // Wishlist:
 // - Check github for updates
 //  - Use GET /repos/:owner/:repo/releases/latest
@@ -46,6 +49,8 @@ impl Default for ClickStormApp {
             Box::new(ClickerPanel::default()),
             #[cfg(feature = "scripting")]
             Box::new(ScriptPanel::default()),
+            #[cfg(feature = "node_graph")]
+            Box::new(GraphPanel::default()),
         ];
 
         Self {
@@ -75,6 +80,14 @@ impl eframe::App for ClickStormApp {
             if panel.as_any().downcast_ref::<ScriptPanel>().is_some() {
                 let script_panel = panel.as_any().downcast_ref::<ScriptPanel>().unwrap();
                 eframe::set_value(storage, script::SCRIPT_PANEL_KEY, script_panel);
+            }
+
+            #[cfg(feature = "node_graph")]
+            if panel.as_any().downcast_ref::<GraphPanel>().is_some() {
+                use crate::ui::graph;
+
+                let graph_panel = panel.as_any().downcast_ref::<GraphPanel>().unwrap();
+                eframe::set_value(storage, graph::NODE_GRAPH_PANEL_KEY, graph_panel);
             }
 
             panel.set_user_settings(self.user_settings.clone())
@@ -225,7 +238,7 @@ impl eframe::App for ClickStormApp {
 
                 ui.separator();
 
-                #[cfg(feature = "scripting")]
+                #[cfg(any(feature = "scripting", feature = "node_graph"))]
                 {
                     for (index, panel) in self.panels.iter().enumerate() {
                         let panel_name = panel.name();
@@ -283,6 +296,19 @@ impl ClickStormApp {
                         .downcast_mut::<ScriptPanel>()
                         .unwrap()
                         .load(script_panel);
+                }
+
+                #[cfg(feature = "node_graph")]
+                if panel.as_any().downcast_ref::<GraphPanel>().is_some() {
+                    use crate::ui::graph;
+
+                    let graph_panel: GraphPanel =
+                        eframe::get_value(storage, graph::NODE_GRAPH_PANEL_KEY).unwrap_or_default();
+                    panel
+                        .as_any()
+                        .downcast_mut::<GraphPanel>()
+                        .unwrap()
+                        .load(graph_panel);
                 }
 
                 panel.set_user_settings(value.user_settings.clone())
