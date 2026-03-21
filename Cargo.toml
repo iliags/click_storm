@@ -97,9 +97,6 @@ unic-langid = "0.9"
 log = "0.4"
 env_logger = "0.11"
 
-# Node graph
-egui-snarl = "0.9.0"
-
 [dev-dependencies]
 criterion = "0.8"
 
@@ -119,6 +116,5 @@ opt-level = 2
 
 [features]
 #default = []
-default = ["node_graph"]
+default = ["scripting"]
 scripting = ["dep:rhai", "cs_scripting/scripting"]
-node_graph = []

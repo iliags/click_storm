@@ -5,8 +5,6 @@ use cs_hal::input::keycode::AppKeycode;
 /// Clicker panel
 pub mod clicker;
 
-pub mod graph;
-
 /// Script panel
 #[cfg(feature = "scripting")]
 pub mod script;
