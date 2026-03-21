@@ -9,7 +9,7 @@ use cs_hal::{
 };
 use device_query::DeviceQuery;
 use enigo::{Button, Enigo, Keyboard, Mouse, Settings};
-use rand::Rng;
+use rand::RngExt;
 use std::sync::{Arc, Mutex};
 
 use crate::hal::mouse::MousePosition;

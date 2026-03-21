@@ -9,7 +9,7 @@ use std::{
 use cs_hal::input::mouse_click::MouseClickType;
 use device_query::{DeviceQuery, DeviceState};
 use enigo::{Button, Enigo, Mouse, Settings};
-use rand::Rng;
+use rand::RngExt;
 
 use crate::settings::{
     app_settings::AppSettings, cursor_position::CursorPosition, repeat_type::RepeatType,
