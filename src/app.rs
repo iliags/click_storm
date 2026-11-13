@@ -5,13 +5,9 @@ use egui::containers::menu::{MenuButton, MenuConfig};
 //use strum::IntoEnumIterator;
 
 use crate::do_once::DoOnceGate;
-//use crate::localization::language::Language;
 use crate::settings::user_settings::UserSettings;
 use crate::ui::UIPanel;
 use crate::ui::clicker::{self, ClickerPanel};
-
-#[cfg(feature = "scripting")]
-use crate::ui::script::{self, ScriptPanel};
 
 // Wishlist:
 // - Check github for updates
@@ -42,11 +38,7 @@ pub struct ClickStormApp {
 
 impl Default for ClickStormApp {
     fn default() -> Self {
-        let panels: Vec<Box<dyn UIPanel>> = vec![
-            Box::new(ClickerPanel::default()),
-            #[cfg(feature = "scripting")]
-            Box::new(ScriptPanel::default()),
-        ];
+        let panels: Vec<Box<dyn UIPanel>> = vec![Box::new(ClickerPanel::default())];
 
         Self {
             user_settings: UserSettings::default(),
@@ -71,12 +63,6 @@ impl eframe::App for ClickStormApp {
                 eframe::set_value(storage, clicker::CLICKER_PANEL_KEY, clicker_panel);
             }
 
-            #[cfg(feature = "scripting")]
-            if panel.as_any().downcast_ref::<ScriptPanel>().is_some() {
-                let script_panel = panel.as_any().downcast_ref::<ScriptPanel>().unwrap();
-                eframe::set_value(storage, script::SCRIPT_PANEL_KEY, script_panel);
-            }
-
             panel.set_user_settings(self.user_settings.clone())
         }
     }
@@ -88,16 +74,16 @@ impl eframe::App for ClickStormApp {
     }
 
     /// Called each time the UI needs repainting, which may be many times per second.
-    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
+    fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         // Request repaint so the input is updated
-        ctx.request_repaint();
+        ui.request_repaint();
 
         // Handle input
         self.handle_input();
         self.panels[self.active_panel].handle_input();
 
         // Top panel
-        egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
+        egui::Panel::top("top_panel").show(ui, |ui| {
             egui::MenuBar::new().ui(ui, |ui| {
                 MenuButton::new("⛭")
                     .config(
@@ -129,7 +115,7 @@ impl eframe::App for ClickStormApp {
                         }
 
                         for panel in self.panels.iter_mut() {
-                            panel.show_settings(ctx, ui);
+                            panel.show_settings(&ui.ctx().clone(), ui);
                         }
 
                         ui.separator();
@@ -209,7 +195,7 @@ impl eframe::App for ClickStormApp {
 
                         ui.separator();
 
-                        egui::widgets::global_theme_preference_switch(ui);
+                        egui::widgets::global_theme_preference_buttons(ui);
                     });
 
                 ui.separator();
@@ -224,22 +210,11 @@ impl eframe::App for ClickStormApp {
                 }
 
                 ui.separator();
-
-                #[cfg(feature = "scripting")]
-                {
-                    for (index, panel) in self.panels.iter().enumerate() {
-                        let panel_name = panel.name();
-
-                        ui.radio_value(&mut self.active_panel, index, panel_name);
-                    }
-
-                    ui.separator();
-                }
             });
         });
 
-        egui::CentralPanel::default().show(ctx, |ui| {
-            self.panels[self.active_panel].show(ctx, ui);
+        egui::CentralPanel::default().show(ui, |ui| {
+            self.panels[self.active_panel].show(&ui.ctx().clone(), ui);
         });
     }
 }
@@ -271,18 +246,6 @@ impl ClickStormApp {
                         .downcast_mut::<ClickerPanel>()
                         .unwrap()
                         .load(clicker_panel);
-                }
-
-                // Note: I apparently can't use cfg on an else if
-                #[cfg(feature = "scripting")]
-                if panel.as_any().downcast_ref::<ScriptPanel>().is_some() {
-                    let script_panel: ScriptPanel =
-                        eframe::get_value(storage, script::SCRIPT_PANEL_KEY).unwrap_or_default();
-                    panel
-                        .as_any()
-                        .downcast_mut::<ScriptPanel>()
-                        .unwrap()
-                        .load(script_panel);
                 }
 
                 panel.set_user_settings(value.user_settings.clone())

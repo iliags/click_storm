@@ -5,8 +5,8 @@
 fn main() -> eframe::Result {
     env_logger::init();
 
-    const WIDTH: f32 = 615.0;
-    const HEIGHT: f32 = 300.0;
+    const WIDTH: f32 = 650.0;
+    const HEIGHT: f32 = 310.0;
 
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
@@ -19,6 +19,8 @@ fn main() -> eframe::Result {
             .with_active(true)
             // Disable the minimize button
             .with_minimize_button(false)
+            // Disable the maximize button
+            .with_maximize_button(false)
             // Set the window icon (optional)
             .with_icon(
                 eframe::icon_data::from_png_bytes(&include_bytes!("../assets/icon-256.png")[..])
