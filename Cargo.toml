@@ -72,7 +72,7 @@ eframe = { version = "0.37", default-features = false, features = [
 ] }
 
 # Localization
-fluent = "0.17"
+#fluent = "0.17"
 fluent-templates = "0.15"
 unic-langid = "0.9"
 
