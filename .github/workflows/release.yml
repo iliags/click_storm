@@ -37,7 +37,7 @@ jobs:
             os: windows-latest
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: sudo apt-get install -y libxdo-dev
         if: runner.os == 'Linux'
       - uses: taiki-e/upload-rust-binary-action@v1
