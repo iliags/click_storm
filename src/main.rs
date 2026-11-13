@@ -5,7 +5,7 @@
 fn main() -> eframe::Result {
     env_logger::init();
 
-    const WIDTH: f32 = 615.0;
+    const WIDTH: f32 = 650.0;
     const HEIGHT: f32 = 310.0;
 
     let native_options = eframe::NativeOptions {
@@ -14,7 +14,7 @@ fn main() -> eframe::Result {
             .with_inner_size([750.0, HEIGHT])
             .with_min_inner_size([WIDTH, HEIGHT])
             // Allow resizing the window
-            .with_resizable(false)
+            .with_resizable(true)
             // Start with focus on the window
             .with_active(true)
             // Disable the minimize button
