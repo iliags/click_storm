@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.2.16
+
+- Fix version number
+- Fix GH Actions versions for runners
+
 ## 0.2.15
 
 - Update dependencies
