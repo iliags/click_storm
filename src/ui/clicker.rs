@@ -13,8 +13,8 @@ use egui::Margin;
 use enigo::{Enigo, Mouse, Settings};
 use std::{
     sync::{
-        atomic::{AtomicBool, Ordering},
         Arc,
+        atomic::{AtomicBool, Ordering},
     },
     thread::{self, JoinHandle},
 };
@@ -82,7 +82,7 @@ impl Default for ClickerPanel {
 }
 
 impl UIPanel for ClickerPanel {
-    fn show(&mut self, ctx: &egui::Context, ui: &mut egui::Ui) {
+    fn show(&mut self, _ctx: &egui::Context, ui: &mut egui::Ui) {
         // TODO: Move to app tick method when egui implements [#5113](https://github.com/emilk/egui/issues/5113)
         if self.display_size == (0, 0) {
             self.init();
@@ -99,10 +99,10 @@ impl UIPanel for ClickerPanel {
             self.ui_cursor_position(ui);
         });
 
-        egui::TopBottomPanel::bottom("actions")
-            .show_separator_line(true)
-            .max_height(50.0)
-            .show(ctx, |ui| {
+        egui::Panel::bottom("actions")
+            .show_separator_line(false)
+            .resizable(false)
+            .show(ui, |ui| {
                 self.ui_actions(ui);
             });
     }
@@ -295,62 +295,56 @@ impl ClickerPanel {
                 ui.vertical(|ui| {
                     ui.heading(self.get_locale_string("click_options"));
 
-                    ui.centered_and_justified(|ui| {
-                        // Click button name
-                        let selected_button =
-                            self.settings.mouse_button().as_str_locale().to_owned();
+                    // Click button name
+                    let selected_button = self.settings.mouse_button().as_str_locale().to_owned();
 
-                        // Generate the combo box
-                        egui::ComboBox::from_label(self.get_locale_string("mouse_button"))
-                            .selected_text(self.get_locale_string(&selected_button))
-                            .show_ui(ui, |ui| {
-                                // Iterate over the click types
-                                let mut current_value = self.settings.mouse_button().clone();
-                                const MOUSE_BUTTONS: &[MouseButton] =
-                                    &[MouseButton::Left, MouseButton::Right, MouseButton::Middle];
-                                for mouse_button in MOUSE_BUTTONS {
-                                    // Get the locale string for the click type
-                                    let mouse_button_locale =
-                                        self.get_locale_string(mouse_button.as_str_locale());
+                    // Generate the combo box
+                    egui::ComboBox::from_label(self.get_locale_string("mouse_button"))
+                        .selected_text(self.get_locale_string(&selected_button))
+                        .show_ui(ui, |ui| {
+                            // Iterate over the click types
+                            let mut current_value = self.settings.mouse_button().clone();
+                            const MOUSE_BUTTONS: &[MouseButton] =
+                                &[MouseButton::Left, MouseButton::Right, MouseButton::Middle];
+                            for mouse_button in MOUSE_BUTTONS {
+                                // Get the locale string for the click type
+                                let mouse_button_locale =
+                                    self.get_locale_string(mouse_button.as_str_locale());
 
-                                    // Select the click type
-                                    ui.selectable_value(
-                                        &mut current_value,
-                                        mouse_button.clone(),
-                                        mouse_button_locale,
-                                    );
-                                }
-                                self.settings.mouse_button_mut().clone_from(&current_value);
-                            });
-                    });
+                                // Select the click type
+                                ui.selectable_value(
+                                    &mut current_value,
+                                    mouse_button.clone(),
+                                    mouse_button_locale,
+                                );
+                            }
+                            self.settings.mouse_button_mut().clone_from(&current_value);
+                        });
 
-                    ui.centered_and_justified(|ui| {
-                        // Click type options
-                        // Get the selected click type name
-                        let selected_click_type =
-                            self.settings.click_type().as_str_locale().to_owned();
+                    // Click type options
+                    // Get the selected click type name
+                    let selected_click_type = self.settings.click_type().as_str_locale().to_owned();
 
-                        // Generate the combo box
-                        egui::ComboBox::from_label(self.get_locale_string("click_type"))
-                            .selected_text(self.get_locale_string(&selected_click_type))
-                            .show_ui(ui, |ui| {
-                                // Iterate over the click types
-                                let mut current_value = self.settings.click_type().clone();
-                                for click_type in MouseClickType::iter() {
-                                    // Get the locale string for the click type
-                                    let click_type_locale =
-                                        self.get_locale_string(click_type.as_str_locale());
+                    // Generate the combo box
+                    egui::ComboBox::from_label(self.get_locale_string("click_type"))
+                        .selected_text(self.get_locale_string(&selected_click_type))
+                        .show_ui(ui, |ui| {
+                            // Iterate over the click types
+                            let mut current_value = self.settings.click_type().clone();
+                            for click_type in MouseClickType::iter() {
+                                // Get the locale string for the click type
+                                let click_type_locale =
+                                    self.get_locale_string(click_type.as_str_locale());
 
-                                    // Select the click type
-                                    ui.selectable_value(
-                                        &mut current_value,
-                                        click_type,
-                                        click_type_locale,
-                                    );
-                                }
-                                self.settings.click_type_mut().clone_from(&current_value);
-                            });
-                    });
+                                // Select the click type
+                                ui.selectable_value(
+                                    &mut current_value,
+                                    click_type,
+                                    click_type_locale,
+                                );
+                            }
+                            self.settings.click_type_mut().clone_from(&current_value);
+                        });
                 });
             });
     }
@@ -508,6 +502,8 @@ impl ClickerPanel {
 
     fn ui_actions(&mut self, ui: &mut egui::Ui) {
         ui.centered_and_justified(|ui| {
+            const BUTTON_MIN_SIZE: egui::Vec2 = egui::vec2(10.0, 30.0);
+
             ui.columns(2, |cols| {
                 let keycode: device_query::Keycode = self.hotkey_code.into();
                 let key_code_text = format!(" ({keycode})").to_owned();
@@ -519,7 +515,7 @@ impl ClickerPanel {
 
                     let start_button = ui.add_enabled(
                         enabled,
-                        egui::Button::new(start_text).min_size(egui::vec2(10.0, 30.0)),
+                        egui::Button::new(start_text).min_size(BUTTON_MIN_SIZE),
                     );
 
                     if start_button.clicked() {
@@ -531,7 +527,10 @@ impl ClickerPanel {
                         let mut stop_text = self.get_locale_string("stop");
                         stop_text.push_str(&key_code_text);
 
-                        if ui.button(stop_text).clicked() {
+                        let stop_button =
+                            ui.add(egui::Button::new(stop_text).min_size(BUTTON_MIN_SIZE));
+
+                        if stop_button.clicked() {
                             self.stop();
                         }
                     });

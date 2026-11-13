@@ -13,10 +13,6 @@ Click Storm is an open-source auto-clicker and input automation tool written in 
 > [!NOTE]
 > Windows Security has marked the executable as having `Trojan:Script/Wacatac.B!ml` in the past, which is a false positive. See the Antivirus section for more information.
 
-## Clicker vs Scripting
-
-The clicker mode is for spamming the mouse button quickly. For a more customized approach, scripting is available using [Rhai](https://rhai.rs/book/language/).
-
 ## Notes
 
 The application uses OS threads to perform work. While the timing may not be 100% accurate, it tries to be as close as possible. The location picker and clicking only works on the main display due to library limitations.

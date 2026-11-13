@@ -31,7 +31,7 @@ impl MouseButton {
         }
     }
 
-    /// Get the string representation of the enum, used for scripting
+    /// Get the string representation of the enum, was used for scripting
     pub fn as_str(&self) -> &str {
         match self {
             Self::Left => "Left",

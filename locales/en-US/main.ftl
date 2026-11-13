@@ -72,14 +72,6 @@ actions = Actions
 start = Start
 stop = Stop
 
-# Scripting
-log = Log
-misc = Misc
-none = None
-font_size = Font Size
-theme = Theme
-run = Run
-
 # File
 new = New
 open = Open

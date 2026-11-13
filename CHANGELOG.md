@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.2.15
+
+- Update dependencies
+- Remove scripting feature
+  - Rhai broke their codegen module somewhere and it refuses to recognize a custom API
+  - `egui_code_editor` is consistently behind `egui` updates and is outside the scope of maintainability
+  - It was difficult to use and maintain since it was implemented in around two weeks.
+
 ## 0.2.14
 
 - Force CI/CD run

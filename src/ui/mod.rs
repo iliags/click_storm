@@ -5,10 +5,6 @@ use cs_hal::input::keycode::AppKeycode;
 /// Clicker panel
 pub mod clicker;
 
-/// Script panel
-#[cfg(feature = "scripting")]
-pub mod script;
-
 pub(crate) trait UIPanel {
     /// Show the panel
     fn show(&mut self, ctx: &egui::Context, ui: &mut egui::Ui);
